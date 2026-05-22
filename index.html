@@ -502,6 +502,72 @@ input,textarea,select{user-select:auto;-webkit-user-select:auto}
 
 
 
+/* ══ STEPS & CALORIES ══ */
+.steps-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.steps-day-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:7px 4px;text-align:center;display:flex;flex-direction:column;gap:4px;transition:border-color .2s}
+.steps-day-card.goal-reached{border-color:var(--green);background:rgba(56,161,105,.06)}
+.steps-day-lbl{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase}
+.steps-day-date{font-size:8px;color:var(--muted);font-family:var(--mono)}
+.steps-inp{width:100%;border:1px solid var(--border);border-radius:5px;padding:4px 2px;font-family:var(--mono);font-size:12px;font-weight:700;text-align:center;background:var(--surface);color:var(--text);outline:none;min-height:36px}
+.steps-inp:focus{border-color:var(--teal)}
+.steps-bar-wrap{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:2px}
+.steps-bar{height:100%;border-radius:2px;transition:width .4s;background:var(--teal)}
+.steps-bar.goal-ok{background:var(--green)}
+.steps-summary{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.steps-stat{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:80px}
+.steps-stat-val{font-size:18px;font-weight:700;font-family:var(--mono);color:var(--teal-d)}
+.steps-stat-lbl{font-size:9px;color:var(--muted);text-align:center}
+.steps-goal-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.steps-goal-inp{border:1px solid var(--border);border-radius:var(--rs);padding:6px 10px;font-family:var(--mono);font-size:14px;font-weight:700;width:110px;background:var(--surface);color:var(--text);outline:none;min-height:44px;text-align:center}
+.steps-goal-inp:focus{border-color:var(--teal)}
+/* Calories */
+.cal-tracker-wrap{display:flex;flex-direction:column;gap:10px}
+.cal-day-selector{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cal-day-nav{background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:5px 14px;font-size:18px;cursor:pointer;color:var(--teal-d);min-height:44px;min-width:44px;display:flex;align-items:center;justify-content:center}
+.cal-day-nav:hover{background:var(--teal-l)}
+.cal-day-lbl{font-size:14px;font-weight:700;color:var(--text);flex:1;text-align:center}
+.cal-total-bar{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:8px}
+.cal-total-row{display:flex;align-items:center;justify-content:space-between}
+.cal-total-val{font-size:28px;font-weight:700;font-family:var(--mono);color:var(--teal-d);line-height:1}
+.cal-total-goal{font-size:12px;color:var(--muted)}
+.cal-macro-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+.cal-macro-card{background:var(--surface);border-radius:var(--rs);padding:8px;text-align:center;border:1px solid var(--border)}
+.cal-macro-val{font-size:16px;font-weight:700;font-family:var(--mono)}
+.cal-macro-lbl{font-size:9px;color:var(--muted);margin-top:2px}
+.cal-goal-bar-wrap{height:7px;background:var(--border);border-radius:4px;overflow:hidden}
+.cal-goal-bar{height:100%;border-radius:4px;transition:width .5s;background:linear-gradient(90deg,var(--teal),var(--green))}
+.cal-goal-bar.over{background:linear-gradient(90deg,var(--orange),var(--red))}
+.cal-meals{display:flex;flex-direction:column;gap:8px}
+.cal-meal-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
+.cal-meal-hdr{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;background:var(--bg);cursor:pointer;min-height:48px}
+.cal-meal-name{font-size:13px;font-weight:700;color:var(--text)}
+.cal-meal-total{font-size:12px;font-family:var(--mono);color:var(--teal-d);font-weight:700}
+.cal-meal-body{padding:10px 14px;display:flex;flex-direction:column;gap:8px}
+.cal-food-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)}
+.cal-food-row:last-child{border-bottom:none}
+.cal-food-name{flex:1;font-size:13px;color:var(--text)}
+.cal-food-cals{font-size:13px;font-weight:700;font-family:var(--mono);color:var(--teal-d);width:56px;text-align:right;flex-shrink:0}
+.cal-food-macros{font-size:10px;color:var(--muted);white-space:nowrap}
+.cal-food-del{background:none;border:none;color:#ddd;cursor:pointer;font-size:14px;min-width:32px;min-height:32px;display:flex;align-items:center;justify-content:center;border-radius:6px}
+.cal-food-del:hover{color:var(--red);background:rgba(229,62,62,.1)}
+.add-food-form{display:flex;flex-direction:column;gap:8px;padding:10px;background:var(--teal-l);border-radius:var(--rs);border:1px solid var(--teal)}
+.add-food-form input{font-size:16px;padding:10px 12px;min-height:48px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);outline:none;font-family:var(--font)}
+.add-food-form input:focus{border-color:var(--teal)}
+.add-food-form .macro-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px}
+.add-food-form .macro-row input{font-size:15px}
+.add-food-btn-row{display:flex;gap:8px}
+/* Responsive */
+@media(max-width:768px){
+  .steps-grid{gap:3px}
+  .steps-inp{font-size:14px!important;min-height:44px}
+  .steps-day-lbl{font-size:8px}
+  .cal-macro-row{grid-template-columns:repeat(3,1fr);gap:6px}
+  .add-food-form .macro-row{grid-template-columns:1fr 1fr;gap:6px}
+  .cal-total-val{font-size:24px}
+  .cal-day-nav{min-height:48px;min-width:48px}
+  .cal-day-lbl{font-size:15px}
+}
+
 /* ════════════════════════════════════════════════════════
    MOBILE RESPONSIVE — Coach Tracker Pro
    Breakpoint: 768px
@@ -1185,6 +1251,40 @@ input,textarea,select{user-select:auto;-webkit-user-select:auto}
       </div>
       <button class="btn btn-teal btn-sm" id="add-photo-btn">📸 Photo</button>
     </div>
+    <!-- Steps tracker -->
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title">👟 Pas quotidiens (7 derniers jours)</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:11px;color:var(--muted)">Objectif :</span>
+          <input type="number" id="steps-goal-inp" class="steps-goal-inp" value="10000" min="1000" max="50000" step="500">
+          <span style="font-size:11px;color:var(--muted)">pas/jour</span>
+        </div>
+      </div>
+      <div style="padding:12px">
+        <div class="steps-grid" id="steps-grid"></div>
+        <div class="steps-summary" id="steps-summary"></div>
+      </div>
+    </div>
+    <!-- Calories tracker -->
+    <div class="card">
+      <div class="card-hdr">
+        <div class="card-title">🍽️ Calories & Macros</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:11px;color:var(--muted)">Objectif :</span>
+          <input type="number" id="cal-goal-inp" class="steps-goal-inp" value="2500" min="500" max="6000" step="50">
+          <span style="font-size:11px;color:var(--muted)">kcal/jour</span>
+        </div>
+      </div>
+      <div style="padding:12px" id="cal-tracker-wrap">
+        <div class="cal-day-selector">
+          <button class="cal-day-nav" id="cal-day-prev">&#8249;</button>
+          <div class="cal-day-lbl" id="cal-day-lbl">Aujourd'hui</div>
+          <button class="cal-day-nav" id="cal-day-next">&#8250;</button>
+        </div>
+        <div id="cal-content"></div>
+      </div>
+    </div>
     <!-- Sleep tracker -->
     <div class="card">
       <div class="card-hdr"><div class="card-title">😴 Sommeil & Énergie (7 derniers jours)</div></div>
@@ -1687,6 +1787,10 @@ function migrateState(raw) {
   // v2 → v3: ajout isWarmup/supersetGroup/tempo/rir/id sur exercices
   if (v < 3) {
     s.currentBlock = s.currentBlock || 'Accumulation';
+    s.steps = s.steps || {};
+    s.calories = s.calories || {};
+    s.stepsGoal = s.stepsGoal || 10000;
+    s.caloriesGoal = s.caloriesGoal || 2500;
     s.blockWeek    = s.blockWeek    || 1;
     s.profilTaille = s.profilTaille || 175;
     // Attribuer des IDs aux exercices existants
@@ -1719,6 +1823,8 @@ let S={
   history:{},prs:{},
   mesures:{poids:[],poitrine:[],taille:[],hanches:[],bras:[],cuisse:[]},
   sleep:{},nutrition:{},
+  steps:{},calories:{},
+  stepsGoal:10000,caloriesGoal:2500,
   painLog:[],
   sessRecovery:{},photos:[],
   darkMode:false,exViewMode:'compact',
@@ -2823,8 +2929,320 @@ document.getElementById('gen-sample-data').addEventListener('click',async()=>{
 });
 
 /* ══ CORPS ══ */
+
+/* ══ STEPS TRACKER ══ */
+let _calDayOffset = 0; // 0=today, -1=yesterday, etc.
+
+function renderStepsGrid() {
+  const grid = document.getElementById('steps-grid');
+  const summary = document.getElementById('steps-summary');
+  const goalInp = document.getElementById('steps-goal-inp');
+  if (!grid) return;
+
+  // Load goal from state
+  if (goalInp) {
+    goalInp.value = S.stepsGoal || 10000;
+    goalInp.addEventListener('change', e => {
+      S.stepsGoal = parseInt(e.target.value) || 10000;
+      save(); renderStepsGrid();
+    });
+  }
+
+  const goal = S.stepsGoal || 10000;
+  grid.innerHTML = '';
+  let totalSteps = 0, daysWithData = 0, bestDay = 0, bestDaySteps = 0;
+  const today = new Date();
+
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const ds = localDateStr(d);
+    const steps = parseInt((S.steps && S.steps[ds]) || 0);
+    const pct = Math.min(100, Math.round(steps / goal * 100));
+    const reached = steps >= goal;
+    if (steps > 0) { totalSteps += steps; daysWithData++; }
+    if (steps > bestDaySteps) { bestDaySteps = steps; bestDay = i; }
+
+    const card = document.createElement('div');
+    card.className = 'steps-day-card' + (reached ? ' goal-reached' : '');
+    card.setAttribute('data-date', ds);
+
+    const lbl = document.createElement('div');
+    lbl.className = 'steps-day-lbl';
+    lbl.textContent = DAYS_SH[(d.getDay() + 6) % 7];
+
+    const dateEl = document.createElement('div');
+    dateEl.className = 'steps-day-date';
+    dateEl.textContent = d.toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'});
+
+    const inp = document.createElement('input');
+    inp.type = 'number';
+    inp.className = 'steps-inp';
+    inp.value = steps || '';
+    inp.placeholder = '0';
+    inp.min = 0;
+    inp.max = 100000;
+    inp.step = 100;
+    inp.setAttribute('aria-label', 'Pas du ' + DAYS[( d.getDay() + 6) % 7]);
+    inp.addEventListener('change', e => {
+      if (!S.steps) S.steps = {};
+      S.steps[ds] = parseInt(e.target.value) || 0;
+      save(); renderStepsGrid();
+    });
+
+    const barWrap = document.createElement('div');
+    barWrap.className = 'steps-bar-wrap';
+    const bar = document.createElement('div');
+    bar.className = 'steps-bar' + (reached ? ' goal-ok' : '');
+    bar.style.width = pct + '%';
+    barWrap.appendChild(bar);
+
+    const emoji = document.createElement('div');
+    emoji.style.cssText = 'font-size:14px;line-height:1';
+    emoji.textContent = reached ? '🎯' : pct >= 75 ? '💪' : pct >= 50 ? '🚶' : steps > 0 ? '🐌' : '';
+
+    card.appendChild(lbl);
+    card.appendChild(dateEl);
+    card.appendChild(inp);
+    card.appendChild(barWrap);
+    card.appendChild(emoji);
+    grid.appendChild(card);
+  }
+
+  // Summary
+  if (summary) {
+    summary.innerHTML = '';
+    const avg = daysWithData > 0 ? Math.round(totalSteps / daysWithData) : 0;
+    const daysReached = Array.from({length:7},(_,i)=>{const d=new Date(today);d.setDate(d.getDate()-i);return parseInt((S.steps&&S.steps[localDateStr(d)])||0)>=goal;}).filter(Boolean).length;
+
+    [
+      {val: totalSteps.toLocaleString('fr'), lbl: 'Total 7j'},
+      {val: avg.toLocaleString('fr'), lbl: 'Moyenne/jour'},
+      {val: bestDaySteps.toLocaleString('fr'), lbl: 'Meilleur jour'},
+      {val: daysReached + '/7', lbl: 'Jours objectif ✓'},
+    ].forEach(({val, lbl}) => {
+      const s = document.createElement('div');
+      s.className = 'steps-stat';
+      const v = document.createElement('div');
+      v.className = 'steps-stat-val';
+      v.textContent = val;
+      const l = document.createElement('div');
+      l.className = 'steps-stat-lbl';
+      l.textContent = lbl;
+      s.appendChild(v); s.appendChild(l);
+      summary.appendChild(s);
+    });
+  }
+}
+
+/* ══ CALORIES TRACKER ══ */
+const MEAL_NAMES = ['Petit-déjeuner 🌅', 'Déjeuner 🌞', 'Dîner 🌙', 'Collation 🍎'];
+
+function calDayKey(offset) {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return localDateStr(d);
+}
+
+function calDayLabel(offset) {
+  if (offset === 0) return 'Aujourd'hui';
+  if (offset === -1) return 'Hier';
+  if (offset === 1) return 'Demain';
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return d.toLocaleDateString('fr-FR', {weekday:'long', day:'2-digit', month:'long'});
+}
+
+function renderCalTracker() {
+  const lbl = document.getElementById('cal-day-lbl');
+  const content = document.getElementById('cal-content');
+  const goalInp = document.getElementById('cal-goal-inp');
+  if (!content) return;
+
+  if (goalInp) {
+    goalInp.value = S.caloriesGoal || 2500;
+    goalInp.addEventListener('change', e => {
+      S.caloriesGoal = parseInt(e.target.value) || 2500;
+      save(); renderCalTracker();
+    });
+  }
+
+  if (lbl) {
+    lbl.textContent = calDayLabel(_calDayOffset);
+    // Capitalize first letter
+    lbl.textContent = lbl.textContent.charAt(0).toUpperCase() + lbl.textContent.slice(1);
+  }
+
+  const dk = calDayKey(_calDayOffset);
+  if (!S.calories) S.calories = {};
+  if (!S.calories[dk]) S.calories[dk] = { meals: [{items:[]},{items:[]},{items:[]},{items:[]}] };
+  // Ensure 4 meals
+  while (S.calories[dk].meals.length < 4) S.calories[dk].meals.push({items:[]});
+
+  const dayData = S.calories[dk];
+  const goal = S.caloriesGoal || 2500;
+
+  // Totals
+  let totalCal = 0, totalP = 0, totalC = 0, totalF = 0;
+  dayData.meals.forEach(m => (m.items || []).forEach(item => {
+    totalCal += item.cal || 0;
+    totalP += item.protein || 0;
+    totalC += item.carbs || 0;
+    totalF += item.fat || 0;
+  }));
+  const pct = Math.min(100, Math.round(totalCal / goal * 100));
+  const over = totalCal > goal;
+
+  content.innerHTML = '';
+
+  // Total banner
+  const totalBanner = document.createElement('div');
+  totalBanner.className = 'cal-total-bar';
+  totalBanner.style.marginTop = '10px';
+  totalBanner.style.marginBottom = '12px';
+
+  const row1 = document.createElement('div');
+  row1.className = 'cal-total-row';
+  const valEl = document.createElement('div');
+  valEl.className = 'cal-total-val';
+  valEl.textContent = Math.round(totalCal).toLocaleString('fr') + ' kcal';
+  valEl.style.color = over ? 'var(--red)' : 'var(--teal-d)';
+  const goalEl = document.createElement('div');
+  goalEl.style.cssText = 'text-align:right';
+  goalEl.innerHTML = `<div style="font-size:12px;color:var(--muted)">Objectif : ${goal.toLocaleString('fr')} kcal</div>
+    <div style="font-size:13px;font-weight:700;color:${over?'var(--red)':'var(--green)'}">${over?'▲ +':'▼ '}${Math.abs(goal-Math.round(totalCal)).toLocaleString('fr')} kcal ${over?'en excès':'restants'}</div>`;
+  row1.appendChild(valEl); row1.appendChild(goalEl);
+
+  const barW = document.createElement('div'); barW.className = 'cal-goal-bar-wrap';
+  const barF = document.createElement('div'); barF.className = 'cal-goal-bar' + (over?' over':'');
+  barF.style.width = pct + '%';
+  barW.appendChild(barF);
+
+  const macroRow = document.createElement('div'); macroRow.className = 'cal-macro-row';
+  [
+    {lbl:'Protéines', val:Math.round(totalP), unit:'g', color:'var(--purple)'},
+    {lbl:'Glucides',  val:Math.round(totalC), unit:'g', color:'var(--orange)'},
+    {lbl:'Lipides',   val:Math.round(totalF), unit:'g', color:'var(--blue)'},
+  ].forEach(({lbl, val, unit, color}) => {
+    const mc = document.createElement('div'); mc.className = 'cal-macro-card';
+    const mv = document.createElement('div'); mv.className = 'cal-macro-val'; mv.style.color = color; mv.textContent = val + unit;
+    const ml = document.createElement('div'); ml.className = 'cal-macro-lbl'; ml.textContent = lbl;
+    mc.appendChild(mv); mc.appendChild(ml); macroRow.appendChild(mc);
+  });
+
+  totalBanner.appendChild(row1); totalBanner.appendChild(barW); totalBanner.appendChild(macroRow);
+  content.appendChild(totalBanner);
+
+  // Meals
+  const mealsWrap = document.createElement('div');
+  mealsWrap.className = 'cal-meals';
+
+  dayData.meals.forEach((meal, mi) => {
+    const mealCal = (meal.items || []).reduce((a, item) => a + (item.cal || 0), 0);
+    const card = document.createElement('div');
+    card.className = 'cal-meal-card';
+
+    // Header
+    const mHdr = document.createElement('div');
+    mHdr.className = 'cal-meal-hdr';
+    mHdr.setAttribute('role', 'button');
+    mHdr.setAttribute('aria-label', 'Afficher ' + MEAL_NAMES[mi]);
+
+    const mName = document.createElement('div'); mName.className = 'cal-meal-name'; mName.textContent = MEAL_NAMES[mi];
+    const mTotal = document.createElement('div'); mTotal.className = 'cal-meal-total';
+    mTotal.textContent = Math.round(mealCal) + ' kcal';
+
+    const addItemBtn = document.createElement('button');
+    addItemBtn.className = 'btn btn-teal btn-sm';
+    addItemBtn.textContent = '+ Ajouter';
+    addItemBtn.style.cssText = 'margin-left:8px;min-height:38px;font-size:12px';
+
+    mHdr.appendChild(mName); mHdr.appendChild(mTotal); mHdr.appendChild(addItemBtn);
+
+    // Body
+    const mBody = document.createElement('div');
+    mBody.className = 'cal-meal-body';
+
+    // Food items
+    (meal.items || []).forEach((item, ii) => {
+      const fRow = document.createElement('div'); fRow.className = 'cal-food-row';
+      const fName = document.createElement('div'); fName.className = 'cal-food-name'; fName.textContent = item.name;
+      const fCal = document.createElement('div'); fCal.className = 'cal-food-cals'; fCal.textContent = Math.round(item.cal) + ' kcal';
+      const fMacro = document.createElement('div'); fMacro.className = 'cal-food-macros';
+      fMacro.textContent = `P:${item.protein||0}g G:${item.carbs||0}g L:${item.fat||0}g`;
+      const fDel = document.createElement('button'); fDel.className = 'cal-food-del'; fDel.textContent = '×';
+      fDel.setAttribute('aria-label', 'Supprimer ' + item.name);
+      fDel.addEventListener('click', () => {
+        meal.items.splice(ii, 1); save(); renderCalTracker();
+      });
+      fRow.appendChild(fName); fRow.appendChild(fCal); fRow.appendChild(fMacro); fRow.appendChild(fDel);
+      mBody.appendChild(fRow);
+    });
+
+    // Add food form
+    const form = document.createElement('div');
+    form.className = 'add-food-form';
+    form.style.display = 'none';
+
+    const nameInp = document.createElement('input'); nameInp.type='text'; nameInp.placeholder='Aliment (ex: Riz cuit, Poulet grillé...)'; nameInp.setAttribute('aria-label','Nom de l'aliment');
+    const macroRow2 = document.createElement('div'); macroRow2.className = 'macro-row';
+    const calInp  = document.createElement('input'); calInp.type='number'; calInp.placeholder='kcal'; calInp.min=0; calInp.max=5000; calInp.step=1; calInp.setAttribute('aria-label','Calories');
+    const protInp = document.createElement('input'); protInp.type='number'; protInp.placeholder='Prot. g'; protInp.min=0; protInp.step=0.1; protInp.setAttribute('aria-label','Protéines');
+    const carbInp = document.createElement('input'); carbInp.type='number'; carbInp.placeholder='Gluc. g'; carbInp.min=0; carbInp.step=0.1; carbInp.setAttribute('aria-label','Glucides');
+    const fatInp  = document.createElement('input'); fatInp.type='number'; fatInp.placeholder='Lip. g'; fatInp.min=0; fatInp.step=0.1; fatInp.setAttribute('aria-label','Lipides');
+    macroRow2.appendChild(calInp); macroRow2.appendChild(protInp); macroRow2.appendChild(carbInp); macroRow2.appendChild(fatInp);
+
+    const btnRow = document.createElement('div'); btnRow.className = 'add-food-btn-row';
+    const addBtn2 = document.createElement('button'); addBtn2.className = 'btn btn-teal'; addBtn2.textContent = 'Ajouter'; addBtn2.style.flex='1';
+    const cancelBtn2 = document.createElement('button'); cancelBtn2.className = 'btn btn-ghost'; cancelBtn2.textContent = 'Annuler'; cancelBtn2.style.flex='1';
+
+    addBtn2.addEventListener('click', () => {
+      const name = nameInp.value.trim();
+      const cal  = parseFloat(calInp.value) || 0;
+      if (!name || !cal) { showToast('Renseignez au minimum le nom et les calories.', 'warn'); return; }
+      if (!meal.items) meal.items = [];
+      meal.items.push({
+        name,
+        cal:  Math.round(cal),
+        protein: parseFloat(protInp.value) || 0,
+        carbs:   parseFloat(carbInp.value) || 0,
+        fat:     parseFloat(fatInp.value)  || 0,
+      });
+      save(); renderCalTracker();
+    });
+    // Enter to add
+    [nameInp, calInp, protInp, carbInp, fatInp].forEach(inp => {
+      inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addBtn2.click(); } });
+    });
+    cancelBtn2.addEventListener('click', () => { form.style.display = 'none'; });
+
+    btnRow.appendChild(cancelBtn2); btnRow.appendChild(addBtn2);
+    form.appendChild(nameInp); form.appendChild(macroRow2); form.appendChild(btnRow);
+    mBody.appendChild(form);
+
+    addItemBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      form.style.display = form.style.display === 'none' ? 'flex' : 'none';
+      form.style.flexDirection = 'column';
+      if (form.style.display !== 'none') setTimeout(() => nameInp.focus(), 50);
+    });
+
+    card.appendChild(mHdr); card.appendChild(mBody);
+    mealsWrap.appendChild(card);
+  });
+
+  content.appendChild(mealsWrap);
+}
+
+// Nav buttons for calorie day selector
+document.getElementById('cal-day-prev').addEventListener('click', () => { _calDayOffset--; renderCalTracker(); });
+document.getElementById('cal-day-next').addEventListener('click', () => { if (_calDayOffset < 0) { _calDayOffset++; renderCalTracker(); } });
+
 function renderCorps(){
   const profilInp=document.getElementById('profil-taille');if(profilInp){profilInp.value=S.profilTaille||'';profilInp.addEventListener('input',e=>{S.profilTaille=parseInt(e.target.value)||0;save();});}
+  // Steps & Calories
+  renderStepsGrid();
+  renderCalTracker();
   // Sleep grid
   renderSleepGrid();// Nutrition grid
   renderNutriGrid();// Mesures

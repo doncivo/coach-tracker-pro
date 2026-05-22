@@ -263,6 +263,7 @@ input,textarea,select{user-select:auto;-webkit-user-select:auto}
 .sess-info-chip strong{color:var(--text);font-family:var(--mono)}
 .sess-body-wrap{display:flex;flex:1;overflow:hidden}
 .sess-nav{width:210px;flex-shrink:0;overflow-y:auto;background:var(--surface);border-right:1px solid var(--border);padding:7px 5px;display:flex;flex-direction:column;gap:2px}
+.sess-nav-strip{display:none}
 .sess-nav-item{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:var(--rs);cursor:pointer;transition:all .15s;border:1.5px solid transparent}
 .sess-nav-item:hover{background:var(--bg)}
 .sess-nav-item.active-nav{background:var(--teal-l);border-color:var(--teal)}
@@ -500,78 +501,496 @@ input,textarea,select{user-select:auto;-webkit-user-select:auto}
 .dragging{opacity:.5;border:2px dashed var(--teal)!important}
 
 
-/* ── MOBILE EXERCISE CARDS (replaces table on small screens) ── */
+
+/* ════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE — Coach Tracker Pro
+   Breakpoint: 768px
+   ════════════════════════════════════════════════════════ */
+
+/* ── Animations ── */
+@keyframes pulse-btn{0%,100%{box-shadow:none}50%{box-shadow:0 0 0 3px rgba(91,168,160,.4)}}
+
+/* ── 1. GLOBAL MOBILE BASE ── */
 @media(max-width:768px){
-  .ex-table-wrap{overflow-x:unset}
-  .ex-table,.ex-table thead,.ex-table tbody,.ex-table tr,.ex-table td,.ex-table th{display:block;width:100%}
-  .ex-table thead{display:none}
-  .ex-table tr{border:1px solid var(--border);border-radius:var(--r);margin:0 0 8px;padding:10px;background:var(--card);box-shadow:var(--sh);position:relative}
-  .ex-table tr.done-row{opacity:.45}
-  .ex-table td{padding:3px 0;border:none;text-align:left}
-  .ex-table td::before{content:attr(data-label);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:block;margin-bottom:2px}
-  .ex-table td:first-child{position:absolute;top:10px;right:10px;padding:0}
-  .ex-table td:first-child::before{display:none}
-  .ex-name-inp{font-size:15px!important;font-weight:600;padding:0!important}
-  .ex-num-inp{font-size:15px!important;padding:4px 6px!important;border:1px solid var(--border)!important;border-radius:6px;background:var(--bg)!important;width:70px;margin-right:6px}
-  .ex-del{min-height:36px;min-width:36px;display:flex;align-items:center;justify-content:center}
-  .add-ex-btn{min-height:44px;font-size:14px!important}
-}
-/* ── SESSION TABLE mobile ── */
-@media(max-width:768px){
-  .sess-body-wrap{flex-direction:column}
-  .sess-nav{display:none} /* replaced by top scroll strip */
-  .sess-nav-strip{display:flex;overflow-x:auto;gap:6px;padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
-  .sess-nav-strip::-webkit-scrollbar{display:none}
-  .sess-strip-item{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 10px;border-radius:var(--rs);border:1.5px solid var(--border);cursor:pointer;background:var(--bg);min-width:56px}
-  .sess-strip-item.active-nav{background:var(--teal-l);border-color:var(--teal)}
-  .sess-strip-item.done-nav{opacity:.5}
-  .sess-strip-num{font-size:10px;font-weight:700;color:var(--muted)}
-  .sess-strip-dots{display:flex;gap:2px}
-  .sess-strip-dot{width:5px;height:5px;border-radius:50%;background:var(--border)}
-  .sess-strip-dot.dot-done{background:var(--green)}
-  /* Session sets: stacked cards instead of table */
-  .sess-sets-table,.sess-sets-table thead,.sess-sets-table tbody,.sess-sets-table tr,.sess-sets-table td,.sess-sets-table th{display:block;width:100%}
-  .sess-sets-table thead{display:none}
-  .sess-sets-table tr{border:1px solid var(--border);border-radius:var(--r);margin:0 0 10px;padding:12px;background:var(--bg)}
-  .sess-sets-table tr.srow-done{background:rgba(56,161,105,.06);border-color:#9ae6b4}
-  .sess-sets-table tr.srow-active{background:rgba(91,168,160,.06);border-color:var(--teal)}
-  .sess-sets-table td{padding:4px 0;border:none}
-  .set-inp{font-size:20px!important;padding:10px 8px!important;min-height:48px;width:80px!important}
-  .set-inp.inp-r{width:70px!important}
-  .set-val-btn{min-height:48px;font-size:14px!important;padding:12px 20px!important}
-  .set-copy-btn{min-height:36px;min-width:36px;font-size:13px!important}
-  .sess-nav-btns{padding:12px 14px}
-  .sess-nav-btn{min-height:48px;font-size:13px}
-}
-/* ── GRIDS responsive ── */
-@media(max-width:768px){
-  .prog-cards{grid-template-columns:1fr!important}
-  .lib-grid{grid-template-columns:1fr!important}
-  .corps-grid{grid-template-columns:1fr!important}
-  .bilan-grid{grid-template-columns:1fr 1fr!important}
-  .kpi-grid{grid-template-columns:1fr 1fr!important}
-  .kpi-wide{grid-column:span 2}
-  .ach-grid{grid-template-columns:repeat(3,1fr)!important}
-  .sleep-grid{gap:3px}
-  .sleep-inp{font-size:15px!important;padding:6px 2px!important}
-  .cal-cell{min-height:56px!important;padding:3px!important}
-  .cal-dn{font-size:10px}
-  .cal-mpill{font-size:6px!important;padding:0px 2px!important}
-  .cal-checks{display:none} /* too small on mobile */
-  .focus-inp{font-size:24px!important;width:90px!important}
-  .hdr-sub{display:none}
-  .side-panel{display:none}
-  .chrono-display{font-size:28px!important}
-}
-/* ── TOUCH feedback ── */
-.day-tab:active,.bnav-btn:active,.sess-nav-item:active,.lib-card:active,.ach-card:active{opacity:.75;transform:scale(.97)}
-/* ── Safe area padding for scrollable content ── */
-.day-detail,.prog-wrap,.corps-wrap,.bilan-wrap,.kpi-wrap,.ach-wrap,.lib-wrap,.cal-wrap,.session-body{padding-bottom:max(16px,env(safe-area-inset-bottom,16px))}
-/* ── iOS keyboard fix ── */
-@supports(-webkit-touch-callout:none){
-  .sess-main,.day-detail{-webkit-overflow-scrolling:touch}
+  /* Typography scale-up */
+  body{font-size:14px}
+  .label,.sp-title,.card-title{font-size:11px}
+  .stat-lbl{font-size:10px}
+  .stat-val{font-size:22px}
+  .section-title{font-size:16px}
+
+  /* Touch feedback */
+  .btn:active,.day-tab:active,.bnav-btn:active,.sess-nav-item:active,
+  .lib-card:active,.ach-card:active,.card-hdr button:active{
+    opacity:.75;transform:scale(.97)
+  }
+
+  /* Safe area padding on scrollable containers */
+  .day-detail,.prog-wrap,.corps-wrap,.bilan-wrap,
+  .kpi-wrap,.ach-wrap,.lib-wrap,.cal-wrap,.session-body{
+    padding-bottom:max(80px,env(safe-area-inset-bottom,80px))
+  }
+
+  /* Modal full-width on mobile */
+  .modal{
+    width:96%;
+    padding:16px;
+    max-height:90vh;
+    border-radius:var(--r) var(--r) 0 0;
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    margin:0;
+    border-radius:16px 16px 0 0;
+    animation:slideUp .25s ease
+  }
+  @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .modal-overlay{align-items:flex-end}
+  .form-group input,.form-group select,.form-group textarea{
+    font-size:16px!important;
+    padding:12px 14px!important;
+    min-height:48px
+  }
+  .form-group label{font-size:11px}
+  .modal-title{font-size:17px}
+  .modal-actions .btn{min-height:48px;font-size:14px;flex:1}
+
+  /* Tabs hidden, bottom nav shown */
+  .tabs{display:none}
+  .bottom-nav{display:block}
+  .content{padding-bottom:calc(58px + env(safe-area-inset-bottom,0px))}
+
+  /* Header compact */
+  .hdr{padding:env(safe-area-inset-top,8px) 10px 8px;gap:5px}
+  .hdr h1{font-size:12px}
+  .hdr-badge{font-size:9px;padding:2px 6px}
+  .hdr-btn{min-height:34px;padding:4px 7px;font-size:10px}
+
+  /* Bottom nav sizing */
+  .bottom-nav-inner{height:58px}
+  .bnav-btn{min-height:58px}
+  .bnav-icon{font-size:20px}
+  .bnav-label{font-size:10px}
+  .bnav-more-menu{padding:10px;gap:8px}
+  .bnav-more-btn{min-height:56px;font-size:11px;padding:10px 8px;border-radius:10px}
+  .bnav-more-btn span:first-child{font-size:20px!important}
+
+  /* Toast position above bottom nav */
+  .toast{
+    bottom:calc(70px + env(safe-area-inset-bottom,0px));
+    top:auto;
+    right:12px;
+    left:12px;
+    text-align:center;
+    border-radius:12px
+  }
+  .save-badge{bottom:calc(70px + env(safe-area-inset-bottom,0px));right:12px}
 }
 
+/* ── 2. PLANNING — Day tabs horizontal ── */
+@media(max-width:768px){
+  .weekly-wrap{flex-direction:column}
+  .day-tabs{
+    flex-direction:row;
+    width:100%;
+    height:auto;
+    overflow-x:auto;
+    overflow-y:hidden;
+    padding:6px 8px;
+    border-right:none;
+    border-bottom:1px solid var(--border);
+    gap:6px;
+    -ms-overflow-style:none;
+    scrollbar-width:none
+  }
+  .day-tabs::-webkit-scrollbar{display:none}
+  .day-tab{
+    min-width:70px;
+    flex-shrink:0;
+    padding:7px 5px;
+    border-radius:10px
+  }
+  .dt-name{font-size:11px}
+  .dt-date{font-size:9px}
+  .dt-mtag{font-size:8px;padding:2px 4px}
+  .dt-status{font-size:10px}
+  .side-panel{display:none}
+  .day-panel{flex:1;overflow:hidden}
+  .day-detail{padding:10px 10px;gap:7px}
+
+  /* Day header */
+  .day-hdr-card{padding:10px 12px}
+  .dhc-dayname{font-size:14px}
+  .muscle-slot-sel{font-size:12px;padding:8px 28px 8px 8px;min-height:44px}
+  .muscle-slot-lbl{font-size:10px}
+  .muscle-slots-row{gap:6px}
+
+  /* Exercise TABLE → CARDS on mobile */
+  .ex-table-wrap{overflow-x:unset}
+  .ex-table,.ex-table thead,.ex-table tbody,.ex-table tr,.ex-table td,.ex-table th{
+    display:block;width:100%
+  }
+  .ex-table thead{display:none}
+  .ex-table tr{
+    border:1px solid var(--border);
+    border-radius:10px;
+    margin:0 0 10px;
+    padding:12px;
+    background:var(--card);
+    box-shadow:var(--sh);
+    position:relative
+  }
+  .ex-table tr.done-row{opacity:.4}
+  .ex-table tr.overload-row{border-left:3px solid var(--green)}
+  .ex-table tr.pr-row{border-left:3px solid #ffd700}
+  .ex-table tr.plateau-row{border-left:3px solid var(--red)}
+  .ex-table tr.srow-warmup{background:rgba(255,200,50,.06)}
+  .ex-table td{padding:4px 0;border:none;text-align:left}
+  /* Checkbox cell — top right */
+  .ex-table td:first-child{
+    position:absolute;top:10px;right:10px;
+    width:auto;padding:0
+  }
+  .ex-table td:first-child::before{display:none}
+  /* Delete button */
+  .ex-table td:last-child{
+    position:absolute;top:8px;right:36px;
+    width:auto;padding:0
+  }
+  .ex-cb{width:22px;height:22px;cursor:pointer}
+  .ex-del{min-height:32px;min-width:32px;font-size:16px;display:flex;align-items:center;justify-content:center}
+  .ex-name-inp{font-size:15px!important;font-weight:600;padding:2px 0!important;width:calc(100% - 70px)}
+  .ex-num-inp{
+    font-size:16px!important;
+    padding:8px 10px!important;
+    border:1.5px solid var(--border)!important;
+    border-radius:8px;
+    background:var(--bg)!important;
+    min-width:60px;
+    min-height:44px;
+    margin:2px 4px 2px 0
+  }
+  .ex-muscle-sel,.ex-rpe-sel,.ex-rir-sel{
+    font-size:13px;
+    padding:6px 4px;
+    min-height:36px;
+    max-width:none
+  }
+  .ex-note-inp{font-size:12px;padding:6px 0}
+  .add-ex-btn{
+    min-height:48px;
+    font-size:14px!important;
+    margin:5px 0 6px;
+    width:100%
+  }
+  /* Warmup add button */
+  .day-detail > .card > button[style*="warmup"]{min-height:44px;font-size:13px!important}
+
+  /* Warmup textarea */
+  .day-detail textarea{font-size:14px;min-height:60px}
+
+  /* Card header */
+  .card-hdr{padding:10px 14px}
+  .card-title{font-size:12px}
+
+  /* Cardio section */
+  div[style*="grid-template-columns:200px"]{
+    display:flex!important;
+    flex-direction:column!important;
+    gap:10px!important;
+    padding:12px!important
+  }
+  div[style*="grid-template-columns:200px"] select,
+  div[style*="grid-template-columns:200px"] input{
+    min-height:48px;
+    font-size:15px!important;
+    width:100%!important
+  }
+  /* View toggle */
+  .ex-view-toggle{padding:3px 4px}
+  .ex-view-btn{padding:6px 14px;font-size:11px;min-height:34px}
+}
+
+/* ── 3. SÉANCE — Session mode ── */
+@media(max-width:768px){
+  .sess-topbar{padding:8px 12px;gap:8px;flex-wrap:wrap}
+  .sess-day-btn{padding:7px 11px;font-size:11px;min-height:38px}
+  .chrono-widget{padding:6px 12px;border-radius:14px}
+  .chrono-display{font-size:28px;min-width:58px}
+  .rest-preset{padding:5px 9px;font-size:10px;min-height:34px}
+  .chrono-btn{padding:6px 12px;font-size:14px;min-height:36px}
+  .recovery-btn{font-size:18px;padding:4px 10px;min-height:38px}
+  .nutri-btn{font-size:11px;padding:5px 10px;min-height:34px}
+
+  /* Progress banner */
+  .sess-progress-bar-area{padding:6px 12px;gap:10px;font-size:11px}
+
+  /* Hide left nav, show strip */
+  .sess-body-wrap{flex-direction:column}
+  .sess-nav{display:none}
+  .sess-nav-strip{
+    display:flex;
+    overflow-x:auto;
+    gap:7px;
+    padding:10px 12px;
+    background:var(--surface);
+    border-bottom:1px solid var(--border);
+    flex-shrink:0;
+    -ms-overflow-style:none;
+    scrollbar-width:none
+  }
+  .sess-nav-strip::-webkit-scrollbar{display:none}
+  .sess-strip-item{
+    flex-shrink:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:3px;
+    padding:8px 12px;
+    border-radius:10px;
+    border:1.5px solid var(--border);
+    cursor:pointer;
+    background:var(--bg);
+    min-width:60px;
+    min-height:54px;
+    touch-action:manipulation
+  }
+  .sess-strip-item.active-nav{background:var(--teal-l);border-color:var(--teal)}
+  .sess-strip-item.done-nav{opacity:.5}
+  .sess-strip-num{font-size:12px;font-weight:700;color:var(--muted)}
+  .sess-strip-dots{display:flex;gap:3px}
+  .sess-strip-dot{width:6px;height:6px;border-radius:50%;background:var(--border)}
+  .sess-strip-dot.dot-done{background:var(--green)}
+
+  /* Exercise header */
+  .sess-ex-hdr{padding:12px 14px;position:sticky;top:0;z-index:10}
+  .sess-ex-main-name{font-size:16px}
+  .sess-ex-sub-item{font-size:11px;padding:3px 9px}
+
+  /* Sets: table → cards */
+  .sess-sets-table,.sess-sets-table thead,.sess-sets-table tbody,
+  .sess-sets-table tr,.sess-sets-table td,.sess-sets-table th{
+    display:block;width:100%
+  }
+  .sess-sets-table thead{display:none}
+  .sess-sets-table tr{
+    border:1px solid var(--border);
+    border-radius:12px;
+    margin:0 0 12px;
+    padding:14px;
+    background:var(--bg);
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:10px
+  }
+  .sess-sets-table tr.srow-done{background:rgba(56,161,105,.06);border-color:#9ae6b4}
+  .sess-sets-table tr.srow-active{background:rgba(91,168,160,.06);border-color:var(--teal);box-shadow:0 0 0 2px rgba(91,168,160,.15)}
+  .sess-sets-table td{padding:0;border:none;flex:none}
+  /* Badge numéro de série */
+  .sess-sets-table td:first-child{width:100%;margin-bottom:4px}
+  .snum{width:28px;height:28px;font-size:11px}
+  /* Inputs de saisie */
+  .set-inp{
+    font-size:22px!important;
+    padding:12px 10px!important;
+    min-height:54px;
+    width:80px!important;
+    border-radius:10px
+  }
+  .set-inp.inp-r{width:72px!important}
+  .set-inp.inp-rpe,.set-inp.inp-rir{
+    font-size:14px!important;
+    width:68px!important;
+    min-height:48px
+  }
+  /* Bouton Copier = */
+  .set-copy-btn{
+    min-height:44px;
+    min-width:44px;
+    font-size:15px!important;
+    border-radius:8px;
+    display:flex;align-items:center;justify-content:center
+  }
+  /* Bouton Valider */
+  .set-val-btn{
+    min-height:54px;
+    font-size:16px!important;
+    padding:14px 24px!important;
+    border-radius:12px;
+    flex:1
+  }
+  /* Colonnes vol/1RM cachées sur mobile */
+  .set-vol-val,.set-1rm-val,.sess-prev-hint{display:none}
+  /* Ajouter une série */
+  .sess-add-set-btn{min-height:48px;font-size:14px!important;border-radius:10px;margin-top:4px}
+  /* Note */
+  .sess-note-area{padding:12px 14px}
+  .sess-note-inp{font-size:14px;padding:10px 12px;min-height:60px}
+  /* Prev/Next buttons */
+  .sess-nav-btns{padding:10px 14px;gap:10px}
+  .sess-nav-btn{min-height:50px;font-size:14px;flex:1;justify-content:center}
+
+  /* Focus overlay */
+  .focus-overlay{padding-top:env(safe-area-inset-top,0px)}
+  .focus-top{padding:12px 14px}
+  .focus-ex-name{font-size:16px}
+  .focus-inp{font-size:24px!important;padding:12px!important;min-height:56px;width:90px!important}
+  .focus-val-btn{min-height:56px;font-size:16px}
+  .focus-body{padding:12px}
+  .focus-set-row{gap:8px;padding:12px;border-radius:12px}
+  .focus-chrono-time{font-size:44px}
+}
+
+/* ── 4. PROGRESSION ── */
+@media(max-width:768px){
+  .prog-wrap{padding:10px 12px;gap:10px}
+  .prog-cards{grid-template-columns:1fr!important}
+  .prog-filter-row{gap:6px;width:100%}
+  .prog-filter-sel{flex:1;min-height:44px;font-size:14px;padding:8px 10px}
+  .prog-card-hdr{padding:10px 12px}
+  .prog-card-name{font-size:13px}
+  .prog-card-body{padding:10px 12px}
+  .prog-table td,.prog-table th{font-size:11px;padding:5px 6px}
+  .btn-green.btn-sm{min-height:44px;font-size:13px}
+}
+
+/* ── 5. CORPS ── */
+@media(max-width:768px){
+  .corps-wrap{padding:10px 12px;gap:10px}
+  .corps-grid{grid-template-columns:1fr!important}
+
+  /* Sleep grid — bigger inputs */
+  .sleep-grid{grid-template-columns:repeat(7,1fr);gap:3px}
+  .sleep-day-card{padding:7px 3px}
+  .sleep-day-lbl{font-size:9px}
+  .sleep-inp{font-size:16px!important;padding:7px 2px!important;min-height:44px}
+  .sleep-qual-btn{font-size:14px;padding:3px}
+
+  /* Nutrition */
+  .nutri-row{flex-wrap:wrap;gap:5px;padding:6px 0}
+  .nutri-day{font-size:11px;width:32px}
+  .nutri-btn.nutri-btn{font-size:12px;padding:8px 10px;min-height:40px;flex:1}
+
+  /* Mesures */
+  .mesure-form{gap:6px}
+  .mesure-form .mesure-inp{min-height:44px;font-size:15px;padding:8px 10px}
+  .mesure-form .btn{min-height:44px}
+  .mesure-val{font-size:16px}
+  .mesure-date{font-size:11px}
+  .poids-big{font-size:36px}
+
+  /* Pain journal */
+  .pain-entry{font-size:12px;padding:8px 0;gap:8px}
+  #add-pain-btn{min-height:44px}
+
+  /* Profil height input */
+  #profil-taille{min-height:44px;font-size:15px;width:80px!important}
+  #add-photo-btn{min-height:44px}
+
+  /* Heatmap */
+  .sh-dot{width:8px;height:8px}
+}
+
+/* ── 6. BILAN ── */
+@media(max-width:768px){
+  .bilan-wrap{padding:10px 12px;gap:10px}
+  .bilan-grid{grid-template-columns:1fr 1fr!important;gap:8px}
+  .bilan-big{font-size:26px}
+  .bilan-sub{font-size:11px}
+  .bilan-card{padding:10px}
+  .bilan-nav-btn{padding:5px 16px;font-size:18px;min-height:44px}
+  .bilan-week-lbl{font-size:13px}
+  #export-pdf-btn{min-height:44px}
+}
+
+/* ── 7. KPI ── */
+@media(max-width:768px){
+  .kpi-wrap{padding:10px 12px;gap:10px}
+  .kpi-grid{grid-template-columns:1fr 1fr!important;gap:8px}
+  .kpi-wide{grid-column:span 2}
+  .kpi-card{padding:10px}
+  .kpi-val{font-size:22px}
+  .kpi-sub{font-size:11px}
+  .kpi-label{font-size:10px}
+  .kpi-tonnage-row{font-size:11px;flex-wrap:wrap;gap:4px}
+  /* Gauge smaller */
+  .kpi-gauge{width:44px;height:44px}
+  .kpi-gauge svg{width:44px;height:44px}
+  .kpi-gauge-text{font-size:9px}
+}
+
+/* ── 8. OBJECTIFS & BADGES ── */
+@media(max-width:768px){
+  .ach-wrap{padding:10px 12px;gap:10px}
+  .ach-grid{grid-template-columns:repeat(3,1fr)!important;gap:8px}
+  .ach-card{padding:12px 8px;gap:5px}
+  .ach-icon{font-size:24px}
+  .ach-name{font-size:11px}
+  .ach-desc{font-size:9px}
+  /* Objective form */
+  #obj-edit{padding:14px 12px}
+  #obj-edit input[type="text"],#obj-edit input[type="date"],
+  #obj-edit input[type="number"]{
+    font-size:16px!important;
+    padding:12px!important;
+    min-height:48px
+  }
+  #obj-edit-grid{grid-template-columns:1fr!important}
+  #obj-edit div[style*="grid-column:span 2"]{
+    grid-column:span 1!important
+  }
+  #obj-save-btn,#obj-cancel-btn,#obj-edit-btn{min-height:44px;font-size:13px}
+  .countdown-chip{font-size:13px;padding:6px 14px}
+  .obj-stat-row{font-size:12px;padding:8px 0}
+  .obj-progress-bar-wrap{height:10px}
+}
+
+/* ── 9. BIBLIOTHÈQUE ── */
+@media(max-width:768px){
+  .lib-wrap{padding:10px 12px;gap:10px}
+  .lib-grid{grid-template-columns:1fr!important}
+  .lib-card-hdr{padding:12px}
+  .lib-card-body{padding:12px}
+  #lib-search{font-size:16px;padding:10px 12px;min-height:44px;width:100%!important}
+  #lib-filter-muscle,#lib-filter-pattern{
+    font-size:14px;padding:8px 10px;min-height:44px;flex:1
+  }
+  .lib-tip{font-size:12px}
+  .lib-card .btn-ghost{min-height:44px;font-size:13px}
+}
+
+/* ── 10. CALENDRIER ── */
+@media(max-width:768px){
+  .cal-wrap{padding:10px 12px}
+  .cal-hdr{margin-bottom:10px;gap:8px}
+  .cal-nav{padding:6px 16px;font-size:18px;min-height:44px}
+  .cal-month{font-size:15px;min-width:0;flex:1;text-align:center}
+  .cal-grid{gap:3px}
+  .cal-dh{font-size:9px;padding:3px 1px}
+  .cal-cell{min-height:60px;padding:4px;border-radius:6px}
+  .cal-dn{font-size:12px;font-weight:700}
+  .cal-mpill{font-size:7px;padding:1px 3px;border-radius:5px}
+  .cal-status{font-size:9px}
+  .cal-checks{display:none} /* Trop petites cases à cocher sur mobile */
+}
+
+/* ── 11. MODALS améliorés ── */
+@media(max-width:768px){
+  /* Modal objectif bloc selection */
+  #mf_block{font-size:16px;min-height:48px}
+}
+
+/* ── 12. GRIDS universels ── */
+@media(max-width:480px){
+  /* Très petit écran */
+  .ach-grid{grid-template-columns:repeat(2,1fr)!important}
+  .sleep-grid{grid-template-columns:repeat(7,1fr)}
+  .bilan-grid{grid-template-columns:1fr!important}
+  .kpi-grid{grid-template-columns:1fr!important}
+  .kpi-wide{grid-column:span 1}
+}
 </style>
 </head>
 <body>
@@ -698,10 +1117,10 @@ input,textarea,select{user-select:auto;-webkit-user-select:auto}
       </div>
       <div style="display:flex;flex-direction:column;gap:2px">
         <div style="font-size:8px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Nutrition</div>
-        <div id="nutri-today-btns" style="display:flex;gap:3px">
-          <button class="nutri-btn" data-n="deficit">Déficit</button>
-          <button class="nutri-btn" data-n="maint">Maint.</button>
-          <button class="nutri-btn" data-n="surplus">Surplus</button>
+        <div id="nutri-today-btns" style="display:flex;gap:5px">
+          <button class="nutri-btn" data-n="deficit" style="min-height:38px;font-size:12px">Déficit</button>
+          <button class="nutri-btn" data-n="maint" style="min-height:38px;font-size:12px">Maint.</button>
+          <button class="nutri-btn" data-n="surplus" style="min-height:38px;font-size:12px">Surplus</button>
         </div>
       </div>
       <div class="chrono-widget">
@@ -857,7 +1276,7 @@ input,textarea,select{user-select:auto;-webkit-user-select:auto}
 
       <!-- Vue édition — masquée par défaut -->
       <div id="obj-edit" style="display:none;padding:16px 18px;border-top:1px solid var(--border);background:var(--bg)">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div id="obj-edit-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
           <div style="grid-column:span 2">
             <label style="display:block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px">Mon objectif</label>
             <input type="text" id="obj-inp-text" class="inp" style="width:100%;font-size:13px" placeholder="Ex : Prendre 5kg de muscle d'ici janvier...">

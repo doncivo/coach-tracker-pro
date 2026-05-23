@@ -4016,9 +4016,27 @@ function renderDayDetail(i){
   const eright=document.createElement('div');eright.style.cssText='display:flex;align-items:center;gap:6px';
   const em=document.createElement('span');em.style.cssText='font-size:10px;color:var(--muted)';em.id='ex-meta-'+i;
   const vt=document.createElement('div');vt.className='ex-view-toggle';
-  ['Compact','Détail'].forEach((lbl,vi)=>{
-    const vb=document.createElement('button');vb.className='ex-view-btn'+(_exView===(vi===0?'compact':'detail')?' active':'');
-    vb.textContent=lbl;vb.addEventListener('click',()=>{_exView=vi===0?'compact':'detail';vt.querySelectorAll('.ex-view-btn').forEach((b,bi)=>b.classList.toggle('active',bi===vi));buildExTable(i,tbody,d,updateExMeta);});
+  const viewModes=[
+    {val:'compact',lbl:'Compact',icon:'☰',tip:'Vue compacte — colonnes essentielles'},
+    {val:'detail',lbl:'Détail',icon:'⊞',tip:'Vue détail — toutes les colonnes (RPE, Tempo, Note…)'}
+  ];
+  viewModes.forEach((mode,vi)=>{
+    const vb=document.createElement('button');
+    vb.className='ex-view-btn'+(_exView===mode.val?' active':'');
+    vb.innerHTML=`${mode.icon} ${mode.lbl}`;
+    vb.title=mode.tip;
+    vb.setAttribute('aria-label',mode.tip);
+    vb.addEventListener('click',()=>{
+      S.exViewMode=mode.val;
+      _exView=mode.val;
+      save();
+      // Rebuild ALL exercise tables to apply new view
+      document.querySelectorAll('.ex-view-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.ex-view-btn').forEach(b=>{
+        if(b.innerHTML.includes(mode.icon)) b.classList.add('active');
+      });
+      renderDayDetail(S.activeDay);
+    });
     vt.appendChild(vb);
   });
   eright.appendChild(em);eright.appendChild(vt);
@@ -6280,6 +6298,7 @@ document.getElementById('next-month').addEventListener('click',()=>{S.calMonth++
 
 /* ══ INIT ══ */
 load();
+_exView = S.exViewMode||'compact';
 document.documentElement.setAttribute('data-theme',S.darkMode?'dark':'light');
 document.getElementById('darkmode-btn').textContent=S.darkMode?'☀️':'🌙';
 updateWeekBadges();renderDayTabs();renderDayDetail(S.activeDay);renderGoals();
@@ -6407,6 +6426,13 @@ if (new URLSearchParams(location.search).has('test')) {
     console.log(`[CTP Tests] ${passed} passed, ${failed} failed`);
   });
 }
+
+
+rt('Modal.confirm is async function', Modal.confirm.constructor.name === 'AsyncFunction');
+    assert('computeBodyComp: taille 0 returns null', (()=>{const orig=S.profilTaille;S.profilTaille=0;const r=computeBodyComp();S.profilTaille=orig;return r===null;})());
+    assert('computeBodyComp: taille 999 returns null', (()=>{const orig=S.profilTaille;S.profilTaille=999;const r=computeBodyComp();S.profilTaille=orig;return r===null;})());
+
+    console.log(`[CTP Tests] ${passed} passed, ${failed} failed`);
 
 
 </script>

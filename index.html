@@ -568,135 +568,6 @@ input,textarea,select{user-select:auto;-webkit-user-select:auto}
   .cal-day-lbl{font-size:15px}
 }
 
-
-/* ══ DASHBOARD ══ */
-.dashboard-wrap{flex:1;overflow-y:auto;padding:12px 18px;display:flex;flex-direction:column;gap:14px}
-.dash-greeting{font-size:20px;font-weight:700;color:var(--text)}
-.dash-sub{font-size:13px;color:var(--muted);margin-top:2px}
-.dash-quick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
-.dash-quick-card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--border);padding:14px;display:flex;flex-direction:column;gap:4px;cursor:pointer;transition:box-shadow .2s}
-.dash-quick-card:hover,.dash-quick-card:active{box-shadow:var(--sh2)}
-.dash-quick-icon{font-size:26px;line-height:1;margin-bottom:2px}
-.dash-quick-val{font-size:22px;font-weight:700;font-family:var(--mono);color:var(--teal-d);line-height:1}
-.dash-quick-lbl{font-size:11px;color:var(--muted)}
-.dash-quick-sub{font-size:10px;color:var(--muted);margin-top:1px}
-.dash-quick-card.dash-accent-green{border-left:3px solid var(--green)}
-.dash-quick-card.dash-accent-orange{border-left:3px solid var(--orange)}
-.dash-quick-card.dash-accent-red{border-left:3px solid var(--red)}
-.dash-quick-card.dash-accent-teal{border-left:3px solid var(--teal)}
-.dash-quick-card.dash-accent-purple{border-left:3px solid var(--purple)}
-.dash-section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--teal-d);margin-bottom:2px}
-.dash-today-card{background:linear-gradient(135deg,var(--teal),var(--teal-d));color:#fff;border-radius:var(--r);padding:16px;box-shadow:0 4px 16px rgba(91,168,160,.3)}
-.dash-today-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;opacity:.8;margin-bottom:8px}
-.dash-today-exname{font-size:16px;font-weight:700;line-height:1.3}
-.dash-today-meta{font-size:12px;opacity:.85;margin-top:4px}
-.dash-today-actions{display:flex;gap:8px;margin-top:12px}
-.dash-today-btn{padding:8px 16px;border-radius:var(--rs);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;min-height:40px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;transition:all .2s}
-.dash-today-btn:hover,.dash-today-btn:active{background:rgba(255,255,255,.3)}
-.dash-today-btn.primary{background:rgba(255,255,255,.9);color:var(--teal-d)}
-.dash-alerts-list{display:flex;flex-direction:column;gap:6px}
-.dash-alert-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--rs);border:1px solid var(--border);background:var(--card);font-size:12px;cursor:pointer}
-.dash-alert-item:hover{background:var(--bg)}
-.dash-alert-icon{font-size:18px;flex-shrink:0}
-.dash-alert-text{flex:1;color:var(--text)}
-.dash-alert-action{font-size:11px;color:var(--teal-d);font-weight:600;flex-shrink:0}
-/* ══ CHARTS ENGINE ══ */
-.chart-wrap{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--border);padding:14px;overflow:hidden}
-.chart-wrap-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--teal-d);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
-.chart-wrap-sub{font-size:10px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0}
-.chart-period-btns{display:flex;gap:3px;background:var(--bg);border-radius:20px;padding:2px}
-.chart-period-btn{padding:3px 10px;border-radius:16px;border:none;font-family:var(--font);font-size:10px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all .15s}
-.chart-period-btn.active{background:var(--surface);color:var(--teal-d);box-shadow:var(--sh)}
-canvas.chart-canvas{width:100%!important;display:block;cursor:crosshair}
-.chart-tooltip{position:fixed;background:var(--text);color:var(--surface);padding:7px 12px;border-radius:8px;font-size:11px;font-weight:600;pointer-events:none;z-index:9999;transform:translate(-50%,-130%);white-space:nowrap;box-shadow:var(--sh2)}
-.chart-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
-.chart-legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
-.chart-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.chart-no-data{text-align:center;padding:30px;color:var(--muted);font-size:12px}
-/* Radar chart */
-.radar-wrap{display:flex;flex-direction:column;align-items:center;padding:10px}
-/* Score de forme */
-.fitness-score-wrap{display:flex;align-items:center;gap:18px;padding:6px 0}
-.fitness-score-ring{position:relative;width:90px;height:90px;flex-shrink:0}
-.fitness-score-ring svg{width:90px;height:90px;transform:rotate(-90deg)}
-.fitness-score-ring-bg{fill:none;stroke:var(--border);stroke-width:7}
-.fitness-score-ring-fill{fill:none;stroke-width:7;stroke-linecap:round;transition:stroke-dashoffset .8s ease}
-.fitness-score-val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--mono);font-size:20px;font-weight:700;color:var(--text)}
-.fitness-score-grade{font-size:11px;color:var(--muted);margin-top:-2px}
-.fitness-score-details{flex:1;display:flex;flex-direction:column;gap:5px}
-.fitness-score-row{display:flex;align-items:center;gap:6px;font-size:11px}
-.fitness-score-icon{width:18px;text-align:center;flex-shrink:0}
-.fitness-score-lbl{flex:1;color:var(--muted)}
-.fitness-score-pts{font-family:var(--mono);font-weight:700;font-size:11px;color:var(--text)}
-/* Corrélation sommeil/perf */
-.correl-dots-wrap{position:relative;width:100%;height:120px;margin-top:6px}
-.correl-dot{position:absolute;width:10px;height:10px;border-radius:50%;transform:translate(-50%,-50%);cursor:pointer;transition:transform .15s}
-.correl-dot:hover{transform:translate(-50%,-50%) scale(1.5)}
-/* TDEE */
-.tdee-bar-row{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:11px}
-.tdee-bar-lbl{width:80px;color:var(--muted);flex-shrink:0}
-/* Mobile */
-@media(max-width:768px){
-  #hdr-fitness-score{font-size:10px;padding:2px 6px;min-width:32px}
-  .dashboard-wrap{padding:10px 12px;gap:12px}
-  .dash-greeting{font-size:17px}
-  .dash-quick-grid{grid-template-columns:repeat(2,1fr);gap:8px}
-  .dash-quick-card{padding:12px}
-  .dash-quick-val{font-size:20px}
-  .chart-wrap{padding:12px}
-  .fitness-score-ring{width:80px;height:80px}
-  .fitness-score-ring svg{width:80px;height:80px}
-  .fitness-score-val{font-size:18px}
-  .chart-period-btn{padding:3px 8px;font-size:9px}
-}
-
-
-/* ══ ONBOARDING WIZARD ══ */
-.onboard-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
-.onboard-card{background:var(--surface);border-radius:20px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);display:flex;flex-direction:column}
-.onboard-header{background:linear-gradient(135deg,var(--teal),var(--teal-d));color:#fff;padding:24px 24px 20px;border-radius:20px 20px 0 0;text-align:center;flex-shrink:0}
-.onboard-header-icon{font-size:42px;margin-bottom:8px}
-.onboard-header-title{font-size:22px;font-weight:800;margin-bottom:4px}
-.onboard-header-sub{font-size:13px;opacity:.85}
-.onboard-steps-bar{display:flex;gap:6px;padding:16px 24px 0;flex-shrink:0}
-.onboard-step-dot{height:4px;flex:1;border-radius:4px;background:var(--border);transition:background .3s}
-.onboard-step-dot.done{background:var(--teal)}
-.onboard-step-dot.active{background:var(--teal);opacity:.5}
-.onboard-body{padding:20px 24px;flex:1;overflow-y:auto}
-.onboard-step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px;display:flex;align-items:center;gap:8px}
-.onboard-step-sub{font-size:12px;color:var(--muted);margin-bottom:18px}
-.onboard-field{margin-bottom:14px}
-.onboard-label{font-size:12px;font-weight:600;color:var(--text);margin-bottom:5px;display:flex;align-items:center;gap:6px}
-.onboard-label span{font-size:10px;color:var(--muted);font-weight:400}
-.onboard-inp{width:100%;padding:10px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:14px;color:var(--text);box-sizing:border-box;transition:border .2s}
-.onboard-inp:focus{outline:none;border-color:var(--teal)}
-.onboard-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.onboard-select{width:100%;padding:10px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:14px;color:var(--text);box-sizing:border-box}
-.onboard-select:focus{outline:none;border-color:var(--teal)}
-.onboard-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
-.onboard-chip{padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--muted);cursor:pointer;transition:all .15s;font-weight:500}
-.onboard-chip.sel{background:var(--teal);color:#fff;border-color:var(--teal);font-weight:700}
-.onboard-info-box{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6}
-.onboard-info-box strong{color:var(--text)}
-.onboard-calc-result{background:linear-gradient(135deg,var(--teal)11,var(--bg));border:1.5px solid var(--teal);border-radius:10px;padding:12px 16px;margin-top:12px;display:none}
-.onboard-calc-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:2px 0}
-.onboard-calc-val{font-family:var(--mono);font-weight:700;font-size:14px;color:var(--teal-d)}
-.onboard-footer{padding:16px 24px 20px;display:flex;gap:10px;flex-shrink:0;border-top:1px solid var(--border)}
-.onboard-btn-back{flex:0 0 auto;padding:12px 20px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:14px;font-weight:600;color:var(--muted);cursor:pointer}
-.onboard-btn-next{flex:1;padding:12px 20px;border-radius:12px;border:none;background:var(--teal);color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:background .2s}
-.onboard-btn-next:hover{background:var(--teal-d)}
-.onboard-btn-next:disabled{background:var(--border);color:var(--muted);cursor:default}
-.onboard-skip{font-size:11px;color:var(--muted);text-align:center;padding:0 24px 16px;cursor:pointer;text-decoration:underline}
-@media(max-width:500px){
-  .onboard-card{border-radius:16px;max-height:95vh}
-  .onboard-header{padding:20px 16px 16px;border-radius:16px 16px 0 0}
-  .onboard-header-icon{font-size:34px}
-  .onboard-header-title{font-size:18px}
-  .onboard-body{padding:16px}
-  .onboard-footer{padding:12px 16px 16px}
-  .onboard-row{grid-template-columns:1fr}
-}
-
 /* ════════════════════════════════════════════════════════
    MOBILE RESPONSIVE — Coach Tracker Pro
    Breakpoint: 768px
@@ -1285,41 +1156,88 @@ canvas.chart-canvas{width:100%!important;display:block;cursor:crosshair}
 }
 
 
-/* ══════════════════════════════════════════════════════════
-   MOBILE DEFINITIVE OVERRIDE — wins all cascade conflicts
-   ══════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   MOBILE COMPLETE — iPhone 14/15/16 Pro Max optimized
+   ═══════════════════════════════════════════════════════════ */
+html { height: 100dvh; }
+
 @media screen and (max-width: 768px) {
+  html, body { height: 100dvh; overflow: hidden; }
 
-  /* ── App shell ── */
-  body { overflow: hidden; }
-  .hdr { padding: 8px 12px; gap: 6px; }
-  .hdr h1 { font-size: 14px; }
-  .hdr-sub { display: none; }
-  .hdr-right { gap: 4px; }
-  .hdr-btn { min-width: 32px; min-height: 32px; font-size: 14px; }
-  .hdr-badge { font-size: 9px; padding: 2px 6px; }
-  #hdr-fitness-score { display: none; } /* hide on mobile header - shown in dashboard */
+  /* Header: safe area Dynamic Island */
+  .hdr {
+    padding-top: max(12px, env(safe-area-inset-top, 12px)) !important;
+    padding-bottom: 8px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    gap: 6px !important;
+    overflow: hidden;
+  }
+  .hdr h1 { font-size: 12px !important; white-space: nowrap; }
+  .hdr-sub { display: none !important; }
+  .hdr-desktop-only { display: none !important; }
+  #hdr-fitness-score { display: none !important; }
 
-  /* ── Tabs desktop → hidden ── */
-  .tabs { display: none; }
+  /* Desktop tabs hidden */
+  .tabs { display: none !important; }
 
-  /* ── Bottom nav always visible ── */
-  .bottom-nav { display: flex !important; }
+  /* Bottom nav */
+  .bottom-nav {
+    display: flex !important;
+    position: fixed !important;
+    bottom: 0 !important; left: 0 !important; right: 0 !important;
+    z-index: 500 !important;
+    background: var(--surface) !important;
+    border-top: 1px solid var(--border) !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+  }
+  .bottom-nav-inner {
+    display: flex !important;
+    width: 100% !important;
+    height: 54px !important;
+  }
+  .bnav-btn {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 2px !important;
+    min-height: 54px !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 6px 2px !important;
+  }
+  .bnav-icon { font-size: 20px !important; line-height: 1 !important; }
+  .bnav-label { font-size: 9px !important; font-weight: 600 !important; }
 
-  /* ── Planning layout → single column ── */
+  /* Content: between header and bottom nav */
+  .content {
+    flex: 1 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding-bottom: calc(54px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Tab panes */
+  .tab-pane { display: none !important; flex-direction: column !important; overflow: hidden !important; flex: 1 !important; }
+  .tab-pane.active { display: flex !important; }
+
+  /* Planning: single column */
   .weekly-wrap {
     display: flex !important;
     flex-direction: column !important;
-    flex: 1;
-    overflow: hidden;
-    width: 100%;
+    flex: 1 !important;
+    overflow: hidden !important;
+    min-height: 0 !important;
   }
   .day-tabs {
     display: flex !important;
     flex-direction: row !important;
     width: 100% !important;
     height: auto !important;
-    min-height: 80px !important;
+    min-height: 72px !important;
     overflow-x: auto !important;
     overflow-y: hidden !important;
     padding: 6px 8px !important;
@@ -1327,90 +1245,71 @@ canvas.chart-canvas{width:100%!important;display:block;cursor:crosshair}
     border-bottom: 1px solid var(--border) !important;
     gap: 6px !important;
     flex-shrink: 0 !important;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
   }
-  .day-tabs::-webkit-scrollbar { display: none; }
-  .day-tab {
-    min-width: 68px !important;
-    flex-shrink: 0 !important;
-    padding: 7px 5px !important;
-    border-radius: 10px !important;
-  }
+  .day-tabs::-webkit-scrollbar { display: none !important; }
+  .day-tab { min-width: 66px !important; flex-shrink: 0 !important; padding: 6px 4px !important; border-radius: 10px !important; }
   .side-panel { display: none !important; }
-  .day-panel {
+  .day-panel { flex: 1 !important; overflow: hidden !important; min-height: 0 !important; }
+  .day-detail { height: 100% !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch !important; }
+
+  /* Session */
+  .session-wrap, .sess-wrap { flex-direction: column !important; flex: 1 !important; overflow: hidden !important; }
+  .sess-nav { flex-direction: row !important; overflow-x: auto !important; flex-shrink: 0 !important; border-right: none !important; border-bottom: 1px solid var(--border) !important; }
+
+  /* Scrollable content */
+  .dashboard-wrap, .prog-wrap, .corps-wrap, .kpi-wrap,
+  .bilan-wrap, .achievements-wrap, .lib-wrap, .cal-wrap, .settings-wrap {
     flex: 1 !important;
-    overflow: hidden !important;
-    width: 100% !important;
-  }
-  .day-detail {
-    height: 100%;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 10px 12px !important;
+    min-height: 0 !important;
   }
 
-  /* ── Session layout → single column ── */
-  .sess-wrap {
-    display: flex !important;
-    flex-direction: column !important;
-  }
-  .sess-nav {
-    flex-direction: row !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    flex-shrink: 0 !important;
-    border-right: none !important;
-    border-bottom: 1px solid var(--border) !important;
-  }
-
-  /* ── Content areas scroll properly ── */
-  .tab-pane { 
-    display: none; 
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .tab-pane.active { 
-    display: flex !important; 
-  }
-
-  /* ── Dashboard mobile ── */
-  .dashboard-wrap { 
-    padding: 10px 12px; 
-    gap: 12px; 
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
+  /* Dashboard */
   .dash-quick-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
 
-  /* ── Cards & forms ── */
-  .card { border-radius: 12px; }
-  .inp, .sel-inp, select { font-size: 16px !important; } /* prevent iOS zoom */
+  /* iOS: no zoom on input focus */
+  input, select, textarea { font-size: 16px !important; }
+
+  /* Modals */
+  .modal { width: calc(100vw - 32px) !important; max-height: 85vh !important; }
   
-  /* ── Tables → cards on mobile ── */
-  .ex-table-wrap { overflow-x: hidden; }
-  
-  /* ── Bottom nav safe area ── */
-  .bottom-nav {
-    padding-bottom: env(safe-area-inset-bottom, 8px) !important;
-    height: calc(60px + env(safe-area-inset-bottom, 0px)) !important;
-  }
-  
-  /* ── Fix progress/corps/kpi tabs ── */
-  .prog-wrap, .corps-wrap, .kpi-wrap, .bilan-wrap, .achievements-wrap, .lib-wrap, .cal-wrap {
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-    flex: 1;
-  }
+  /* Onboarding */
+  .onboard-card { border-radius: 16px !important; max-height: calc(100dvh - 32px) !important; }
 }
 
-@media screen and (max-width: 400px) {
-  .dash-quick-grid { grid-template-columns: repeat(2, 1fr) !important; }
-  .dash-quick-val { font-size: 18px !important; }
-  .day-tab { min-width: 60px !important; }
-  .hdr h1 { font-size: 13px; }
+@media screen and (max-width: 430px) and (min-width: 390px) {
+  .bnav-icon { font-size: 22px !important; }
+  .bnav-label { font-size: 10px !important; }
 }
+@media screen and (max-width: 389px) {
+  .day-tab { min-width: 60px !important; }
+  .hdr h1 { font-size: 11px !important; }
+}
+
+/* hdr-desktop-only: hidden on mobile, shown on desktop */
+.hdr-desktop-only { display: inline-flex; }
+
+
+/* ══ ONBOARDING ══ */
+.onboard-chip{padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--muted);cursor:pointer;transition:all .15s;font-weight:500;display:inline-block}
+.onboard-chip.sel{background:var(--teal);color:#fff;border-color:var(--teal);font-weight:700}
+.onboard-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.onboard-field{margin-bottom:14px}
+.onboard-label{font-size:12px;font-weight:600;color:var(--text);margin-bottom:5px;display:block}
+.onboard-inp{width:100%;padding:10px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:16px;color:var(--text);box-sizing:border-box}
+.onboard-inp:focus{outline:none;border-color:var(--teal)}
+.onboard-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.onboard-step-dot{height:4px;flex:1;border-radius:4px;background:var(--border)}
+.onboard-step-dot.done{background:var(--teal)}
+.onboard-info-box{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6}
+@media(max-width:500px){.onboard-row{grid-template-columns:1fr}}
 
 </style>
+  <link id="pwa-manifest" rel="manifest">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -1423,14 +1322,13 @@ canvas.chart-canvas{width:100%!important;display:block;cursor:crosshair}
   <div class="hdr-right">
     <span class="hdr-badge" id="week-type-badge">A</span>
     <button class="hdr-btn" id="toggle-week-btn" title="Changer semaine A/B" aria-label="Changer semaine A/B">⇄</button>
-    <button class="hdr-btn btn-archive" id="archive-week-btn" title="Archiver la semaine" aria-label="Archiver"><span>📁</span></button>
+    <button class="hdr-btn btn-archive" id="archive-week-btn" title="Archiver la semaine" aria-label="Archiver" class="hdr-btn hdr-desktop-only"><span>📁</span></button>
     <span class="hdr-badge badge-block" id="week-counter-badge">S1</span>
     <button class="hdr-btn" id="block-btn" title="Changer de bloc" aria-label="Bloc">📦</button>
-    <button class="hdr-btn btn-export" id="export-btn" title="Exporter les données" aria-label="Exporter"><span>⬇</span></button>
-    <button class="hdr-btn btn-import" id="import-btn" title="Importer des données" aria-label="Importer"><span>⬆</span></button>
-    <button class="hdr-btn" id="search-btn" title="Recherche globale" aria-label="Recherche" onclick="openSearch()">🔍</button>
-    <button class="hdr-btn" id="focus-btn" title="Mode focus" aria-label="Mode focus">🎯</button>
-    <span id="hdr-fitness-score" title="Score de forme" onclick="switchTab('dashboard')" style="cursor:pointer;font-family:var(--mono);font-size:12px;font-weight:700;padding:3px 8px;border-radius:12px;background:var(--teal);color:#fff;min-width:40px;text-align:center;display:inline-flex;align-items:center;gap:3px"></span>
+    <button class="hdr-btn btn-export" id="export-btn" title="Exporter les données" aria-label="Exporter" class="hdr-btn hdr-desktop-only"><span>⬇</span></button>
+    <button class="hdr-btn btn-import" id="import-btn" title="Importer des données" aria-label="Importer" class="hdr-btn hdr-desktop-only"><span>⬆</span></button>
+    <button class="hdr-btn" id="focus-btn" title="Mode focus" aria-label="Mode focus" class="hdr-btn hdr-desktop-only">🎯</button>
+    <span id="hdr-fitness-score" style="display:none;cursor:pointer;font-family:var(--mono);font-size:12px;font-weight:700;padding:3px 8px;border-radius:12px;background:var(--teal);color:#fff" onclick="switchTab('dashboard')"></span>
     <button class="hdr-btn" id="darkmode-btn" aria-label="Mode sombre">🌙</button>
     <input type="file" id="import-file" accept=".json" style="display:none">
   </div>
@@ -1439,10 +1337,6 @@ canvas.chart-canvas{width:100%!important;display:block;cursor:crosshair}
 <!-- BOTTOM NAV — mobile only -->
 <nav class="bottom-nav" role="navigation" aria-label="Navigation principale">
   <div class="bottom-nav-inner">
-    <button class="bnav-btn" data-tab="dashboard" aria-label="Accueil">
-      <span class="bnav-icon">🏠</span>
-      <span class="bnav-label">Accueil</span>
-    </button>
     <button class="bnav-btn active" data-tab="weekly" aria-label="Planning">
       <span class="bnav-icon">📋</span>
       <span class="bnav-label">Planning</span>
@@ -1471,11 +1365,9 @@ canvas.chart-canvas{width:100%!important;display:block;cursor:crosshair}
     <button class="bnav-more-btn" data-tab="achievements" role="menuitem"><span style="font-size:16px">🏆</span><span>Objectifs</span></button>
     <button class="bnav-more-btn" data-tab="library" role="menuitem"><span style="font-size:16px">📚</span><span>Biblio</span></button>
     <button class="bnav-more-btn" data-tab="monthly" role="menuitem"><span style="font-size:16px">📅</span><span>Calendrier</span></button>
-    <button class="bnav-more-btn" data-tab="settings" role="menuitem"><span style="font-size:16px">⚙️</span><span>Réglages</span></button>
   </div>
 </nav>
 <div class="tabs">
-  <button class="tab-btn" data-tab="dashboard">🏠 Accueil</button>
   <button class="tab-btn active" data-tab="weekly">📋 Planning</button>
   <button class="tab-btn" data-tab="session">⚡ Séance</button>
   <button class="tab-btn" data-tab="progression">📈 Progression</button>
@@ -1485,7 +1377,6 @@ canvas.chart-canvas{width:100%!important;display:block;cursor:crosshair}
   <button class="tab-btn" data-tab="achievements">🏆 Objectifs</button>
   <button class="tab-btn" data-tab="library">📚 Bibliothèque</button>
   <button class="tab-btn" data-tab="monthly">📅 Calendrier</button>
-  <button class="tab-btn" data-tab="settings">⚙️ Réglages</button>
 </div>
 <div class="content">
 
@@ -1595,6 +1486,7 @@ canvas.chart-canvas{width:100%!important;display:block;cursor:crosshair}
 <!-- PROGRESSION -->
 <div class="tab-pane" id="tab-progression">
   <div class="prog-wrap">
+    <div id="prog-charts-section"></div>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
       <span class="section-title">📈 Progression</span>
       <div class="prog-filter-row">
@@ -1605,7 +1497,6 @@ canvas.chart-canvas{width:100%!important;display:block;cursor:crosshair}
       </div>
       <button class="btn btn-green btn-sm" id="gen-sample-data">💡 Données démo</button>
     </div>
-    <div id="prog-charts-section" style="display:flex;flex-direction:column;gap:12px;margin-bottom:14px"></div>
     <div class="prog-cards" id="prog-cards"></div>
   </div>
 </div>
@@ -1634,8 +1525,8 @@ canvas.chart-canvas{width:100%!important;display:block;cursor:crosshair}
       </div>
       <div style="padding:12px">
         <div class="steps-grid" id="steps-grid"></div>
+<div id="steps-chart-container"></div>
         <div class="steps-summary" id="steps-summary"></div>
-        <div id="steps-chart-container" style="margin-top:8px"></div>
       </div>
     </div>
     <!-- Calories tracker -->
@@ -1649,7 +1540,6 @@ canvas.chart-canvas{width:100%!important;display:block;cursor:crosshair}
         </div>
       </div>
       <div style="padding:12px" id="cal-tracker-wrap">
-        <div id="cal-chart-container" style="margin-bottom:10px"></div>
         <div class="cal-day-selector">
           <button class="cal-day-nav" id="cal-day-prev">&#8249;</button>
           <div class="cal-day-lbl" id="cal-day-lbl">Aujourd'hui</div>
@@ -1661,10 +1551,8 @@ canvas.chart-canvas{width:100%!important;display:block;cursor:crosshair}
     <!-- Sleep tracker -->
     <div class="card">
       <div class="card-hdr"><div class="card-title">😴 Sommeil & Énergie (7 derniers jours)</div></div>
-      <div style="padding:10px">
-        <div id="sleep-chart-container" style="margin-bottom:8px"></div>
-        <div class="sleep-grid" id="sleep-grid"></div>
-      </div>
+      <div style="padding:10px"><div class="sleep-grid" id="sleep-grid"></div>
+<div id="sleep-chart-container"></div></div>
     </div>
     <!-- Nutrition tracker -->
     <div class="card">
@@ -1672,7 +1560,8 @@ canvas.chart-canvas{width:100%!important;display:block;cursor:crosshair}
       <div style="padding:10px" id="nutri-grid"></div>
     </div>
     <!-- Mesures -->
-    <div class="corps-grid" id="corps-grid"></div>
+    <div<div id="cal-chart-container"></div>
+     class="corps-grid" id="corps-grid"></div>
     <!-- Pain journal -->
     <div class="card">
       <div class="card-hdr">
@@ -1693,18 +1582,12 @@ canvas.chart-canvas{width:100%!important;display:block;cursor:crosshair}
         </div>
       </div>
     </div>
+    <!-- Chart containers for Corps -->
+    <div id="corps-charts-weight"></div>
+    <div id="corps-charts-steps"></div>
+    <div id="corps-charts-cal"></div>
+    <div id="corps-charts-sleep"></div>
   </div>
-
-    <!-- Charts section in Corps -->
-    <div class="card" style="margin:8px 0">
-      <div class="card-hdr"><div class="card-title">📈 Graphiques</div></div>
-      <div style="padding:12px;display:flex;flex-direction:column;gap:14px">
-        <div id="corps-charts-weight"></div>
-        <div id="corps-charts-steps"></div>
-        <div id="corps-charts-cal"></div>
-        <div id="corps-charts-sleep"></div>
-      </div>
-    </div>
 </div>
 
 <!-- BILAN -->
@@ -1760,8 +1643,8 @@ canvas.chart-canvas{width:100%!important;display:block;cursor:crosshair}
           </div>
         </div>
       </div>
-      <div id="obj-milestones" style="padding:10px 18px 4px"></div>
 
+      <div id="obj-milestones" style="padding:10px 18px 4px"></div>
       <!-- Vue édition — masquée par défaut -->
       <div id="obj-edit" style="display:none;padding:16px 18px;border-top:1px solid var(--border);background:var(--bg)">
         <div id="obj-edit-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
@@ -1803,21 +1686,15 @@ canvas.chart-canvas{width:100%!important;display:block;cursor:crosshair}
   </div>
 </div>
 
-<!-- SETTINGS -->
-<div class="tab-pane" id="tab-settings">
-  <div class="settings-wrap" id="settings-wrap">
-      <div class="settings-section"><div class="settings-section-title">⚙️ Configuration initiale</div><button class="btn btn-outline" onclick="resetOnboarding()" style="margin-top:8px;width:100%">🔄 Relancer la configuration initiale</button></div></div>
-</div>
-
 <!-- BIBLIOTHÈQUE -->
 <div class="tab-pane" id="tab-library">
   <div class="lib-wrap">
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
       <span class="section-title">📚 Bibliothèque d exercices</span>
       <input type="text" id="lib-search" class="inp" placeholder="Rechercher un exercice..." style="width:200px">
-      <select id="lib-filter-muscle" class="prog-filter-sel" onchange="renderLibrary()"><option value="">Tous les groupes</option></select>
-      <select id="lib-filter-pattern" class="prog-filter-sel" onchange="renderLibrary()"><option value="">Tous les patterns</option><option value="push">Poussé</option><option value="pull">Tiré</option><option value="legs">Jambes</option><option value="core">Gainage</option></select>
-      <select id="lib-filter-equipment" class="prog-filter-sel" onchange="renderLibrary()"><option value="">Tout équipement</option><option value="barre">Barre</option><option value="haltères">Haltères</option><option value="machine">Machine</option><option value="câble">Câble</option><option value="poids du corps">Poids du corps</option><option value="élastique">Élastique</option></select>
+      <select id="lib-filter-muscle" class="prog-filter-sel"><option value="">Tous les groupes</option></select>
+      <select id="lib-filter-pattern" class="prog-filter-sel"><option value="">Tous les patterns</option><option value="push">Poussé</option><option value="pull">Tiré</option><option value="legs">Jambes</option><option value="core">Gainage</option></select>
+      <select id="lib-filter-equipment" class="prog-filter-sel" onchange="renderLibrary()"><option value="">Tout équipement</option><option value="barre">Barre</option><option value="haltères">Haltères</option><option value="machine">Machine</option><option value="câble">Câble</option><option value="poids du corps">Poids du corps</option></select>
       <select id="lib-filter-difficulty" class="prog-filter-sel" onchange="renderLibrary()"><option value="">Tous niveaux</option><option value="débutant">Débutant</option><option value="intermédiaire">Intermédiaire</option><option value="avancé">Avancé</option></select>
     </div>
     <div class="lib-grid" id="lib-grid"></div>
@@ -1833,33 +1710,38 @@ canvas.chart-canvas{width:100%!important;display:block;cursor:crosshair}
       <button class="cal-nav" id="next-month">&#8250;</button>
     </div>
     <div class="cal-grid" id="cal-grid"></div>
-    <div id="cal-legend"></div>
+    <div id="cal-legend" style="display:flex;flex-wrap:wrap;gap:8px;padding:10px 4px;font-size:11px"></div>
   </div>
 </div>
 
 </div>
+
+<!-- SETTINGS -->
+<div class="tab-pane" id="tab-settings">
+  <div class="settings-wrap" id="settings-wrap"></div>
+</div>
+
 <!-- Focus mode overlay -->
 <div id="focus-overlay" style="display:none" class="focus-overlay"></div>
 
-
+<div id="search-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;align-items:flex-start;justify-content:center;padding-top:80px"><div style="background:var(--surface);border-radius:16px;width:calc(100% - 32px);max-width:480px;padding:16px"><input id="search-input" type="text" placeholder="Rechercher..." class="inp" style="width:100%;box-sizing:border-box;font-size:16px"><div id="search-results" style="margin-top:12px;max-height:300px;overflow-y:auto"></div></div></div>
 <!-- ══ ONBOARDING WIZARD ══ -->
-<div id="onboard-overlay" class="onboard-overlay" style="display:none" role="dialog" aria-modal="true" aria-label="Configuration initiale">
-  <div class="onboard-card">
-    <div class="onboard-header">
-      <div class="onboard-header-icon">🏋️</div>
-      <div class="onboard-header-title">Coach Tracker Pro</div>
-      <div class="onboard-header-sub">Configurons votre suivi en 4 étapes rapides</div>
+<div id="onboard-overlay" class="onboard-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10000;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)" role="dialog" aria-modal="true">
+  <div class="onboard-card" style="background:var(--surface);border-radius:20px;width:100%;max-width:480px;max-height:90dvh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);display:flex;flex-direction:column">
+    <div style="background:linear-gradient(135deg,var(--teal),var(--teal-d));color:#fff;padding:24px 24px 20px;border-radius:20px 20px 0 0;text-align:center">
+      <div style="font-size:42px;margin-bottom:8px">🏋️</div>
+      <div style="font-size:22px;font-weight:800;margin-bottom:4px">Coach Tracker Pro</div>
+      <div style="font-size:13px;opacity:.85">Configurons votre suivi en 4 étapes rapides</div>
     </div>
-    <div class="onboard-steps-bar" id="onboard-steps-bar"></div>
-    <div class="onboard-body" id="onboard-body"></div>
-    <div class="onboard-footer">
-      <button class="onboard-btn-back" id="onboard-back" style="display:none">← Retour</button>
-      <button class="onboard-btn-next" id="onboard-next">Commencer →</button>
+    <div id="onboard-steps-bar" style="display:flex;gap:6px;padding:16px 24px 0"></div>
+    <div id="onboard-body" style="padding:20px 24px;flex:1;overflow-y:auto"></div>
+    <div style="padding:16px 24px 20px;display:flex;gap:10px;border-top:1px solid var(--border)">
+      <button id="onboard-back" style="display:none;padding:12px 20px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:14px;font-weight:600;color:var(--muted);cursor:pointer">← Retour</button>
+      <button id="onboard-next" style="flex:1;padding:12px 20px;border-radius:12px;border:none;background:var(--teal);color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer">Commencer →</button>
     </div>
-    <div class="onboard-skip" id="onboard-skip">Passer la configuration</div>
+    <div id="onboard-skip" style="font-size:11px;color:var(--muted);text-align:center;padding:0 24px 16px;cursor:pointer;text-decoration:underline">Passer la configuration</div>
   </div>
 </div>
-
 <script>
 
 /* ╔══════════════════════════════════════════════════════════╗
@@ -2226,6 +2108,15 @@ function migrateState(raw) {
   }
 
   s._schemaVersion = SCHEMA_VERSION;
+  if(!s._gender)      s._gender      = 'm';
+  if(!s._dob)         s._dob         = '';
+  if(!s._level)       s._level       = 'intermediaire';
+  if(!s._daysPerWeek) s._daysPerWeek = 4;
+  if(!s._place)       s._place       = 'salle';
+  if(!s._sleepGoal)   s._sleepGoal   = 8;
+  if(!s._startDate)   s._startDate   = '';
+  if(!s.mesures.cou)    s.mesures.cou    = [];
+  if(!s.mesures.mollet) s.mesures.mollet = [];
   return s;
 }
 
@@ -2253,6 +2144,8 @@ let S={
   sessStartTime:null,
   _schemaVersion:SCHEMA_VERSION,
   _currentTab:'weekly',
+  _gender:'m', _dob:'', _level:'intermediaire',
+  _daysPerWeek:4, _place:'salle', _sleepGoal:8, _startDate:'',
 };
 
 /* ══ PERSIST ══ */
@@ -3807,168 +3700,105 @@ function renderDashboard(){
 // ╔══════════════════════════════════════════════════════╗
 // ║  ONBOARDING WIZARD                                   ║
 // ╚══════════════════════════════════════════════════════╝
-const ONBOARD_KEY = 'ctp_onboard_done_v1';
+const ONBOARD_KEY = 'ctp_onboard_done_v2';
 
 const ONBOARD_STEPS = [
-  {
-    id: 'identity',
-    icon: '👤',
-    title: 'Votre profil',
-    sub: 'Ces données servent au calcul de votre IMC, TDEE et masse grasse',
-    fields: () => `
+  { id:'identity', icon:'👤', title:'Votre profil',
+    sub:'Ces données servent au calcul de votre IMC et TDEE',
+    fields:()=>`
       <div class="onboard-row">
-        <div class="onboard-field">
-          <div class="onboard-label">📅 Date de naissance <span>(optionnel)</span></div>
-          <input type="date" class="onboard-inp" id="ob-dob" max="${new Date().toISOString().slice(0,10)}">
-        </div>
-        <div class="onboard-field">
-          <div class="onboard-label">⚧ Sexe</div>
-          <select class="onboard-select" id="ob-gender">
-            <option value="m">Homme</option>
-            <option value="f">Femme</option>
-          </select>
-        </div>
+        <div class="onboard-field"><label class="onboard-label">⚧ Sexe</label>
+          <select class="onboard-inp" id="ob-gender"><option value="m">Homme</option><option value="f">Femme</option></select></div>
+        <div class="onboard-field"><label class="onboard-label">📅 Âge</label>
+          <input type="number" class="onboard-inp" id="ob-age" placeholder="30" min="10" max="100"></div>
       </div>
       <div class="onboard-row">
-        <div class="onboard-field">
-          <div class="onboard-label">📏 Taille (cm)</div>
-          <input type="number" class="onboard-inp" id="ob-height" placeholder="175" min="130" max="230">
-        </div>
-        <div class="onboard-field">
-          <div class="onboard-label">⚖️ Poids actuel (kg)</div>
-          <input type="number" class="onboard-inp" id="ob-weight" placeholder="75" min="30" max="300" step="0.1">
-        </div>
+        <div class="onboard-field"><label class="onboard-label">📏 Taille (cm)</label>
+          <input type="number" class="onboard-inp" id="ob-height" placeholder="175" min="130" max="230"></div>
+        <div class="onboard-field"><label class="onboard-label">⚖️ Poids (kg)</label>
+          <input type="number" class="onboard-inp" id="ob-weight" placeholder="75" min="30" max="300" step="0.1"></div>
       </div>
-      <div class="onboard-field">
-        <div class="onboard-label">📍 Ville <span>(pour météo, optionnel)</span></div>
-        <input type="text" class="onboard-inp" id="ob-city" placeholder="Paris, Lyon, Marseille...">
-      </div>
-      <div id="ob-bmi-result" class="onboard-calc-result">
-        <div class="onboard-calc-row"><span>IMC</span><span class="onboard-calc-val" id="ob-bmi-val">—</span></div>
-        <div class="onboard-calc-row"><span>Catégorie</span><span id="ob-bmi-cat" style="font-size:12px;font-weight:600">—</span></div>
-      </div>
-    `,
-    onShow: () => {
-      const h = document.getElementById('ob-height');
-      const w = document.getElementById('ob-weight');
-      const calc = () => {
-        const hv = parseFloat(h?.value), wv = parseFloat(w?.value);
-        const res = document.getElementById('ob-bmi-result');
-        if(hv>100 && wv>20 && res){
-          const bmi = Math.round(wv/(hv/100)**2*10)/10;
-          const cat = bmi<18.5?'Insuffisance pondérale':bmi<25?'Poids normal ✅':bmi<30?'Surpoids':'Obésité';
-          document.getElementById('ob-bmi-val').textContent = bmi;
-          document.getElementById('ob-bmi-cat').textContent = cat;
-          res.style.display = 'block';
+      <div id="ob-bmi-box" style="display:none;margin-top:10px;background:var(--bg);border:1px solid var(--teal);border-radius:10px;padding:10px 14px;font-size:12px">
+        IMC : <strong id="ob-bmi-val"></strong> — <span id="ob-bmi-cat"></span>
+      </div>`,
+    onShow:()=>{
+      const calc=()=>{
+        const h=parseFloat(document.getElementById('ob-height')?.value);
+        const w=parseFloat(document.getElementById('ob-weight')?.value);
+        if(h>100&&w>20){
+          const bmi=Math.round(w/(h/100)**2*10)/10;
+          const cat=bmi<18.5?'Insuffisant':bmi<25?'Normal ✅':bmi<30?'Surpoids':'Obésité';
+          document.getElementById('ob-bmi-val').textContent=bmi;
+          document.getElementById('ob-bmi-cat').textContent=cat;
+          document.getElementById('ob-bmi-box').style.display='block';
         }
       };
-      h?.addEventListener('input', calc);
-      w?.addEventListener('input', calc);
+      document.getElementById('ob-height')?.addEventListener('input',calc);
+      document.getElementById('ob-weight')?.addEventListener('input',calc);
     },
-    save: () => {
-      const height = parseInt(document.getElementById('ob-height')?.value)||0;
-      const weight = parseFloat(document.getElementById('ob-weight')?.value)||0;
-      const gender = document.getElementById('ob-gender')?.value||'m';
-      const dob    = document.getElementById('ob-dob')?.value||'';
-      if(height>0) S.profilTaille = height;
-      if(weight>0){
-        if(!S.mesures.poids) S.mesures.poids=[];
-        const today = localDateStr();
-        if(!S.mesures.poids.find(e=>e.date===today))
-          S.mesures.poids.push({date:today, val:String(weight)});
-      }
-      S._gender = gender;
-      S._dob    = dob;
-      save();
+    save:()=>{
+      const h=parseInt(document.getElementById('ob-height')?.value)||0;
+      const w=parseFloat(document.getElementById('ob-weight')?.value)||0;
+      const g=document.getElementById('ob-gender')?.value||'m';
+      const a=parseInt(document.getElementById('ob-age')?.value)||30;
+      if(h>0) S.profilTaille=h;
+      if(w>0){ if(!S.mesures.poids)S.mesures.poids=[];
+        const td=localDateStr(); if(!S.mesures.poids.find(e=>e.date===td)) S.mesures.poids.push({date:td,val:String(w)});}
+      S._gender=g; S._age=a; save();
     }
   },
-  {
-    id: 'measures',
-    icon: '📏',
-    title: 'Mensurations',
-    sub: 'Pour calculer votre % de graisse (formule US Navy) et suivre votre évolution',
-    fields: () => `
+  { id:'measures', icon:'📏', title:'Mensurations',
+    sub:'Pour le suivi corporel et le % de masse grasse (US Navy)',
+    fields:()=>`
       <div class="onboard-row">
-        <div class="onboard-field">
-          <div class="onboard-label">🎽 Tour de poitrine <span>(cm)</span></div>
-          <input type="number" class="onboard-inp" id="ob-chest" placeholder="100" min="50" max="200" step="0.5">
-        </div>
-        <div class="onboard-field">
-          <div class="onboard-label">👔 Tour de taille <span>(cm)</span></div>
-          <input type="number" class="onboard-inp" id="ob-waist" placeholder="85" min="50" max="200" step="0.5">
-        </div>
+        <div class="onboard-field"><label class="onboard-label">🎽 Poitrine (cm)</label>
+          <input type="number" class="onboard-inp" id="ob-chest" placeholder="100" min="50" max="200" step="0.5"></div>
+        <div class="onboard-field"><label class="onboard-label">👔 Taille (cm)</label>
+          <input type="number" class="onboard-inp" id="ob-waist" placeholder="85" min="50" max="200" step="0.5"></div>
       </div>
       <div class="onboard-row">
-        <div class="onboard-field">
-          <div class="onboard-label">🍑 Tour de hanches <span>(cm)</span></div>
-          <input type="number" class="onboard-inp" id="ob-hips" placeholder="95" min="50" max="200" step="0.5">
-        </div>
-        <div class="onboard-field">
-          <div class="onboard-label">💪 Bras contracté <span>(cm)</span></div>
-          <input type="number" class="onboard-inp" id="ob-arm" placeholder="35" min="15" max="70" step="0.5">
-        </div>
+        <div class="onboard-field"><label class="onboard-label">🍑 Hanches (cm)</label>
+          <input type="number" class="onboard-inp" id="ob-hips" placeholder="95" min="50" max="200" step="0.5"></div>
+        <div class="onboard-field"><label class="onboard-label">📏 Tour de cou (cm)</label>
+          <input type="number" class="onboard-inp" id="ob-neck" placeholder="38" min="20" max="60" step="0.5"></div>
       </div>
       <div class="onboard-row">
-        <div class="onboard-field">
-          <div class="onboard-label">🦵 Cuisse <span>(cm)</span></div>
-          <input type="number" class="onboard-inp" id="ob-thigh" placeholder="58" min="20" max="100" step="0.5">
-        </div>
-        <div class="onboard-field">
-          <div class="onboard-label">📏 Tour de cou <span>(cm, US Navy)</span></div>
-          <input type="number" class="onboard-inp" id="ob-neck" placeholder="38" min="20" max="60" step="0.5">
-        </div>
+        <div class="onboard-field"><label class="onboard-label">💪 Bras contracté (cm)</label>
+          <input type="number" class="onboard-inp" id="ob-arm" placeholder="35" min="15" max="70" step="0.5"></div>
+        <div class="onboard-field"><label class="onboard-label">🦵 Cuisse (cm)</label>
+          <input type="number" class="onboard-inp" id="ob-thigh" placeholder="58" min="20" max="100" step="0.5"></div>
       </div>
-      <div class="onboard-info-box">
-        💡 <strong>Formule US Navy :</strong> taille + tour de taille + tour de cou → % masse grasse.<br>
-        Toutes les mesures sont optionnelles — ajoutez ce que vous avez maintenant, le reste plus tard.
-      </div>
-    `,
-    onShow: () => {},
-    save: () => {
-      const today = localDateStr();
-      const fields = [
-        {id:'ob-chest', key:'poitrine'}, {id:'ob-waist', key:'taille'},
-        {id:'ob-hips',  key:'hanches'}, {id:'ob-arm',   key:'bras'},
-        {id:'ob-thigh', key:'cuisse'},  {id:'ob-neck',  key:'cou'},
-      ];
-      fields.forEach(({id,key})=>{
-        const v = document.getElementById(id)?.value;
-        if(v && parseFloat(v)>0){
-          if(!S.mesures[key]) S.mesures[key]=[];
-          if(!S.mesures[key].find(e=>e.date===today))
-            S.mesures[key].push({date:today, val:v});
-        }
-      });
-      save();
+      <div class="onboard-info-box">💡 Toutes les mesures sont optionnelles. La formule US Navy utilise taille + tour de taille + tour de cou.</div>`,
+    onShow:()=>{},
+    save:()=>{
+      const today=localDateStr();
+      [{id:'ob-chest',key:'poitrine'},{id:'ob-waist',key:'taille'},{id:'ob-hips',key:'hanches'},
+       {id:'ob-arm',key:'bras'},{id:'ob-thigh',key:'cuisse'},{id:'ob-neck',key:'cou'}].forEach(({id,key})=>{
+        const v=document.getElementById(id)?.value;
+        if(v&&parseFloat(v)>0){if(!S.mesures[key])S.mesures[key]=[];
+          if(!S.mesures[key].find(e=>e.date===today))S.mesures[key].push({date:today,val:v});}
+      }); save();
     }
   },
-  {
-    id: 'goals',
-    icon: '🎯',
-    title: 'Vos objectifs',
-    sub: 'Définissez votre objectif principal pour personnaliser votre suivi',
-    fields: () => `
-      <div class="onboard-field">
-        <div class="onboard-label">🏆 Objectif principal</div>
+  { id:'goals', icon:'🎯', title:'Vos objectifs',
+    sub:"Définissez votre objectif principal",
+    fields:()=>`
+      <div class="onboard-field"><label class="onboard-label">🏆 Objectif principal</label>
         <div class="onboard-chips" id="ob-goal-chips">
           <div class="onboard-chip" data-val="prise_masse">💪 Prise de masse</div>
           <div class="onboard-chip" data-val="perte_poids">🔥 Perte de poids</div>
-          <div class="onboard-chip" data-val="force">🏋️ Force / Performance</div>
-          <div class="onboard-chip" data-val="endurance">🏃 Endurance</div>
-          <div class="onboard-chip" data-val="sante">❤️ Santé générale</div>
+          <div class="onboard-chip" data-val="force">🏋️ Force</div>
+          <div class="onboard-chip" data-val="sante">❤️ Santé</div>
           <div class="onboard-chip" data-val="recompo">⚡ Recomposition</div>
         </div>
       </div>
-      <div class="onboard-field" style="margin-top:14px">
-        <div class="onboard-label">⚖️ Poids cible <span>(kg, optionnel)</span></div>
-        <input type="number" class="onboard-inp" id="ob-target-weight" placeholder="70" min="30" max="300" step="0.1">
+      <div class="onboard-row">
+        <div class="onboard-field"><label class="onboard-label">⚖️ Poids cible (kg)</label>
+          <input type="number" class="onboard-inp" id="ob-target-weight" placeholder="70" min="30" max="300" step="0.1"></div>
+        <div class="onboard-field"><label class="onboard-label">📅 Date cible</label>
+          <input type="date" class="onboard-inp" id="ob-target-date" min="${new Date().toISOString().slice(0,10)}"></div>
       </div>
-      <div class="onboard-field">
-        <div class="onboard-label">📅 Date cible <span>(optionnel)</span></div>
-        <input type="date" class="onboard-inp" id="ob-target-date" min="${new Date().toISOString().slice(0,10)}">
-      </div>
-      <div class="onboard-field">
-        <div class="onboard-label">👣 Objectif de pas quotidiens</div>
+      <div class="onboard-field"><label class="onboard-label">👣 Objectif pas/jour</label>
         <div class="onboard-chips" id="ob-steps-chips">
           <div class="onboard-chip" data-val="5000">5 000</div>
           <div class="onboard-chip sel" data-val="10000">10 000</div>
@@ -3976,236 +3806,126 @@ const ONBOARD_STEPS = [
           <div class="onboard-chip" data-val="15000">15 000</div>
         </div>
       </div>
-      <div class="onboard-field">
-        <div class="onboard-label">🔥 Objectif calorique <span>(kcal/jour)</span></div>
+      <div class="onboard-field"><label class="onboard-label">🔥 Calories/jour</label>
         <input type="number" class="onboard-inp" id="ob-cal-goal" placeholder="2500" min="1000" max="6000" step="50">
         <div id="ob-tdee-hint" style="font-size:11px;color:var(--muted);margin-top:4px"></div>
-      </div>
-    `,
-    onShow: () => {
-      // Chip selection
-      document.getElementById('ob-goal-chips')?.addEventListener('click', e=>{
-        const chip = e.target.closest('.onboard-chip');
-        if(!chip) return;
-        document.querySelectorAll('#ob-goal-chips .onboard-chip').forEach(c2=>c2.classList.remove('sel'));
-        chip.classList.add('sel');
+      </div>`,
+    onShow:()=>{
+      document.getElementById('ob-goal-chips')?.addEventListener('click',e=>{
+        const ch=e.target.closest('.onboard-chip');if(!ch)return;
+        document.querySelectorAll('#ob-goal-chips .onboard-chip').forEach(x=>x.classList.remove('sel'));
+        ch.classList.add('sel');
       });
-      document.getElementById('ob-steps-chips')?.addEventListener('click', e=>{
-        const chip = e.target.closest('.onboard-chip');
-        if(!chip) return;
-        document.querySelectorAll('#ob-steps-chips .onboard-chip').forEach(c2=>c2.classList.remove('sel'));
-        chip.classList.add('sel');
+      document.getElementById('ob-steps-chips')?.addEventListener('click',e=>{
+        const ch=e.target.closest('.onboard-chip');if(!ch)return;
+        document.querySelectorAll('#ob-steps-chips .onboard-chip').forEach(x=>x.classList.remove('sel'));
+        ch.classList.add('sel');
       });
-      // TDEE hint
-      const tdeeHint = document.getElementById('ob-tdee-hint');
-      try{
-        const td = computeTDEE();
-        if(tdeeHint && td.tdee>0){
-          tdeeHint.textContent = `TDEE estimé: ~${td.tdee} kcal/j (maintien). Déficit -300 à -500 pour perdre du poids.`;
-          const calInp = document.getElementById('ob-cal-goal');
-          if(calInp && !calInp.value) calInp.value = td.tdee;
-        }
-      }catch(e){}
+      try{const td=computeTDEE();if(td.tdee>0){
+        const hint=document.getElementById('ob-tdee-hint');
+        if(hint)hint.textContent='TDEE estimé: ~'+td.tdee+' kcal/j';
+        const inp=document.getElementById('ob-cal-goal');
+        if(inp&&!inp.value)inp.value=td.tdee;
+      }}catch(e){}
     },
-    save: () => {
-      const goalChip = document.querySelector('#ob-goal-chips .onboard-chip.sel');
-      const stepsChip = document.querySelector('#ob-steps-chips .onboard-chip.sel');
-      const targetWeight = document.getElementById('ob-target-weight')?.value;
-      const targetDate   = document.getElementById('ob-target-date')?.value;
-      const calGoal      = parseInt(document.getElementById('ob-cal-goal')?.value)||0;
-      
-      if(goalChip){
-        const goalMap = {
-          prise_masse:'Prise de masse musculaire', perte_poids:'Perte de poids',
-          force:'Force et performance', endurance:'Endurance cardiovasculaire',
-          sante:'Santé et bien-être', recompo:'Recomposition corporelle'
-        };
-        S.objective = S.objective||{};
-        S.objective.text = goalMap[goalChip.dataset.val]||goalChip.textContent.trim();
-        if(targetWeight) S.objective.targetWeight = targetWeight;
-        if(targetDate)   S.objective.targetDate   = targetDate;
-        S.objective._createdAt = localDateStr();
-      }
-      if(stepsChip) S.stepsGoal = parseInt(stepsChip.dataset.val)||10000;
-      if(calGoal>0) S.caloriesGoal = calGoal;
-      save();
+    save:()=>{
+      const gc=document.querySelector('#ob-goal-chips .onboard-chip.sel');
+      const sc=document.querySelector('#ob-steps-chips .onboard-chip.sel');
+      const tw=document.getElementById('ob-target-weight')?.value;
+      const td=document.getElementById('ob-target-date')?.value;
+      const cg=parseInt(document.getElementById('ob-cal-goal')?.value)||0;
+      if(gc){const gm={prise_masse:'Prise de masse musculaire',perte_poids:'Perte de poids',force:'Force et performance',sante:'Santé générale',recompo:'Recomposition corporelle'};
+        S.objective=S.objective||{};S.objective.text=gm[gc.dataset.val]||gc.textContent.trim();
+        if(tw)S.objective.targetWeight=tw;if(td)S.objective.targetDate=td;S.objective._createdAt=localDateStr();}
+      if(sc)S.stepsGoal=parseInt(sc.dataset.val)||10000;
+      if(cg>0)S.caloriesGoal=cg; save();
     }
   },
-  {
-    id: 'training',
-    icon: '💪',
-    title: 'Votre entraînement',
-    sub: 'Pour préparer votre planning et personnaliser les recommandations',
-    fields: () => `
-      <div class="onboard-field">
-        <div class="onboard-label">📅 Date de début</div>
-        <input type="date" class="onboard-inp" id="ob-start-date" value="${new Date().toISOString().slice(0,10)}">
-      </div>
-      <div class="onboard-field">
-        <div class="onboard-label">⚡ Niveau d'expérience</div>
+  { id:'training', icon:'💪', title:'Entraînement',
+    sub:'Pour personnaliser votre planning',
+    fields:()=>`
+      <div class="onboard-field"><label class="onboard-label">📅 Date de début</label>
+        <input type="date" class="onboard-inp" id="ob-start-date" value="${new Date().toISOString().slice(0,10)}"></div>
+      <div class="onboard-field"><label class="onboard-label">⚡ Niveau</label>
         <div class="onboard-chips" id="ob-level-chips">
           <div class="onboard-chip" data-val="debutant">🌱 Débutant</div>
           <div class="onboard-chip sel" data-val="intermediaire">💪 Intermédiaire</div>
           <div class="onboard-chip" data-val="avance">🔥 Avancé</div>
         </div>
       </div>
-      <div class="onboard-field">
-        <div class="onboard-label">📆 Jours d'entraînement / semaine</div>
+      <div class="onboard-field"><label class="onboard-label">📆 Jours / semaine</label>
         <div class="onboard-chips" id="ob-days-chips">
-          <div class="onboard-chip" data-val="2">2j</div>
-          <div class="onboard-chip" data-val="3">3j</div>
-          <div class="onboard-chip sel" data-val="4">4j</div>
-          <div class="onboard-chip" data-val="5">5j</div>
+          <div class="onboard-chip" data-val="2">2j</div><div class="onboard-chip" data-val="3">3j</div>
+          <div class="onboard-chip sel" data-val="4">4j</div><div class="onboard-chip" data-val="5">5j</div>
           <div class="onboard-chip" data-val="6">6j</div>
         </div>
       </div>
-      <div class="onboard-field">
-        <div class="onboard-label">🏠 Lieu d'entraînement</div>
+      <div class="onboard-field"><label class="onboard-label">🏠 Lieu</label>
         <div class="onboard-chips" id="ob-place-chips">
-          <div class="onboard-chip sel" data-val="salle">🏋️ Salle de sport</div>
+          <div class="onboard-chip sel" data-val="salle">🏋️ Salle</div>
           <div class="onboard-chip" data-val="maison">🏠 Maison</div>
           <div class="onboard-chip" data-val="mixte">⚡ Mixte</div>
         </div>
       </div>
-      <div class="onboard-field">
-        <div class="onboard-label">😴 Objectif de sommeil <span>(heures)</span></div>
-        <div class="onboard-chips" id="ob-sleep-chips">
-          <div class="onboard-chip" data-val="6">6h</div>
-          <div class="onboard-chip" data-val="7">7h</div>
-          <div class="onboard-chip sel" data-val="8">8h</div>
-          <div class="onboard-chip" data-val="9">9h</div>
-        </div>
-      </div>
-      <div class="onboard-info-box">
-        🎉 <strong>Tout est prêt !</strong> Vos données seront sauvegardées et vous pourrez les modifier à tout moment dans l'onglet <strong>Corps</strong> et dans les <strong>Paramètres</strong>.
-      </div>
-    `,
-    onShow: () => {
-      ['ob-level-chips','ob-days-chips','ob-place-chips','ob-sleep-chips'].forEach(cid=>{
-        document.getElementById(cid)?.addEventListener('click', e=>{
-          const chip = e.target.closest('.onboard-chip');
-          if(!chip) return;
-          document.querySelectorAll('#'+cid+' .onboard-chip').forEach(c2=>c2.classList.remove('sel'));
-          chip.classList.add('sel');
+      <div class="onboard-info-box">🎉 <strong>Tout est prêt !</strong> Vous pouvez modifier ces données à tout moment dans Corps et Paramètres.</div>`,
+    onShow:()=>{
+      ['ob-level-chips','ob-days-chips','ob-place-chips'].forEach(cid=>{
+        document.getElementById(cid)?.addEventListener('click',e=>{
+          const ch=e.target.closest('.onboard-chip');if(!ch)return;
+          document.querySelectorAll('#'+cid+' .onboard-chip').forEach(x=>x.classList.remove('sel'));
+          ch.classList.add('sel');
         });
       });
     },
-    save: () => {
-      const levelChip = document.querySelector('#ob-level-chips .onboard-chip.sel');
-      const daysChip  = document.querySelector('#ob-days-chips .onboard-chip.sel');
-      const placeChip = document.querySelector('#ob-place-chips .onboard-chip.sel');
-      const sleepChip = document.querySelector('#ob-sleep-chips .onboard-chip.sel');
-      const startDate = document.getElementById('ob-start-date')?.value;
-      
-      if(levelChip) S._level   = levelChip.dataset.val;
-      if(daysChip)  S._daysPerWeek = parseInt(daysChip.dataset.val)||4;
-      if(placeChip) S._place   = placeChip.dataset.val;
-      if(sleepChip) S._sleepGoal = parseInt(sleepChip.dataset.val)||8;
-      if(startDate) S._startDate = startDate;
+    save:()=>{
+      const lc=document.querySelector('#ob-level-chips .onboard-chip.sel');
+      const dc=document.querySelector('#ob-days-chips .onboard-chip.sel');
+      const pc=document.querySelector('#ob-place-chips .onboard-chip.sel');
+      const sd=document.getElementById('ob-start-date')?.value;
+      if(lc)S._level=lc.dataset.val;
+      if(dc)S._daysPerWeek=parseInt(dc.dataset.val)||4;
+      if(pc)S._place=pc.dataset.val;
+      if(sd)S._startDate=sd;
       save();
     }
   }
 ];
 
-let _obStep = 0;
+let _obStep=0, _obListenersBound=false;
 
 function _obRender(){
-  const step = ONBOARD_STEPS[_obStep];
-  const total = ONBOARD_STEPS.length;
-  
-  // Steps bar
-  const bar = document.getElementById('onboard-steps-bar');
-  if(bar){
-    bar.innerHTML = '';
-    ONBOARD_STEPS.forEach((_,i)=>{
-      const dot = document.createElement('div');
-      dot.className = 'onboard-step-dot' + (i<_obStep?' done':i===_obStep?' done':'');
-      bar.appendChild(dot);
-    });
-  }
-  
-  // Body
-  const body = document.getElementById('onboard-body');
-  if(body){
-    body.innerHTML = `
-      <div class="onboard-step-title">${step.icon} ${step.title}</div>
-      <div class="onboard-step-sub">${step.sub}</div>
-      ${step.fields()}
-    `;
-    setTimeout(()=>step.onShow(), 50);
-  }
-  
-  // Buttons
-  const back = document.getElementById('onboard-back');
-  const next = document.getElementById('onboard-next');
-  if(back) back.style.display = _obStep>0?'block':'none';
-  if(next){
-    const isLast = _obStep===total-1;
-    next.textContent = isLast ? '🚀 Démarrer Coach Tracker Pro !' : 'Suivant →';
-    next.style.fontSize = isLast ? '13px' : '14px';
-  }
+  const step=ONBOARD_STEPS[_obStep];
+  const bar=document.getElementById('onboard-steps-bar');
+  if(bar){bar.innerHTML='';ONBOARD_STEPS.forEach((_,i)=>{const d=document.createElement('div');d.className='onboard-step-dot'+(i<=_obStep?' done':'');bar.appendChild(d);});}
+  const body=document.getElementById('onboard-body');
+  if(body){body.innerHTML=`<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">${step.icon} ${step.title}</div><div style="font-size:12px;color:var(--muted);margin-bottom:18px">${step.sub}</div>${step.fields()}`;
+    setTimeout(()=>step.onShow(),50);}
+  const back=document.getElementById('onboard-back');
+  const next=document.getElementById('onboard-next');
+  if(back)back.style.display=_obStep>0?'block':'none';
+  if(next)next.textContent=_obStep===ONBOARD_STEPS.length-1?'🚀 Démarrer !':'Suivant →';
 }
 
-function _obNext(){
-  // Save current step
-  ONBOARD_STEPS[_obStep].save();
-  
-  if(_obStep < ONBOARD_STEPS.length-1){
-    _obStep++;
-    _obRender();
-  } else {
-    _obFinish();
-  }
-}
+function _obNext(){ONBOARD_STEPS[_obStep].save();if(_obStep<ONBOARD_STEPS.length-1){_obStep++;_obRender();}else{_obFinish();}}
+function _obBack(){if(_obStep>0){_obStep--;_obRender();}}
+function _obFinish(){localStorage.setItem(ONBOARD_KEY,'1');const ov=document.getElementById('onboard-overlay');if(ov)ov.style.display='none';save();try{updateStats();renderDashboard();}catch(e){}showToast('✅ Configuration terminée ! Bienvenue 🏋️','ok',4000);}
 
-function _obBack(){
-  if(_obStep>0){
-    _obStep--;
-    _obRender();
-  }
-}
-
-function _obFinish(){
-  localStorage.setItem(ONBOARD_KEY, '1');
-  const overlay = document.getElementById('onboard-overlay');
-  if(overlay) overlay.style.display='none';
-  save();
-  updateStats();
-  renderDashboard();
-  showToast('✅ Configuration terminée ! Bienvenue sur Coach Tracker Pro 🏋️','ok',4000);
-}
-
-let _obListenersBound = false;
 function showOnboarding(){
-  _obStep = 0;
-  const overlay = document.getElementById('onboard-overlay');
-  if(!overlay){ setTimeout(showOnboarding, 200); return; }
-  overlay.style.display = 'flex';
+  _obStep=0;
+  const ov=document.getElementById('onboard-overlay');
+  if(!ov){setTimeout(showOnboarding,200);return;}
+  ov.style.display='flex';
   _obRender();
-  
   if(!_obListenersBound){
-    _obListenersBound = true;
-    document.getElementById('onboard-next')?.addEventListener('click', _obNext);
-    document.getElementById('onboard-back')?.addEventListener('click', _obBack);
-    document.getElementById('onboard-skip')?.addEventListener('click', ()=>{
-      ONBOARD_STEPS[_obStep].save();
-      _obFinish();
-    });
+    _obListenersBound=true;
+    document.getElementById('onboard-next')?.addEventListener('click',_obNext);
+    document.getElementById('onboard-back')?.addEventListener('click',_obBack);
+    document.getElementById('onboard-skip')?.addEventListener('click',()=>{ONBOARD_STEPS[_obStep].save();_obFinish();});
   }
 }
 
-function checkOnboarding(){
-  const done = localStorage.getItem(ONBOARD_KEY);
-  if(!done){
-    setTimeout(showOnboarding, 600);
-  }
-}
-
-// Re-open onboarding from settings
-function resetOnboarding(){
-  localStorage.removeItem(ONBOARD_KEY);
-  showOnboarding();
-}
+function checkOnboarding(){if(!localStorage.getItem(ONBOARD_KEY))setTimeout(showOnboarding,800);}
+function resetOnboarding(){localStorage.removeItem(ONBOARD_KEY);showOnboarding();}
 
 function renderDayTabs(){
   const nav=document.getElementById('day-tabs');nav.innerHTML='';
@@ -6564,7 +6284,7 @@ document.documentElement.setAttribute('data-theme',S.darkMode?'dark':'light');
 document.getElementById('darkmode-btn').textContent=S.darkMode?'☀️':'🌙';
 updateWeekBadges();renderDayTabs();renderDayDetail(S.activeDay);renderGoals();
 document.getElementById('notes-area').value=S.notes||'';
-updateStats();updateChronoDsp();checkWeeklyAutoSave();checkAndAwardAchievements();checkOnboarding();
+updateStats();updateChronoDsp();checkWeeklyAutoSave();checkAndAwardAchievements();
 // Start on dashboard (or restore last tab)
 const startTab = S._currentTab || 'dashboard';
 setTimeout(()=>switchTab(startTab),0);
@@ -6688,38 +6408,21 @@ if (new URLSearchParams(location.search).has('test')) {
   });
 }
 
+
 </script>
 
 <!-- PWA: Real manifest + Service Worker -->
 <script>
 (function() {
-  // Unregister old SWs to force cache refresh
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { if(r.scope && !r.scope.includes('?v=2')) r.unregister(); });
+      regs.forEach(r => { try { r.unregister(); } catch(e){} });
     });
-    navigator.serviceWorker.register('./sw.js?v=2', { scope: './' })
-      .then(reg => {
-        console.log('[CTP] SW registered:', reg.scope);
-        reg.addEventListener('updatefound', () => {
-          const nw = reg.installing;
-          nw.addEventListener('statechange', () => {
-            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-              showToast && showToast('Mise à jour disponible — rechargez la page', 'save', 5000);
-            }
-          });
-        });
-      })
-      .catch(err => console.warn('[CTP] SW non disponible (mode local):', err));
+    navigator.serviceWorker.register('./sw.js?v=3', { scope: './' })
+      .then(reg => console.log('[CTP] SW registered:', reg.scope))
+      .catch(err => console.warn('[CTP] SW non disponible:', err));
   }
-  // Handle ?tab= shortcut from manifest shortcuts
-  const urlParams = new URLSearchParams(location.search);
-  const tabParam = urlParams.get('tab');
-  if (tabParam) window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => typeof switchTab === 'function' && switchTab(tabParam), 100);
-  });
 })();
 </script>
-
 </body>
 </html>

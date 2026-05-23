@@ -384,7 +384,7 @@ input,textarea,select{user-select:auto;-webkit-user-select:auto}
 .mesure-inp:focus{border-color:var(--teal)}
 .poids-big{font-size:30px;font-weight:700;font-family:var(--mono);color:var(--teal-d);line-height:1}
 .corps-canvas{width:100%;height:65px;display:block;margin-top:7px}
-.streak-heatmap{display:flex;flex-wrap:wrap;gap:3px}
+.streak-heatmap{display:flex;flex-wrap:wrap;gap:2px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
 .sh-dot{width:10px;height:10px;border-radius:2px}
 /* Body diagram */
 .body-diagram-wrap{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap}
@@ -956,7 +956,7 @@ input,textarea,select{user-select:auto;-webkit-user-select:auto}
   #add-photo-btn{min-height:44px}
 
   /* Heatmap */
-  .sh-dot{width:8px;height:8px}
+  .sh-dot{width:calc((100% - 90px) / 15);max-width:9px;min-width:7px;height:8px;flex-shrink:0}
 }
 
 /* ── 6. BILAN ── */
@@ -1290,8 +1290,8 @@ html { height: 100dvh; }
   .hdr h1 { font-size: 11px !important; }
 }
 
-/* hdr-desktop-only: hidden on mobile, shown on desktop */
-.hdr-desktop-only { display: inline-flex; }
+/* hdr-desktop-only: visible only on desktop */
+@media screen and (min-width: 769px) { .hdr-desktop-only { display: inline-flex !important; } }
 
 
 /* ══ ONBOARDING ══ */
@@ -1322,12 +1322,12 @@ html { height: 100dvh; }
   <div class="hdr-right">
     <span class="hdr-badge" id="week-type-badge">A</span>
     <button class="hdr-btn" id="toggle-week-btn" title="Changer semaine A/B" aria-label="Changer semaine A/B">⇄</button>
-    <button class="hdr-btn btn-archive" id="archive-week-btn" title="Archiver la semaine" aria-label="Archiver" class="hdr-btn hdr-desktop-only"><span>📁</span></button>
+    <button class="hdr-btn hdr-desktop-only" id="archive-week-btn" title="Archiver la semaine" aria-label="Archiver"><span>📁</span></button>
     <span class="hdr-badge badge-block" id="week-counter-badge">S1</span>
     <button class="hdr-btn" id="block-btn" title="Changer de bloc" aria-label="Bloc">📦</button>
-    <button class="hdr-btn btn-export" id="export-btn" title="Exporter les données" aria-label="Exporter" class="hdr-btn hdr-desktop-only"><span>⬇</span></button>
-    <button class="hdr-btn btn-import" id="import-btn" title="Importer des données" aria-label="Importer" class="hdr-btn hdr-desktop-only"><span>⬆</span></button>
-    <button class="hdr-btn" id="focus-btn" title="Mode focus" aria-label="Mode focus" class="hdr-btn hdr-desktop-only">🎯</button>
+    <button class="hdr-btn hdr-desktop-only" id="export-btn" title="Exporter les données" aria-label="Exporter"><span>⬇</span></button>
+    <button class="hdr-btn hdr-desktop-only" id="import-btn" title="Importer des données" aria-label="Importer"><span>⬆</span></button>
+    <button class="hdr-btn hdr-desktop-only" id="focus-btn" title="Mode focus" aria-label="Mode focus">🎯</button>
     <span id="hdr-fitness-score" style="display:none;cursor:pointer;font-family:var(--mono);font-size:12px;font-weight:700;padding:3px 8px;border-radius:12px;background:var(--teal);color:#fff" onclick="switchTab('dashboard')"></span>
     <button class="hdr-btn" id="darkmode-btn" aria-label="Mode sombre">🌙</button>
     <input type="file" id="import-file" accept=".json" style="display:none">
@@ -1337,7 +1337,11 @@ html { height: 100dvh; }
 <!-- BOTTOM NAV — mobile only -->
 <nav class="bottom-nav" role="navigation" aria-label="Navigation principale">
   <div class="bottom-nav-inner">
-    <button class="bnav-btn active" data-tab="weekly" aria-label="Planning">
+    <button class="bnav-btn" data-tab="dashboard" aria-label="Accueil">
+      <span class="bnav-icon">🏠</span>
+      <span class="bnav-label">Accueil</span>
+    </button>
+    <button class="bnav-btn" data-tab="weekly" aria-label="Planning">
       <span class="bnav-icon">📋</span>
       <span class="bnav-label">Planning</span>
     </button>
@@ -1345,10 +1349,7 @@ html { height: 100dvh; }
       <span class="bnav-icon">⚡</span>
       <span class="bnav-label">Séance</span>
     </button>
-    <button class="bnav-btn" data-tab="progression" aria-label="Progression">
-      <span class="bnav-icon">📈</span>
-      <span class="bnav-label">Progrès</span>
-    </button>
+
     <button class="bnav-btn" data-tab="corps" aria-label="Corps">
       <span class="bnav-icon">💪</span>
       <span class="bnav-label">Corps</span>
@@ -1360,6 +1361,7 @@ html { height: 100dvh; }
   </div>
   <!-- "Plus" drawer -->
   <div class="bnav-more-menu" id="bnav-more-menu" role="menu">
+    <button class="bnav-more-btn" data-tab="progression" role="menuitem"><span style="font-size:16px">📈</span><span>Progrès</span></button>
     <button class="bnav-more-btn" data-tab="bilan" role="menuitem"><span style="font-size:16px">📊</span><span>Bilan</span></button>
     <button class="bnav-more-btn" data-tab="kpi" role="menuitem"><span style="font-size:16px">🎯</span><span>KPI</span></button>
     <button class="bnav-more-btn" data-tab="achievements" role="menuitem"><span style="font-size:16px">🏆</span><span>Objectifs</span></button>
@@ -1368,6 +1370,7 @@ html { height: 100dvh; }
   </div>
 </nav>
 <div class="tabs">
+  <button class="tab-btn" data-tab="dashboard">🏠 Accueil</button>
   <button class="tab-btn active" data-tab="weekly">📋 Planning</button>
   <button class="tab-btn" data-tab="session">⚡ Séance</button>
   <button class="tab-btn" data-tab="progression">📈 Progression</button>
@@ -1561,7 +1564,7 @@ html { height: 100dvh; }
     </div>
     <!-- Mesures -->
     <div<div id="cal-chart-container"></div>
-     class="corps-grid" id="corps-grid"></div>
+    <div class="corps-grid" id="corps-grid"></div>
     <!-- Pain journal -->
     <div class="card">
       <div class="card-hdr">
@@ -5500,7 +5503,45 @@ function renderNutriGrid(){
 function renderStreakHeatmap(){
   const hm=document.getElementById('streak-heatmap');if(!hm)return;hm.innerHTML='';
   const today=new Date();
-  for(let i=89;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-i);const ds=localDateStr(d);const dot=document.createElement('div');dot.className='sh-dot';dot.title=ds;const matchDay=S.days.find(d2=>d2.date===ds);const histDay=Object.values(S.history).flatMap(wk=>(wk.days||[])).find(d2=>d2.date===ds);const aDay=matchDay||histDay;const trained=aDay&&(aDay.exercises||[]).some(e=>e.done&&!e.isWarmup);const isRest=aDay&&getDMS(aDay).includes('rep');if(trained)dot.style.background='var(--teal)';else if(isRest)dot.style.background='#d4e8f8';else dot.style.background='var(--border)';hm.appendChild(dot);}
+  const DAYS=['L','M','M','J','V','S','D'];
+  
+  // Build a 13-week grid (91 days) — like GitHub graph
+  const wrapper=document.createElement('div');
+  wrapper.style.cssText='overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px';
+  
+  const grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-rows:repeat(7,10px);grid-auto-flow:column;gap:2px;width:max-content';
+  
+  // Day labels on left
+  const labelCol=document.createElement('div');
+  labelCol.style.cssText='display:grid;grid-template-rows:repeat(7,10px);gap:2px;margin-right:4px;font-size:8px;color:var(--muted);text-align:right;flex-shrink:0';
+  DAYS.forEach(d=>{const l=document.createElement('div');l.style.cssText='line-height:10px';l.textContent=d;labelCol.appendChild(l);});
+  
+  // Fill 91 days (13 weeks)
+  const startOffset=91-1;
+  for(let i=startOffset;i>=0;i--){
+    const d=new Date(today);d.setDate(d.getDate()-i);
+    const ds=localDateStr(d);
+    const dot=document.createElement('div');
+    dot.style.cssText='width:10px;height:10px;border-radius:2px;cursor:default';
+    dot.title=ds;
+    const matchDay=S.days.find(d2=>d2.date===ds);
+    const histDay=Object.values(S.history).flatMap(wk=>(wk.days||[])).find(d2=>d2.date===ds);
+    const aDay=matchDay||histDay;
+    const trained=aDay&&(aDay.exercises||[]).some(e=>e.done&&!e.isWarmup);
+    const isRest=aDay&&getDMS(aDay).includes('rep');
+    if(trained) dot.style.background='var(--teal)';
+    else if(isRest) dot.style.background='#d4e8f8';
+    else dot.style.background='var(--border)';
+    grid.appendChild(dot);
+  }
+  
+  const row=document.createElement('div');
+  row.style.cssText='display:flex;align-items:flex-start';
+  row.appendChild(labelCol);
+  row.appendChild(wrapper);
+  wrapper.appendChild(grid);
+  hm.appendChild(row);
 }
 function renderPainList(){
   const pl=document.getElementById('pain-list');if(!pl)return;pl.innerHTML='';
@@ -6303,7 +6344,7 @@ document.documentElement.setAttribute('data-theme',S.darkMode?'dark':'light');
 document.getElementById('darkmode-btn').textContent=S.darkMode?'☀️':'🌙';
 updateWeekBadges();renderDayTabs();renderDayDetail(S.activeDay);renderGoals();
 document.getElementById('notes-area').value=S.notes||'';
-updateStats();updateChronoDsp();checkWeeklyAutoSave();checkAndAwardAchievements();
+updateStats();updateChronoDsp();checkWeeklyAutoSave();checkAndAwardAchievements();checkOnboarding();
 // Start on dashboard (or restore last tab)
 const startTab = S._currentTab || 'dashboard';
 setTimeout(()=>switchTab(startTab),0);

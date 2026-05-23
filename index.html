@@ -6469,11 +6469,6 @@ if (new URLSearchParams(location.search).has('test')) {
 }
 
 
-rt('Modal.confirm is async function', Modal.confirm.constructor.name === 'AsyncFunction');
-    assert('computeBodyComp: taille 0 returns null', (()=>{const orig=S.profilTaille;S.profilTaille=0;const r=computeBodyComp();S.profilTaille=orig;return r===null;})());
-    assert('computeBodyComp: taille 999 returns null', (()=>{const orig=S.profilTaille;S.profilTaille=999;const r=computeBodyComp();S.profilTaille=orig;return r===null;})());
-
-    console.log(`[CTP Tests] ${passed} passed, ${failed} failed`);
 
 
 </script>

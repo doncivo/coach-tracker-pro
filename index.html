@@ -1430,7 +1430,7 @@ html { height:100dvh; }
 
 <!-- PROGRESSION -->
 <div class="tab-pane" id="tab-progression">
-  <div class="prog-wrap">
+  <div class="prog-wrap" id="prog-wrap">
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
       <span class="section-title">📈 Progression</span>
       <div class="prog-filter-row">
@@ -1660,6 +1660,8 @@ html { height:100dvh; }
       <input type="text" id="lib-search" class="inp" placeholder="Rechercher un exercice..." style="width:200px">
       <select id="lib-filter-muscle" class="prog-filter-sel"><option value="">Tous les groupes</option></select>
       <select id="lib-filter-pattern" class="prog-filter-sel"><option value="">Tous les patterns</option><option value="push">Poussé</option><option value="pull">Tiré</option><option value="legs">Jambes</option><option value="core">Gainage</option></select>
+      <select id="lib-filter-equipment" class="prog-filter-sel" onchange="renderLibrary()"><option value="">Tout équipement</option><option value="barre">Barre</option><option value="haltères">Haltères</option><option value="machine">Machine</option><option value="poids du corps">Poids du corps</option></select>
+      <select id="lib-filter-difficulty" class="prog-filter-sel" onchange="renderLibrary()"><option value="">Tous niveaux</option><option value="débutant">Débutant</option><option value="intermédiaire">Intermédiaire</option><option value="avancé">Avancé</option></select>
     </div>
     <div class="lib-grid" id="lib-grid"></div>
   </div>
@@ -1675,9 +1677,16 @@ html { height:100dvh; }
     </div>
     <div class="cal-grid" id="cal-grid"></div>
   </div>
-</div>
+
+    <div id="cal-legend" style="display:flex;flex-wrap:wrap;gap:8px;padding:10px 4px;font-size:11px"></div></div>
 
 </div>
+
+<!-- SETTINGS -->
+<div class="tab-pane" id="tab-settings">
+  <div class="settings-wrap" id="settings-wrap"></div>
+</div>
+
 <!-- Focus mode overlay -->
 <div id="focus-overlay" style="display:none" class="focus-overlay"></div>
 
@@ -2895,6 +2904,7 @@ function switchTab(tabName) {
   if (mb) mb.setAttribute('aria-expanded','false');
   // Render content
   if(tabName==='dashboard')renderDashboard();
+  if(tabName==='weekly'){renderDayTabs();renderDayDetail(S.activeDay||0);}
   if(tabName==='monthly')renderCalendar();
   if(tabName==='session')renderSession();
   if(tabName==='progression')renderProgression();
@@ -7270,6 +7280,7 @@ if (new URLSearchParams(location.search).has('test')) {
     console.log(`[CTP Tests] ${passed} passed, ${failed} failed`);
   });
 }
+
 
 
 </script>

@@ -1453,6 +1453,178 @@ header.hdr {
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
 }
+
+
+/* ══ FIX scroll section Nutrition ══ */
+#corps-sect-nutrition .card { flex-shrink: 0; }
+#corps-sect-nutrition { padding: 10px 12px !important; gap: 10px; }
+.cal-meal-card { flex-shrink: 0; }
+.cal-meals { display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+.cal-total-bar { flex-shrink: 0; }
+
+
+/* ════════════════════════════════════════════
+   DASHBOARD — Design moderne
+   ════════════════════════════════════════════ */
+.dashboard-wrap {
+  padding: 12px !important;
+  gap: 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Hero */
+.dash-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, var(--teal), var(--teal-d));
+  border-radius: 18px;
+  padding: 18px 20px;
+  color: #fff;
+  gap: 12px;
+}
+.dash-hero-left { flex: 1; min-width: 0; }
+.dash-greeting { font-size: 20px; font-weight: 800; line-height: 1.2; }
+.dash-date { font-size: 12px; opacity: .8; margin-top: 3px; }
+.dash-week-badge {
+  display: inline-block;
+  background: rgba(255,255,255,.2);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+.dash-grade { font-size: 13px; font-weight: 700; margin-top: 6px; }
+.dash-hero-right { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
+.dash-score-svg { width: 90px; height: 90px; transform: rotate(-90deg); filter: drop-shadow(0 2px 8px rgba(0,0,0,.2)); }
+.dash-score-lbl { font-size: 9px; opacity: .8; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+
+/* Stats grid */
+.dash-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.dash-stat-card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 10px 8px;
+  text-align: center;
+  border: 1px solid var(--border);
+  box-shadow: var(--sh);
+}
+.dash-stat-icon { font-size: 18px; line-height: 1; margin-bottom: 4px; }
+.dash-stat-val { font-family: var(--mono); font-size: 15px; font-weight: 800; color: var(--text); line-height: 1; }
+.dash-stat-lbl { font-size: 9px; color: var(--muted); margin-top: 2px; font-weight: 600; }
+.dash-stat-bar-wrap { height: 3px; background: var(--border); border-radius: 3px; margin: 6px 0 4px; overflow: hidden; }
+.dash-stat-bar { height: 100%; border-radius: 3px; transition: width .8s ease; }
+.dash-stat-sub { font-size: 8px; color: var(--muted); line-height: 1.3; }
+
+/* Session du jour */
+.dash-session-card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 16px;
+  border: 1.5px solid var(--border);
+  box-shadow: var(--sh);
+}
+.dash-session-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.dash-session-day { font-size: 11px; font-weight: 800; color: var(--text); letter-spacing: .05em; }
+.dash-session-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.dash-session-badge.upcoming { background: var(--teal)20; color: var(--teal-d); }
+.dash-session-badge.progress { background: var(--green)20; color: var(--green); }
+.dash-session-badge.rest { background: var(--border); color: var(--muted); }
+.dash-session-muscles {
+  font-size: 11px;
+  color: var(--teal-d);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.dash-session-exs { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+.dash-session-ex {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text);
+  padding: 4px 0;
+}
+.dash-session-ex.done { opacity: .5; text-decoration: line-through; }
+.dash-session-ex-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--border);
+  flex-shrink: 0;
+  border: 1.5px solid var(--muted);
+}
+.dash-session-ex-dot.done { background: var(--teal); border-color: var(--teal); }
+.dash-session-ex-sets { margin-left: auto; font-size: 10px; color: var(--muted); font-family: var(--mono); }
+.dash-session-progress-wrap { height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; margin-top: 4px; }
+.dash-session-progress-bar { height: 100%; background: linear-gradient(90deg,var(--teal),var(--green)); border-radius: 4px; transition: width .8s; }
+.dash-session-msg { font-size: 14px; margin-bottom: 12px; color: var(--text); }
+.dash-session-btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .15s;
+  min-height: 40px;
+}
+.dash-session-btn.primary { background: var(--teal); color: #fff; }
+.dash-session-btn.primary:hover { background: var(--teal-d); }
+.dash-session-btn.secondary { background: var(--bg); color: var(--text); border: 1.5px solid var(--border); }
+
+/* Objectif */
+.dash-obj-card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 14px;
+  border: 1.5px solid var(--teal)40;
+  box-shadow: var(--sh);
+}
+
+/* Alertes */
+.dash-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.dash-alert-orange { background: #FF980015; border: 1px solid #FF980040; color: var(--text); }
+.dash-alert-red { background: var(--red)15; border: 1px solid var(--red)40; color: var(--text); }
+.dash-alert-teal { background: var(--teal)15; border: 1px solid var(--teal)40; color: var(--text); }
+
+/* Mobile */
+@media (max-width: 768px) {
+  .dash-stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .dash-hero { padding: 14px 16px; }
+  .dash-greeting { font-size: 18px; }
+  .dash-score-svg { width: 78px; height: 78px; }
+  .dash-stat-val { font-size: 14px; }
+}
+@media (max-width: 380px) {
+  .dash-stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
 </style>
 </head>
 <body>
@@ -3774,227 +3946,197 @@ function renderDashboard(){
   if(!wrap) return;
   wrap.innerHTML = '';
 
-  const today = new Date();
+  const today    = new Date();
   const todayStr = localDateStr(today);
-  const hours = today.getHours();
-  const greeting = hours<12?'Bonjour':'Bonjour';
-  const emoji = hours<12?'☀️':hours<18?'🌤️':'🌙';
+  const hours    = today.getHours();
+  const dayIdx   = today.getDay()===0?6:today.getDay()-1;
+  const todayDay = S.days[dayIdx]||{};
+  const todayName= ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'][dayIdx];
+  const dateFmt  = today.toLocaleDateString('fr-FR',{day:'numeric',month:'long'});
+  const greetTxt = hours<5?'Bonne nuit':hours<12?'Bonjour':hours<18?'Bonne après-midi':'Bonsoir';
+  const greetEmoji = hours<5?'🌙':hours<12?'☀️':hours<18?'🌤️':'🌙';
 
-  // ── Greeting ──
-  const greetDiv = document.createElement('div');
-  const todayDay = S.days[today.getDay()===0?6:today.getDay()-1];
-  const todayName = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'][today.getDay()===0?6:today.getDay()-1];
-  greetDiv.innerHTML = `<div class="dash-greeting">${emoji} ${greeting} !</div>
-    <div class="dash-sub">${todayName} ${today.toLocaleDateString('fr-FR',{day:'numeric',month:'long'})} — Semaine ${S.weekType||'A'}</div>`;
-  wrap.appendChild(greetDiv);
-
-  // ── Fitness Score ──
+  // ── HERO: Greeting + Score de forme ──
   const fs = computeFitnessScore();
-  const scoreColor = fs.score>=80?'#4CAF50':fs.score>=60?'#5BA8A0':fs.score>=40?'#FF9800':'#F44336';
-  const grade = fs.score>=90?'Excellent':fs.score>=75?'Très bien':fs.score>=60?'Bien':fs.score>=45?'Correct':'À améliorer';
-  const scoreWrap = document.createElement('div');
-  scoreWrap.className = 'chart-wrap';
-  const circ = 2*Math.PI*34;
-  const dash = circ*(fs.score/100);
-  scoreWrap.innerHTML = `<div class="chart-wrap-title">🏅 Score de forme global</div>
-    <div class="fitness-score-wrap">
-      <div class="fitness-score-ring">
-        <svg viewBox="0 0 90 90"><circle class="fitness-score-ring-bg" cx="45" cy="45" r="34"/>
-          <circle class="fitness-score-ring-fill" cx="45" cy="45" r="34"
-            stroke="${scoreColor}" stroke-dasharray="${dash.toFixed(1)} ${circ.toFixed(1)}"
-            stroke-dashoffset="0" style="stroke:${scoreColor}"/>
-        </svg>
-        <div class="fitness-score-val">${fs.score}<div class="fitness-score-grade">${grade}</div></div>
-      </div>
-      <div class="fitness-score-details">
-        ${fs.breakdown.map(b=>`<div class="fitness-score-row">
-          <span class="fitness-score-icon">${b.icon}</span>
-          <span class="fitness-score-lbl">${b.label}</span>
-          <div style="flex:1;background:var(--border);border-radius:4px;height:4px;overflow:hidden">
-            <div style="width:${b.pts}%;height:100%;background:var(${b.color});border-radius:4px;transition:width .6s"></div>
-          </div>
-          <span class="fitness-score-pts" style="color:var(${b.color})">${b.pts}</span>
-        </div>`).join('')}
-      </div>
+  const scoreColor = fs.score>=80?'var(--green)':fs.score>=60?'var(--teal)':fs.score>=40?'var(--orange)':'var(--red)';
+  const grade = fs.score>=90?'Excellent 🔥':fs.score>=75?'Très bien 💪':fs.score>=60?'Bien 👍':fs.score>=45?'Correct 📈':'À améliorer 💤';
+  const circ = 2*Math.PI*38;
+  const dashArr = circ*(fs.score/100);
+
+  const hero = document.createElement('div');
+  hero.className = 'dash-hero';
+  hero.innerHTML = `
+    <div class="dash-hero-left">
+      <div class="dash-greeting">${greetEmoji} ${greetTxt} !</div>
+      <div class="dash-date">${todayName} ${dateFmt}</div>
+      <div class="dash-week-badge">Semaine ${S.weekType||'A'} — Bloc ${S.currentBlock||1}</div>
+      <div class="dash-grade" style="color:${scoreColor}">${grade}</div>
+    </div>
+    <div class="dash-hero-right">
+      <svg class="dash-score-svg" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="38" fill="none" stroke="var(--border)" stroke-width="8"/>
+        <circle cx="50" cy="50" r="38" fill="none" stroke="${scoreColor}" stroke-width="8"
+          stroke-linecap="round" stroke-dasharray="${dashArr.toFixed(1)} ${circ.toFixed(1)}"
+          stroke-dashoffset="${(circ*0.25).toFixed(1)}"
+          style="transition:stroke-dasharray 1s ease"/>
+        <text x="50" y="46" text-anchor="middle" font-family="var(--mono)" font-size="20" font-weight="800" fill="var(--text)">${fs.score}</text>
+        <text x="50" y="60" text-anchor="middle" font-size="9" fill="var(--muted)">/ 100</text>
+      </svg>
+      <div class="dash-score-lbl">Score de forme</div>
     </div>`;
-  wrap.appendChild(scoreWrap);
+  wrap.appendChild(hero);
 
-  // ── Quick stats grid ──
+  // ── STATS RAPIDES ──
   const stepsToday = parseInt(S.steps&&S.steps[todayStr]||0)||0;
-  const calToday = (()=>{ const c=S.calories&&S.calories[todayStr]; let t=0; if(c&&c.meals) c.meals.forEach(m=>(m.items||[]).forEach(it=>t+=parseFloat(it.kcal)||0)); return Math.round(t); })();
-  const sleepToday = parseFloat(S.sleep&&S.sleep[todayStr]&&S.sleep[todayStr].h||0)||0;
-  const weeks7 = lastNDays(7);
-  const trainedDays = weeks7.filter(d=>S.history&&S.history[d]&&S.history[d].length>0).length;
-  const tdee = computeTDEE();
+  const stepsGoal  = S.stepsGoal||10000;
+  const stepsPct   = Math.min(100,Math.round(stepsToday/stepsGoal*100));
+  const calToday   = (()=>{ const cd=S.calories&&S.calories[todayStr]; let t=0; if(cd&&cd.meals) cd.meals.forEach(m=>(m.items||[]).forEach(it=>t+=it.cal||0)); return Math.round(t); })();
+  const calGoal    = S.caloriesGoal||2500;
+  const calPct     = Math.min(100,Math.round(calToday/calGoal*100));
+  const sleepLast  = (()=>{ const d=lastNDays(1)[0]; const sl=S.sleep&&S.sleep[d]; return parseFloat(sl&&(sl.hours||sl.h)||0)||0; })();
+  const sleepGoal  = S._sleepGoal||8;
+  const st         = computeStreak();
+  const tdee       = computeTDEE();
 
-  const cards = [
-    {icon:'👣',val:stepsToday.toLocaleString('fr'),lbl:"Pas aujourd'hui",sub:`/ ${(S.stepsGoal||10000).toLocaleString('fr')} obj.`,accent:'green'},
-    {icon:'🔥',val:calToday,lbl:"Kcal aujourd'hui",sub:`TDEE ~${tdee.tdee} kcal`,accent:'orange'},
-    {icon:'😴',val:sleepToday?sleepToday+'h':'—',lbl:'Sommeil cette nuit',sub:'Obj. 7-8h',accent:'purple'},
-    {icon:'💪',val:trainedDays+'/7',lbl:'Séances (7j)',sub:"jours d'entraînement",accent:'teal'},
-    {icon:'⚡',val:S.currentBlock||1,lbl:'Bloc actuel',sub:`Semaine ${S.blockWeek||1}`,accent:'red'},
+  const stats = [
+    {icon:'👣', val:stepsToday>=1000?(stepsToday/1000).toFixed(1)+'k':stepsToday, lbl:'Pas', sub:`${stepsPct}% de l'objectif`, pct:stepsPct, color:'--green'},
+    {icon:'🔥', val:calToday+'', lbl:'kcal', sub:`/ ${calGoal} objectif`, pct:calPct, color:'--orange'},
+    {icon:'😴', val:sleepLast?sleepLast+'h':'—', lbl:'Sommeil', sub:`Obj. ${sleepGoal}h`, pct:sleepLast?Math.min(100,Math.round(sleepLast/sleepGoal*100)):0, color:'--purple'},
+    {icon:'🔥', val:st.current+'j', lbl:'Streak', sub:`Record ${st.record}j`, pct:Math.min(100,Math.round(st.current/(st.record||1)*100)), color:'--red'},
   ];
 
-  const grid = document.createElement('div');
-  grid.className = 'dash-quick-grid';
-  cards.forEach(card=>{
+  const statsGrid = document.createElement('div');
+  statsGrid.className = 'dash-stats-grid';
+  stats.forEach(s=>{
     const el = document.createElement('div');
-    el.className = `dash-quick-card dash-accent-${card.accent}`;
-    el.innerHTML = `<div class="dash-quick-icon">${card.icon}</div>
-      <div class="dash-quick-val">${card.val}</div>
-      <div class="dash-quick-lbl">${card.lbl}</div>
-      <div class="dash-quick-sub">${card.sub}</div>`;
-    grid.appendChild(el);
+    el.className = 'dash-stat-card';
+    el.innerHTML = `
+      <div class="dash-stat-icon">${s.icon}</div>
+      <div class="dash-stat-val">${s.val}</div>
+      <div class="dash-stat-lbl">${s.lbl}</div>
+      <div class="dash-stat-bar-wrap">
+        <div class="dash-stat-bar" style="width:${s.pct}%;background:var(${s.color})"></div>
+      </div>
+      <div class="dash-stat-sub">${s.sub}</div>`;
+    statsGrid.appendChild(el);
   });
-  wrap.appendChild(grid);
+  wrap.appendChild(statsGrid);
 
-  // ── Séance du jour ──
-  const dayExercises = (S.days[today.getDay()===0?6:today.getDay()-1]||{}).exercises||[];
-  const todayCard = document.createElement('div');
-  if(dayExercises.length){
-    const restDay = dayExercises.every(e=>e.name&&e.name.toLowerCase().includes('repos'));
-    todayCard.className = 'dash-today-card';
-    todayCard.innerHTML = `<div class="dash-today-title">💪 SÉANCE DU JOUR — ${todayName.toUpperCase()}</div>
-      ${restDay?'<div class="dash-today-exname">🛋️ Jour de repos</div><div class="dash-today-meta">Récupération active recommandée</div>':
-        `<div class="dash-today-exname">${dayExercises.map(e=>e.name||'?').slice(0,3).join(' · ')}${dayExercises.length>3?` +${dayExercises.length-3}`:''}
-        </div><div class="dash-today-meta">${dayExercises.length} exercice${dayExercises.length>1?'s':''}</div>`}
-      <div class="dash-today-actions">
-        <button class="dash-today-btn primary" onclick="switchTab('session')">▶ Commencer</button>
-        <button class="dash-today-btn" onclick="switchTab('weekly')">📋 Voir Planning</button>
-      </div>`;
+  // ── SÉANCE DU JOUR ──
+  const exs = (todayDay.exercises||[]).filter(e=>e.name&&e.name.trim()&&!e.isWarmup);
+  const doneExs = exs.filter(e=>e.done);
+  const isRest  = exs.length===0||(exs[0]&&exs[0].name&&exs[0].name.toLowerCase().includes('repos'));
+  const sessionPct = exs.length? Math.round(doneExs.length/exs.length*100):0;
+
+  const sessionCard = document.createElement('div');
+  sessionCard.className = 'dash-session-card';
+  if(isRest || exs.length===0){
+    sessionCard.innerHTML = `
+      <div class="dash-session-header">
+        <span class="dash-session-day">📅 ${todayName.toUpperCase()}</span>
+        <span class="dash-session-badge rest">Repos</span>
+      </div>
+      <div class="dash-session-msg">🛋️ Journée de récupération<br><small style="color:var(--muted)">Marche, étirements, sommeil</small></div>
+      <button class="dash-session-btn secondary" onclick="switchTab('weekly')">📋 Voir planning</button>`;
   } else {
-    todayCard.className = 'chart-wrap';
-    todayCard.innerHTML = `<div class="chart-no-data">📭 Aucune séance planifiée aujourd\'hui<br><small>Profitez-en pour récupérer !</small></div>`;
+    const groups = [...new Set(exs.map(e=>e.muscles&&e.muscles[0]||'').filter(Boolean))].slice(0,3);
+    sessionCard.innerHTML = `
+      <div class="dash-session-header">
+        <span class="dash-session-day">💪 ${todayName.toUpperCase()}</span>
+        <span class="dash-session-badge ${doneExs.length>0?'progress':'upcoming'}">${doneExs.length>0?doneExs.length+'/'+exs.length+' faits':'À venir'}</span>
+      </div>
+      ${groups.length?`<div class="dash-session-muscles">${groups.join(' · ')}</div>`:''}
+      <div class="dash-session-exs">${exs.slice(0,3).map(e=>`
+        <div class="dash-session-ex ${e.done?'done':''}">
+          <span class="dash-session-ex-dot ${e.done?'done':''}"></span>
+          <span>${e.name}</span>
+          <span class="dash-session-ex-sets">${e.sets||3}×${e.reps||'?'}</span>
+        </div>`).join('')}${exs.length>3?`<div style="font-size:10px;color:var(--muted);margin-top:4px">+${exs.length-3} exercices</div>`:''}</div>
+      ${sessionPct>0?`<div class="dash-session-progress-wrap">
+        <div class="dash-session-progress-bar" style="width:${sessionPct}%"></div>
+      </div>`:''}
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="dash-session-btn primary" onclick="switchTab('session')" style="flex:2">▶ ${doneExs.length>0?'Continuer':'Commencer'}</button>
+        <button class="dash-session-btn secondary" onclick="switchTab('weekly')" style="flex:1">📋</button>
+      </div>`;
   }
-  wrap.appendChild(todayCard);
+  wrap.appendChild(sessionCard);
 
-  // ── Alertes ──
+  // ── OBJECTIF + PROGRESSION ──
+  const obj = S.objective;
+  if(obj&&obj.text){
+    const objCard = document.createElement('div');
+    objCard.className = 'dash-obj-card';
+    const poids = (S.mesures&&S.mesures.poids&&S.mesures.poids.length)?
+      parseFloat(S.mesures.poids[S.mesures.poids.length-1].val)||0:0;
+    const targetW = parseFloat(obj.targetWeight)||0;
+    const startW  = (S.mesures&&S.mesures.poids&&S.mesures.poids[0])?
+      parseFloat(S.mesures.poids[0].val)||0:poids;
+    const progress = (startW&&targetW&&poids&&startW!==targetW)?
+      Math.min(100,Math.max(0,Math.round(Math.abs(startW-poids)/Math.abs(startW-targetW)*100))):0;
+    const targetDate = obj.targetDate?new Date(obj.targetDate):null;
+    const daysLeft = targetDate?Math.ceil((targetDate-today)/86400000):null;
+
+    objCard.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="font-size:18px">🎯</span>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--text)">${escHtml(obj.text)}</div>
+          ${daysLeft!==null?`<div style="font-size:10px;color:var(--muted)">${daysLeft>0?daysLeft+' jours restants':'Objectif atteint !'}</div>`:''}
+        </div>
+        ${poids&&targetW?`<div style="margin-left:auto;text-align:right">
+          <div style="font-size:13px;font-weight:700;font-family:var(--mono);color:var(--teal-d)">${poids}kg</div>
+          <div style="font-size:10px;color:var(--muted)">→ ${targetW}kg</div>
+        </div>`:''}
+      </div>
+      ${progress>0?`<div style="background:var(--border);border-radius:6px;height:6px;overflow:hidden">
+        <div style="width:${progress}%;height:100%;background:var(--teal);border-radius:6px;transition:width 1s"></div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px">${progress}% atteint</div>`:''}`;
+    wrap.appendChild(objCard);
+  }
+
+  // ── ALERTES ──
   const pains = activePains();
   const alerts = [];
-  if(stepsToday<(S.stepsGoal||10000)*0.5&&hours>12) alerts.push({icon:'👣',text:`Seulement ${stepsToday.toLocaleString('fr')} pas aujourd\'hui`,action:'Voir Corps',tab:'corps'});
-  if(sleepToday>0&&sleepToday<6) alerts.push({icon:'😴',text:`Sommeil insuffisant (${sleepToday}h)`,action:'Voir Corps',tab:'corps'});
-  if(pains.length>0) alerts.push({icon:'⚠️',text:`${pains.length} douleur${pains.length>1?'s':''} signalée${pains.length>1?'s':''} (14j)`,action:'Voir Corps',tab:'corps'});
-  if(calToday>0&&calToday>(S.caloriesGoal||2500)*1.2) alerts.push({icon:'🔥',text:`Calories dépassées (${calToday} kcal)`,action:'Voir Corps',tab:'corps'});
-  const poids=parseFloat(S.mesures&&S.mesures.poids)||0;
-  if(poids===0) alerts.push({icon:'⚖️',text:'Renseignez votre poids pour le suivi IMC',action:'Voir Corps',tab:'corps'});
+  if(stepsToday<stepsGoal*0.3&&hours>14) alerts.push({icon:'👣',txt:`Seulement ${stepsToday.toLocaleString('fr')} pas — Allez marcher !`,color:'orange',tab:'corps'});
+  if(sleepLast>0&&sleepLast<6) alerts.push({icon:'😴',txt:`Sommeil insuffisant (${sleepLast}h) — Repos prioritaire`,color:'red',tab:'corps'});
+  if(pains.length>0) alerts.push({icon:'⚠️',txt:`${pains.length} douleur${pains.length>1?'s':''} signalée${pains.length>1?'s':''}`,color:'red',tab:'corps'});
+  if(st.current===0&&hours>18) alerts.push({icon:'💪',txt:`Pas encore entraîné aujourd'hui`,color:'teal',tab:'session'});
 
   if(alerts.length){
-    const alertWrap = document.createElement('div');
-    alertWrap.innerHTML = '<div class="dash-section-title">⚡ Alertes</div>';
-    const list = document.createElement('div');
-    list.className = 'dash-alerts-list';
+    const alertsWrap = document.createElement('div');
+    alertsWrap.style.cssText = 'display:flex;flex-direction:column;gap:6px';
     alerts.forEach(a=>{
-      const el = document.createElement('div');
-      el.className = 'dash-alert-item';
-      el.innerHTML = `<span class="dash-alert-icon">${a.icon}</span>
-        <span class="dash-alert-text">${a.text}</span>
-        <span class="dash-alert-action">${a.action} →</span>`;
-      el.addEventListener('click',()=>switchTab(a.tab));
-      list.appendChild(el);
+      const al = document.createElement('div');
+      al.className = `dash-alert dash-alert-${a.color}`;
+      al.innerHTML = `<span>${a.icon}</span><span style="flex:1">${a.txt}</span><span style="font-size:10px;opacity:.7;cursor:pointer" onclick="switchTab('${a.tab}')">Voir →</span>`;
+      alertsWrap.appendChild(al);
     });
-    alertWrap.appendChild(list);
-    wrap.appendChild(alertWrap);
+    wrap.appendChild(alertsWrap);
   }
 
-  // ── Streak + Recent PRs ──
-  const streak = computeStreak();
-  const streakCard = document.createElement('div');
-  streakCard.className = 'chart-wrap';
-  streakCard.style.cssText = 'padding:14px';
-  
-  const streakTitle = document.createElement('div');
-  streakTitle.className = 'chart-wrap-title';
-  streakTitle.textContent = '🔥 Régularité & Performances';
-  streakCard.appendChild(streakTitle);
-  
-  const streakRow = document.createElement('div');
-  streakRow.style.cssText = 'display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-bottom:10px';
-  
-  const streakItems = [
-    {icon:'🔥', label:'Série actuelle', val: streak.current + ' j'},
-    {icon:'🏆', label:'Record', val: streak.record + ' j'},
-    {icon:'📅', label:'Actif ce mois', val: streak.monthActive + ' j'},
-  ];
-  streakItems.forEach(s => {
-    const el = document.createElement('div');
-    el.style.cssText = 'display:flex;flex-direction:column;align-items:center;padding:8px 12px;background:var(--bg);border-radius:var(--rs);flex:1;min-width:70px';
-    el.innerHTML = `<div style="font-size:20px">${s.icon}</div>
-      <div style="font-family:var(--mono);font-weight:700;font-size:18px;color:var(--teal-d)">${s.val}</div>
-      <div style="font-size:10px;color:var(--muted)">${s.label}</div>`;
-    streakRow.appendChild(el);
-  });
-  streakCard.appendChild(streakRow);
-  
-  // Recent PRs
-  const prKeys = Object.keys(S.prs||{}).slice(-5);
-  if(prKeys.length) {
-    const prTitle = document.createElement('div');
-    prTitle.style.cssText = 'font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--teal-d);margin-bottom:6px';
-    prTitle.textContent = '🏋️ Derniers records personnels';
-    streakCard.appendChild(prTitle);
-    
-    const prList = document.createElement('div');
-    prList.style.cssText = 'display:flex;flex-direction:column;gap:4px';
-    prKeys.reverse().forEach(k => {
-      const pr = S.prs[k];
-      const row = document.createElement('div');
-      row.style.cssText = 'display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid var(--border)';
-      row.innerHTML = `<span style="color:var(--text);font-weight:600">${escHtml(k.slice(0,30))}</span>
-        <span style="color:var(--teal-d);font-family:var(--mono);font-weight:700">${pr.weight||'?'} kg × ${pr.reps||'?'}</span>`;
-      prList.appendChild(row);
-    });
-    streakCard.appendChild(prList);
-  }
-  
-  wrap.appendChild(streakCard);
-
-  // ── Volume hebdomadaire chart ──
+  // ── VOLUME HEBDO + BREAKDOWN PPL ──
   setTimeout(()=>{
+    // Volume chart
     const volData = computeWeeklyVolume(8);
-    const {wrap:cw, canvas} = mkChartWrap('dash-vol-chart','📊 Volume par semaine','kg·reps');
-    wrap.appendChild(cw);
-    Charts.barChart(canvas, volData, {height:150, yFmt:v=>v>=1000?Math.round(v/1000)+'k':Math.round(v)});
-
-    // ── ATL/CTL chart ──
-    const atlData = computeATLCTL(28);
-    const {wrap:aw, canvas:ac} = mkChartWrap('dash-atl-chart','📈 Fitness / Fatigue (ATL·CTL)','28 jours');
-    wrap.appendChild(aw);
-    const legend = document.createElement('div');
-    legend.className = 'chart-legend';
-    legend.innerHTML = `<div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--teal)"></div>CTL (forme)</div>
-      <div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--orange)"></div>ATL (fatigue)</div>
-      <div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--green)"></div>TSB (fraîcheur)</div>`;
-    aw.appendChild(legend);
-    Charts.lineChart(ac,[
-      {label:'CTL',values:atlData.map(p=>({x:p.x,y:p.ctl})),color:'--teal'},
-      {label:'ATL',values:atlData.map(p=>({x:p.x,y:p.atl})),color:'--orange'},
-      {label:'TSB',values:atlData.map(p=>({x:p.x,y:p.tsb})),color:'--green'},
-    ],{height:160,fill:false});
-
-    // ── Corrélation sommeil/perf ──
-    const corrPts = computeSleepPerfCorrelation();
-    const {wrap:sw, canvas:sc} = mkChartWrap('dash-corr-chart','🔗 Corrélation Sommeil / Volume','Par séance');
-    wrap.appendChild(sw);
-    Charts.scatterChart(sc,corrPts,{height:140,xLabel:"Sommeil (h)",yLabel:"Volume (kg)"});
-    if(!corrPts.length){
-      const nd=document.createElement('div');nd.className='chart-no-data';
-      nd.textContent='Renseignez le sommeil et faites des séances pour voir la corrélation';
-      sw.appendChild(nd);
+    if(volData.some(v=>v.value>0)){
+      const {wrap:vw,canvas:vc} = mkChartWrap('dash-vol-chart','📊 Volume hebdomadaire','kg/sem');
+      wrap.appendChild(vw);
+      Charts.barChart(vc, volData.map(v=>({label:v.label,value:v.value,color:v.label==='Cette sem.'?'--teal':'--border'})),{height:120,yFmt:v=>v>=1000?(v/1000).toFixed(1)+'t':Math.round(v)+'kg'});
     }
 
-    // ── Push/Pull/Legs donut ──
-    const ppl = computePPL().filter(d=>d.value>0);
-    if(ppl.length){
-      const {wrap:dw, canvas:dc} = mkChartWrap('dash-ppl-chart','🔄 Répartition Push·Pull·Legs',"Tout l'historique");
-      wrap.appendChild(dw);
-      const tot = ppl.reduce((a,d)=>a+d.value,0);
-      const lg = document.createElement('div');lg.className='chart-legend';
-      ppl.forEach(d=>{lg.innerHTML+=`<div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(${d.color})"></div>${d.label}: ${Math.round(d.value/tot*100)}%</div>`;});
-      dw.appendChild(lg);
-      Charts.donutChart(dc,ppl,{height:120,center:tot+''});
+    // PPL donut
+    const ppl = computePPL();
+    if(ppl.some(p=>p.value>0)){
+      const {wrap:pw,canvas:pc} = mkChartWrap('dash-ppl-chart','🎯 Répartition musculaire','cette semaine');
+      wrap.appendChild(pw);
+      Charts.donutChart(pc, ppl.map(p=>({label:p.label,value:p.value,color:p.color})),{size:100});
     }
-  },50);
+  }, 80);
 }
+
+
 
 
 // ╔══════════════════════════════════════════════════════╗

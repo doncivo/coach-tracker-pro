@@ -368,7 +368,7 @@ input,textarea,select{user-select:auto;-webkit-user-select:auto}
 .std-comparison{font-size:9px;color:var(--muted);margin-top:4px;padding:4px 7px;background:var(--bg);border-radius:var(--rs);border:1px solid var(--border)}
 
 /* ══ CORPS ══ */
-.corps-wrap{flex:1;overflow-y:auto;padding:12px 18px;display:flex;flex-direction:column;gap:12px}
+/* [removed duplicate] */
 .corps-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
 .corps-card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--border);overflow:hidden}
 .mesure-entry{display:flex;align-items:center;gap:6px;font-size:10px;padding:4px 0;border-bottom:1px solid var(--border)}
@@ -924,7 +924,7 @@ input,textarea,select{user-select:auto;-webkit-user-select:auto}
 
 /* ── 5. CORPS ── */
 @media(max-width:768px){
-  .corps-wrap{padding:10px 12px;gap:10px}
+  /* [removed duplicate] */
   .corps-grid{grid-template-columns:1fr!important}
 
   /* Sleep grid — bigger inputs */
@@ -1257,6 +1257,202 @@ html { height:100dvh; }
 .onboard-step-dot.done{background:var(--teal)}
 @media(max-width:500px){.onboard-row{grid-template-columns:1fr}}
 
+
+
+/* ════ CORPS — Layout fix scroll iOS Safari ════ */
+.corps-wrap {
+  flex: 1 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+}
+.corps-subnav {
+  flex-shrink: 0 !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none !important;
+}
+.corps-subnav::-webkit-scrollbar { display: none !important; }
+.corps-section {
+  display: none !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  flex-direction: column;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+}
+.corps-section.active {
+  display: flex !important;
+}
+.corps-subbtn {
+  flex: 1 !important;
+  min-width: 75px !important;
+  padding: 10px 6px !important;
+  border: none !important;
+  background: transparent !important;
+  font-family: var(--font) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: var(--muted) !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  border-bottom: 3px solid transparent !important;
+  transition: all .15s !important;
+  min-height: 44px !important;
+}
+.corps-subbtn.active {
+  color: var(--teal-d) !important;
+  border-bottom-color: var(--teal) !important;
+  background: var(--bg) !important;
+}
+/* ════ Même fix pour TOUS les onglets scrollables ════ */
+.tab-pane { display: none !important; flex: 1 !important; min-height: 0 !important; overflow: hidden !important; flex-direction: column !important; }
+.tab-pane.active { display: flex !important; }
+.dashboard-wrap, .prog-wrap, .kpi-wrap, .bilan-wrap,
+.achievements-wrap, .ach-wrap, .lib-wrap, .lib-grid-wrap,
+.cal-wrap, .settings-wrap, .session-body {
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+/* weekly */
+.weekly-wrap {
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.day-panel {
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+.day-detail {
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  height: 100% !important;
+}
+
+
+/* ════════════════════════════════════════════
+   FIX SCROLL iOS SAFARI — RÈGLES FINALES
+   Toutes avec !important pour gagner la cascade
+   ════════════════════════════════════════════ */
+html {
+  height: 100dvh !important;
+  overflow: hidden !important;
+}
+body {
+  height: 100dvh !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+header.hdr {
+  flex-shrink: 0 !important;
+}
+.tabs {
+  flex-shrink: 0 !important;
+}
+.bottom-nav {
+  flex-shrink: 0 !important;
+}
+.content {
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding-bottom: 0 !important;
+}
+.tab-pane {
+  display: none !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  flex-direction: column !important;
+}
+.tab-pane.active {
+  display: flex !important;
+}
+/* Wrappers scrollables */
+.dashboard-wrap, .prog-wrap, .kpi-wrap, .bilan-wrap,
+.ach-wrap, .achievements-wrap, .lib-wrap, .cal-wrap,
+.settings-wrap {
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+}
+/* Corps */
+.corps-wrap {
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+}
+.corps-subnav {
+  flex-shrink: 0 !important;
+}
+.corps-section {
+  display: none !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  flex-direction: column !important;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+}
+.corps-section.active {
+  display: flex !important;
+}
+/* Weekly */
+.weekly-wrap {
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.day-panel {
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.day-detail {
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding-bottom: 16px !important;
+}
+/* Session */
+.session-wrap {
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.session-body, .sess-main {
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
 </style>
 </head>
 <body>

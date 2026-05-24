@@ -1479,6 +1479,26 @@ html { height: 100dvh; }
   .rest-timer-time { font-size: 38px; }
 }
 
+
+/* ══ CORPS PAGE FIXES ══ */
+.corps-wrap { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:10px 12px; display:flex; flex-direction:column; gap:10px; min-height:0; }
+.corps-grid { display:flex; flex-direction:column; gap:10px; }
+.corps-card { background:var(--card); border-radius:var(--r); box-shadow:var(--sh); border:1px solid var(--border); overflow:hidden; }
+.mesure-entry { display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--border); font-size:12px; }
+.mesure-date { color:var(--muted); font-size:11px; min-width:65px; }
+.mesure-val { font-family:var(--mono); font-weight:700; font-size:14px; color:var(--text); }
+.mesure-unit { color:var(--muted); font-size:11px; }
+.mesure-delta { font-size:10px; font-weight:700; margin-left:auto; }
+.mesure-del { background:none; border:none; color:var(--muted); cursor:pointer; font-size:16px; padding:0 4px; line-height:1; }
+.mesure-inp { border:1.5px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text); font-family:var(--font); }
+.mesure-inp:focus { outline:none; border-color:var(--teal); }
+.poids-big { font-family:var(--mono); font-size:28px; font-weight:800; color:var(--teal-d); }
+@media(max-width:768px) {
+  .corps-wrap { padding:8px 10px; gap:8px; }
+  .mesure-val { font-size:16px; }
+  .poids-big { font-size:24px; }
+}
+
 </style>
   <link id="pwa-manifest" rel="manifest">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -1734,7 +1754,7 @@ html { height: 100dvh; }
       <div style="padding:10px" id="nutri-grid"></div>
     </div>
     <!-- Mesures -->
-    <div<div id="cal-chart-container"></div>
+    <div id="cal-chart-container"></div>
     <div class="corps-grid" id="corps-grid"></div>
     <!-- Pain journal -->
     <div class="card">
@@ -1947,6 +1967,8 @@ html { height: 100dvh; }
 </div>
 
 <script>
+
+/*
 
 /* ╔══════════════════════════════════════════════════════════╗
    ║  MODULE 0 — UTILITAIRES TRANSVERSAUX                    ║
@@ -6356,7 +6378,21 @@ function renderCorps(){
     entries.slice(-5).reverse().forEach((e,idx,arr)=>{const me=document.createElement('div');me.className='mesure-entry';const dt=document.createElement('div');dt.className='mesure-date';dt.textContent=new Date(e.date+'T00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'2-digit'});const vl=document.createElement('div');vl.className='mesure-val';vl.textContent=e.val;const un=document.createElement('div');un.className='mesure-unit';un.textContent=unit;const dl=document.createElement('div');dl.className='mesure-delta';const nxt=arr[idx-1];if(nxt){const diff=Math.round((parseFloat(e.val)-parseFloat(nxt.val))*10)/10;dl.textContent=(diff>0?'+':'')+diff;dl.style.color=diff>0?(key==='bras'||key==='poitrine'?'var(--green)':'var(--red)'):(key==='taille'||key==='hanches'?'var(--green)':'var(--red)');}const delBtn=document.createElement('button');delBtn.className='mesure-del';delBtn.textContent='×';delBtn.addEventListener('click',()=>{S.mesures[key].splice(S.mesures[key].indexOf(e),1);save();renderCorps();});me.appendChild(dt);me.appendChild(vl);me.appendChild(un);me.appendChild(dl);me.appendChild(delBtn);body.appendChild(me);});
     // Canvas chart
     if(entries.length>1){const canvas=document.createElement('canvas');canvas.className='corps-canvas';canvas.height=65;body.appendChild(canvas);setTimeout(()=>{const W=canvas.offsetWidth||230;canvas.width=W;const ctx=canvas.getContext('2d');const vals=entries.map(e=>parseFloat(e.val)||0);const minV=Math.min(...vals),maxV=Math.max(...vals);const pad=6,cH=58;ctx.clearRect(0,0,W,65);ctx.strokeStyle='var(--teal)';ctx.lineWidth=2;ctx.lineJoin='round';ctx.beginPath();const step=(W-pad*2)/(vals.length-1||1);vals.forEach((v,i)=>{const x=pad+i*step;const y=maxV===minV?cH/2:pad+(1-(v-minV)/(maxV-minV))*(cH-pad*2);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.stroke();vals.forEach((v,i)=>{const x=pad+i*step;const y=maxV===minV?cH/2:pad+(1-(v-minV)/(maxV-minV))*(cH-pad*2);ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fillStyle='var(--teal)';ctx.fill();ctx.fillStyle='var(--muted)';ctx.font='8px DM Mono,monospace';ctx.textAlign='center';ctx.fillText(v,x,63);});},100);}
-    const form=document.createElement('div');form.className='mesure-form';const dateInp=document.createElement('input');dateInp.type='date';dateInp.className='mesure-inp';dateInp.style.width='118px';dateInp.value=todayStr();const valInp=document.createElement('input');valInp.type='number';valInp.className='mesure-inp';valInp.placeholder=unit;valInp.step='0.1';valInp.style.width='66px';const addBtn=document.createElement('button');addBtn.className='btn btn-teal btn-sm';addBtn.textContent='+ Ajouter';
+    const form=document.createElement('div');
+    form.style.cssText='display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap';
+    const dateInp=document.createElement('input');
+    dateInp.type='date';dateInp.className='mesure-inp';
+    dateInp.style.cssText='flex:1;min-width:120px;max-width:140px;font-size:14px;padding:8px 10px';
+    dateInp.value=todayStr();
+    const valInp=document.createElement('input');
+    valInp.type='number';valInp.className='mesure-inp';
+    valInp.placeholder=unit;valInp.step='0.1';
+    valInp.style.cssText='width:80px;font-size:16px;padding:8px 10px;text-align:center';
+    valInp.setAttribute('inputmode','decimal');
+    const addBtn=document.createElement('button');
+    addBtn.className='btn btn-teal';
+    addBtn.style.cssText='flex:1;min-height:40px;font-size:13px;font-weight:700';
+    addBtn.textContent='+ Ajouter';
     valInp.addEventListener('keydown',e=>{if(e.key==='Enter')addBtn.click();});
     addBtn.addEventListener('click',()=>{if(!valInp.value)return;if(!S.mesures[key])S.mesures[key]=[];S.mesures[key].push({date:dateInp.value,val:valInp.value});S.mesures[key].sort((a,b)=>a.date.localeCompare(b.date));valInp.value='';save();renderCorps();});
     form.appendChild(dateInp);form.appendChild(valInp);form.appendChild(addBtn);body.appendChild(form);card.appendChild(body);grid.appendChild(card);
@@ -7416,9 +7452,6 @@ if (new URLSearchParams(location.search).has('test')) {
     console.log(`[CTP Tests] ${passed} passed, ${failed} failed`);
   });
 }
-
-
-
 
 </script>
 

@@ -3201,7 +3201,8 @@ function computeWeeklyVolume(weeks=8){
       const key=localDateStr(date);
       const hDay=S.history[key];
       if(!hDay) continue;
-      hDay.forEach(ex=>{ if(ex.sets) ex.sets.forEach(set=>{ vol+=(parseFloat(set.weight)||0)*(parseInt(set.reps)||0); }); });
+      const hDayArr=Array.isArray(hDay)?hDay:(hDay.days||[]);
+      hDayArr.forEach(ex=>{ if(ex.sets) ex.sets.forEach(set=>{ vol+=(parseFloat(set.weight)||0)*(parseInt(set.reps)||0); }); });
     }
     return {label:`S${wi+1}`,value:vol};
   });
@@ -3247,7 +3248,7 @@ function computeATLCTL(days=42){
   return dates.map(d=>{
     const hDay=S.history[d];
     let load=0;
-    if(hDay) hDay.forEach(ex=>{ if(ex.sets) ex.sets.forEach(s=>{ load+=(parseFloat(s.weight)||0)*(parseInt(s.reps)||0)/1000; }); });
+    if(hDay){const hDayArr=Array.isArray(hDay)?hDay:(hDay.days||[]);hDayArr.forEach(ex=>{ if(ex.sets) ex.sets.forEach(s=>{ load+=(parseFloat(s.weight)||0)*(parseInt(s.reps)||0)/1000; }); });}
     atl = atl*atlDecay + load*(1-atlDecay)*10;
     ctl = ctl*ctlDecay + load*(1-ctlDecay)*10;
     return {x:d, atl:Math.round(atl), ctl:Math.round(ctl), tsb:Math.round(ctl-atl)};
@@ -3261,7 +3262,7 @@ function computeSleepPerfCorrelation(){
     const sleepH=parseFloat(S.sleep&&S.sleep[d]&&(S.sleep[d].hours||S.sleep[d].h)||0)||0;
     const hDay=S.history[d];
     let vol=0;
-    if(hDay) hDay.forEach(ex=>{ if(ex.sets) ex.sets.forEach(s=>{ vol+=(parseFloat(s.weight)||0)*(parseInt(s.reps)||0); }); });
+    if(hDay){const hDayArr=Array.isArray(hDay)?hDay:(hDay.days||[]);hDayArr.forEach(ex=>{ if(ex.sets) ex.sets.forEach(s=>{ vol+=(parseFloat(s.weight)||0)*(parseInt(s.reps)||0); }); });}
     if(sleepH>0&&vol>0) pts.push({x:sleepH,y:vol,color:'--teal'});
   });
   return pts;

@@ -2352,6 +2352,11 @@ let S={
   _currentTab:'weekly',
   _restDuration:90,
   _restBeep:true,
+  _reminderHour:null,
+  _reminderMinute:null,
+  proteinGoal:0,
+  carbsGoal:0,
+  fatGoal:0,
   _gender:'m', _dob:'', _level:'intermediaire',
   _daysPerWeek:4, _place:'salle', _sleepGoal:8, _startDate:'',
 };
@@ -2952,12 +2957,37 @@ function renderSettings() {
 
   // ── NOTIFICATIONS ──
   const notifSec = _settingsSection('🔔 Notifications');
-  const notifStatus = Notification.permission === 'granted' ? '✅ Activées' : Notification.permission === 'denied' ? '❌ Refusées (modifier dans les réglages système)' : '⬜ Non configurées';
-  _settingsRow(notifSec, 'Notifications de repos', notifStatus, () => {
-    if (Notification.permission === 'granted') return null;
+  const notifPerm = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported';
+  const notifStatus = notifPerm === 'granted' ? '✅ Activées' : notifPerm === 'denied' ? '❌ Refusées (modifier dans Réglages → Safari)' : '⬜ Non configurées';
+  _settingsRow(notifSec, 'Autorisation', notifStatus, () => {
+    if (notifPerm === 'granted') return null;
     const btn = document.createElement('button'); btn.className='btn btn-teal btn-sm';
-    btn.textContent='Activer'; btn.addEventListener('click', requestNotifPermission);
+    btn.textContent = notifPerm === 'denied' ? 'Ouvrir Réglages' : 'Activer';
+    btn.addEventListener('click', requestNotifPermission);
     return btn;
+  });
+  _settingsRow(notifSec, 'Rappel entraînement', "Notification quotidienne à l'heure de ta séance", () => {
+    const wrap2 = document.createElement('div');
+    wrap2.style.cssText = 'display:flex;gap:8px;align-items:center;flex-wrap:wrap';
+    const timeInp = document.createElement('input');
+    timeInp.type = 'time'; timeInp.className = 'onboard-inp';
+    timeInp.style.cssText = 'width:110px;padding:6px 10px;font-size:14px';
+    const h = S._reminderHour; const m = S._reminderMinute;
+    timeInp.value = (h!=null) ? (String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')) : '08:00';
+    const setBtn = document.createElement('button'); setBtn.className='btn btn-teal btn-sm';
+    setBtn.textContent = (h!=null) ? '✅ Modifer' : '🔔 Activer';
+    setBtn.addEventListener('click', async () => {
+      const [hh,mm] = timeInp.value.split(':').map(Number);
+      if(isNaN(hh)||isNaN(mm)) return;
+      const ok = notifPerm === 'granted' || await requestNotifPermission();
+      if(ok) { scheduleTrainingReminder(hh, mm); setBtn.textContent='✅ Modifer'; }
+    });
+    const cancelBtn = document.createElement('button'); cancelBtn.className='btn btn-ghost btn-sm';
+    cancelBtn.textContent='🔕 Annuler';
+    cancelBtn.style.display = (h!=null) ? 'block' : 'none';
+    cancelBtn.addEventListener('click', () => { cancelTrainingReminder(); cancelBtn.style.display='none'; setBtn.textContent='🔔 Activer'; });
+    wrap2.appendChild(timeInp); wrap2.appendChild(setBtn); wrap2.appendChild(cancelBtn);
+    return wrap2;
   });
   wrap.appendChild(notifSec);
 
@@ -4347,6 +4377,436 @@ function _initRestTimerButtons() {
   });
 }
 
+
+// ╔══════════════════════════════════════════════════════╗
+// ║  CALCUL AUTOMATIQUE DES MACROS                       ║
+// ╚══════════════════════════════════════════════════════╝
+
+function computeMacroGoals() {
+  const tdee = computeTDEE().tdee;
+  const goal = S.objective?.text || '';
+  let calTarget = S.caloriesGoal || tdee;
+  
+  // Ajuster selon l'objectif
+  if(goal.includes('masse') || goal.includes('Prise'))      calTarget = Math.round(tdee * 1.10); // +10%
+  else if(goal.includes('poids') || goal.includes('Perte')) calTarget = Math.round(tdee * 0.80); // -20%
+  else if(goal.includes('Force') || goal.includes('force')) calTarget = Math.round(tdee * 1.05); // +5%
+  else calTarget = tdee; // maintien
+  
+  const poids = parseFloat((S.mesures.poids||[]).slice(-1)[0]?.val) || 75;
+  
+  // Protéines: 2g/kg pour prise de masse, 1.8g/kg pour perte, 1.6g/kg maintien
+  let protMulti = 1.8;
+  if(goal.includes('masse')) protMulti = 2.2;
+  else if(goal.includes('Perte') || goal.includes('poids')) protMulti = 2.0;
+  
+  const protG  = Math.round(poids * protMulti);          // protéines (g)
+  const protCal = protG * 4;
+  
+  // Lipides: 25% des calories
+  const fatCal = Math.round(calTarget * 0.25);
+  const fatG   = Math.round(fatCal / 9);
+  
+  // Glucides: le reste
+  const carbCal = calTarget - protCal - fatCal;
+  const carbG   = Math.round(Math.max(0, carbCal) / 4);
+  
+  return {
+    calories: calTarget,
+    protein:  protG,
+    carbs:    carbG,
+    fat:      fatG,
+    protCal, carbCal: Math.max(0, carbCal), fatCal
+  };
+}
+
+function applyMacroGoals() {
+  const mg = computeMacroGoals();
+  S.caloriesGoal  = mg.calories;
+  S.proteinGoal   = mg.protein;
+  S.carbsGoal     = mg.carbs;
+  S.fatGoal       = mg.fat;
+  save();
+  showToast(
+    `🎯 Macros calculées : ${mg.calories} kcal · P ${mg.protein}g · G ${mg.carbs}g · L ${mg.fat}g`,
+    'ok', 5000
+  );
+  renderCalTracker();
+}
+
+
+// ╔══════════════════════════════════════════════════════╗
+// ║  NOTIFICATIONS PUSH                                  ║
+// ╚══════════════════════════════════════════════════════╝
+
+
+
+function sendLocalNotif(title, body, icon) {
+  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+  try { new Notification(title, { body, icon: icon || './icons/icon-192.png', badge: './icons/icon-192.png', silent: false }); }
+  catch(e) {}
+}
+
+// ── Planifier rappel d'entraînement quotidien ──
+function scheduleTrainingReminder(hour, minute) {
+  // Sauvegarde l'heure choisie
+  S._reminderHour   = hour;
+  S._reminderMinute = minute;
+  save();
+
+  // Calcule le délai jusqu'à la prochaine occurrence
+  function getNextMs() {
+    const now  = new Date();
+    const next = new Date();
+    next.setHours(hour, minute, 0, 0);
+    if (next <= now) next.setDate(next.getDate() + 1); // demain si déjà passé
+    return next - now;
+  }
+
+  // Annuler le timer précédent
+  if (window._reminderTimeout) clearTimeout(window._reminderTimeout);
+
+  function fire() {
+    const today = new Date();
+    // Vérifier si une séance est prévue aujourd'hui
+    const dayIdx = (today.getDay() + 6) % 7; // lundi=0
+    const todayDay = S.days[dayIdx];
+    const hasSession = todayDay?.exercises?.some(e => e.name?.trim() && !e.isWarmup);
+    
+    if (hasSession) {
+      const exs = todayDay.exercises.filter(e => e.name?.trim() && !e.isWarmup);
+      sendLocalNotif(
+        "💪 C'est l'heure de t'entraîner !",
+        `${exs.length} exercice${exs.length>1?'s':''} au programme — ${exs.slice(0,2).map(e=>e.name).join(', ')}${exs.length>2?' +'+( exs.length-2):''}`,
+        './icons/icon-192.png'
+      );
+    } else {
+      sendLocalNotif("😴 Journée de repos", "Récupération active recommandée.", './icons/icon-192.png');
+    }
+    // Replanifier pour demain
+    window._reminderTimeout = setTimeout(fire, getNextMs());
+  }
+
+  window._reminderTimeout = setTimeout(fire, getNextMs());
+  showToast(`🔔 Rappel planifié à ${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`, 'ok', 3000);
+}
+
+function cancelTrainingReminder() {
+  if (window._reminderTimeout) clearTimeout(window._reminderTimeout);
+  S._reminderHour = null; S._reminderMinute = null;
+  save();
+  showToast('🔕 Rappel annulé', 'warn', 2000);
+}
+
+// ── Relancer le rappel au démarrage si configuré ──
+function restoreReminder() {
+  if (S._reminderHour != null && S._reminderMinute != null) {
+    scheduleTrainingReminder(S._reminderHour, S._reminderMinute);
+  }
+}
+
+
+// ╔══════════════════════════════════════════════════════╗
+// ║  SCAN CODE-BARRES — Open Food Facts                  ║
+// ╚══════════════════════════════════════════════════════╝
+
+let _barcodeStream = null;
+
+async function openBarcodeScanner(onResult) {
+  // Demander accès caméra
+  if (!navigator.mediaDevices?.getUserMedia) {
+    showToast('Caméra non disponible', 'warn'); return;
+  }
+
+  const overlay = document.getElementById('barcode-overlay');
+  const video   = document.getElementById('barcode-video');
+  const status  = document.getElementById('barcode-status');
+  if (!overlay || !video) return;
+
+  overlay.style.display = 'flex';
+  status.textContent = '📷 Ouverture de la caméra...';
+
+  try {
+    _barcodeStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+    });
+    video.srcObject = _barcodeStream;
+    await video.play();
+    status.textContent = '📷 Pointez le code-barres';
+
+    // Utiliser BarcodeDetector si disponible (Chrome/Safari récent)
+    if ('BarcodeDetector' in window) {
+      const detector = new BarcodeDetector({ formats: ['ean_13','ean_8','upc_a','upc_e','code_128','code_39'] });
+      let scanning = true;
+      
+      const scan = async () => {
+        if (!scanning) return;
+        try {
+          const codes = await detector.detect(video);
+          if (codes.length > 0) {
+            scanning = false;
+            const barcode = codes[0].rawValue;
+            status.textContent = `✅ Code détecté: ${barcode} — Recherche...`;
+            await lookupBarcode(barcode, onResult);
+            closeBarcodeScanner();
+          }
+        } catch(e) {}
+        if (scanning) requestAnimationFrame(scan);
+      };
+      requestAnimationFrame(scan);
+
+    } else {
+      // Fallback: saisie manuelle
+      status.textContent = '⚠️ Scanner non supporté — saisissez le code manuellement';
+      const manualWrap = document.getElementById('barcode-manual');
+      if (manualWrap) manualWrap.style.display = 'flex';
+    }
+
+  } catch(err) {
+    status.textContent = '❌ Accès caméra refusé — saisissez le code manuellement';
+    const manualWrap = document.getElementById('barcode-manual');
+    if (manualWrap) manualWrap.style.display = 'flex';
+  }
+}
+
+async function lookupBarcode(code, onResult) {
+  try {
+    const url = `https://world.openfoodfacts.org/api/v2/product/${code}.json?fields=product_name,nutriments,serving_size,brands`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+    
+    if (data.status === 1 && data.product) {
+      const p = data.product;
+      const n = p.nutriments || {};
+      const per100 = (key) => Math.round((n[key + '_100g'] || 0) * 10) / 10;
+      
+      const result = {
+        name:    (p.brands ? p.brands.split(',')[0] + ' — ' : '') + (p.product_name || 'Inconnu'),
+        cal:     per100('energy-kcal'),
+        protein: per100('proteins'),
+        carbs:   per100('carbohydrates'),
+        fat:     per100('fat'),
+        per:     '100g',
+      };
+      
+      if (onResult) onResult(result);
+      showToast('✅ Produit trouvé: ' + result.name.slice(0,30), 'ok', 3000);
+    } else {
+      showToast('❌ Produit introuvable (code: ' + code + ')', 'warn', 3000);
+    }
+  } catch(e) {
+    showToast('❌ Erreur réseau — vérifiez votre connexion', 'warn', 3000);
+  }
+}
+
+function closeBarcodeScanner() {
+  if (_barcodeStream) {
+    _barcodeStream.getTracks().forEach(t => t.stop());
+    _barcodeStream = null;
+  }
+  const overlay = document.getElementById('barcode-overlay');
+  if (overlay) overlay.style.display = 'none';
+  const video = document.getElementById('barcode-video');
+  if (video) { video.srcObject = null; }
+  const manualWrap = document.getElementById('barcode-manual');
+  if (manualWrap) manualWrap.style.display = 'none';
+}
+
+async function manualBarcodeSearch() {
+  const inp = document.getElementById('barcode-manual-inp');
+  if (!inp || !inp.value.trim()) return;
+  const code = inp.value.trim();
+  document.getElementById('barcode-status').textContent = `🔍 Recherche de ${code}...`;
+  await lookupBarcode(code, window._barcodeCb);
+  closeBarcodeScanner();
+}
+
+
+// ╔══════════════════════════════════════════════════════╗
+// ║  EXPORT PDF BILAN                                    ║
+// ╚══════════════════════════════════════════════════════╝
+
+function exportBilanPDF() {
+  // Générer une page HTML dédiée au bilan, puis window.print()
+  const fs = computeFitnessScore();
+  const td = computeTDEE();
+  const st = computeStreak();
+  const bc = computeBodyComp();
+  const today = new Date().toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'});
+  
+  // Calculs semaine
+  const days7 = lastNDays(7);
+  const weekSteps  = days7.reduce((a,d)=>a+(parseInt(S.steps&&S.steps[d]||0)||0),0);
+  const weekCals   = computeDailyCalories(7).reduce((a,p)=>a+p.y,0);
+  const weekSleep  = computeDailySleep(7).filter(p=>p.y>0);
+  const avgSleep   = weekSleep.length ? weekSleep.reduce((a,p)=>a+p.y,0)/weekSleep.length : 0;
+  const trained    = days7.filter(d=>S.history&&S.history[d]&&(S.history[d].length||Object.keys(S.history[d]).length)>0).length;
+  const volSem     = computeWeeklyVolume(1)[0]?.value || 0;
+  
+  const poids      = parseFloat((S.mesures?.poids||[]).slice(-1)[0]?.val)||0;
+  const objective  = S.objective?.text || 'Non défini';
+
+  const html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Bilan Coach Tracker Pro — ${today}</title>
+<style>
+  @page { margin: 20mm; size: A4; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family: -apple-system, Arial, sans-serif; color:#1a1a2e; font-size:12px; line-height:1.5; }
+  .header { background:linear-gradient(135deg,#5BA8A0,#3d7c76); color:#fff; padding:24px; border-radius:12px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; }
+  .header h1 { font-size:22px; font-weight:800; }
+  .header .date { font-size:12px; opacity:.85; margin-top:4px; }
+  .score-badge { background:rgba(255,255,255,.2); border-radius:50%; width:64px; height:64px; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .score-badge .num { font-size:24px; font-weight:900; }
+  .score-badge .lbl { font-size:9px; opacity:.8; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px; }
+  .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:16px; }
+  .card { border:1px solid #e0e0e0; border-radius:10px; padding:14px; }
+  .card-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#5BA8A0; margin-bottom:10px; }
+  .stat { display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #f0f0f0; }
+  .stat:last-child { border-bottom:none; }
+  .stat-lbl { color:#666; font-size:11px; }
+  .stat-val { font-weight:700; font-size:12px; }
+  .macro-bar { height:6px; background:#eee; border-radius:4px; margin-top:4px; overflow:hidden; }
+  .macro-fill { height:100%; border-radius:4px; }
+  .section-title { font-size:14px; font-weight:700; color:#1a1a2e; margin:16px 0 10px; border-left:4px solid #5BA8A0; padding-left:10px; }
+  .score-row { display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+  .score-chip { background:#f0f9f8; border:1px solid #5BA8A0; border-radius:8px; padding:6px 10px; font-size:11px; display:flex; gap:6px; align-items:center; }
+  .score-chip .pts { font-weight:700; color:#5BA8A0; }
+  .footer { margin-top:24px; padding-top:12px; border-top:1px solid #eee; font-size:10px; color:#999; text-align:center; }
+  .tag { display:inline-block; background:#f0f9f8; border:1px solid #5BA8A0; color:#3d7c76; border-radius:6px; padding:2px 8px; font-size:10px; font-weight:600; margin-right:4px; }
+  @media print { button { display:none; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>🏋️ Coach Tracker Pro</h1>
+    <div class="date">Bilan hebdomadaire — ${today}</div>
+    <div style="margin-top:8px;font-size:11px;opacity:.85">
+      Objectif : <strong>${escHtml(objective)}</strong>${poids>0?' · Poids actuel : '+poids+' kg':''}
+    </div>
+  </div>
+  <div class="score-badge">
+    <div class="num">${fs.score}</div>
+    <div class="lbl">Score</div>
+  </div>
+</div>
+
+<div class="section-title">📊 Score de forme global</div>
+<div class="score-row">
+  ${fs.breakdown.map(b=>`<div class="score-chip">${b.icon} ${b.label} <span class="pts">${b.pts}/100</span></div>`).join('')}
+</div>
+
+<div class="section-title">💪 Activité cette semaine</div>
+<div class="grid">
+  <div class="card">
+    <div class="card-title">Entraînement</div>
+    <div class="stat"><span class="stat-lbl">Séances réalisées</span><span class="stat-val">${trained}/7 jours</span></div>
+    <div class="stat"><span class="stat-lbl">Volume total</span><span class="stat-val">${volSem>=1000?(volSem/1000).toFixed(1)+'t':Math.round(volSem)+'kg'}</span></div>
+    <div class="stat"><span class="stat-lbl">Série actuelle</span><span class="stat-val">${st.current} jours</span></div>
+    <div class="stat"><span class="stat-lbl">Record</span><span class="stat-val">${st.record} jours</span></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Activité & Récupération</div>
+    <div class="stat"><span class="stat-lbl">Pas totaux (7j)</span><span class="stat-val">${weekSteps.toLocaleString('fr')}</span></div>
+    <div class="stat"><span class="stat-lbl">Moy. pas/jour</span><span class="stat-val">${Math.round(weekSteps/7).toLocaleString('fr')}</span></div>
+    <div class="stat"><span class="stat-lbl">Sommeil moyen</span><span class="stat-val">${avgSleep>0?avgSleep.toFixed(1)+'h':'—'}</span></div>
+    <div class="stat"><span class="stat-lbl">Nuits ≥7h</span><span class="stat-val">${weekSleep.filter(p=>p.y>=7).length}/7</span></div>
+  </div>
+</div>
+
+<div class="section-title">🍽️ Nutrition cette semaine</div>
+<div class="grid">
+  <div class="card">
+    <div class="card-title">Calories</div>
+    <div class="stat"><span class="stat-lbl">Total 7j</span><span class="stat-val">${Math.round(weekCals).toLocaleString('fr')} kcal</span></div>
+    <div class="stat"><span class="stat-lbl">Moyenne/jour</span><span class="stat-val">${Math.round(weekCals/7).toLocaleString('fr')} kcal</span></div>
+    <div class="stat"><span class="stat-lbl">Objectif</span><span class="stat-val">${(S.caloriesGoal||2500).toLocaleString('fr')} kcal</span></div>
+    <div class="stat"><span class="stat-lbl">TDEE estimé</span><span class="stat-val">${td.tdee} kcal</span></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Objectifs Macros</div>
+    ${S.proteinGoal>0 ? `
+    <div class="stat"><span class="stat-lbl">Protéines objectif</span><span class="stat-val">${S.proteinGoal}g/j</span></div>
+    <div class="stat"><span class="stat-lbl">Glucides objectif</span><span class="stat-val">${S.carbsGoal}g/j</span></div>
+    <div class="stat"><span class="stat-lbl">Lipides objectif</span><span class="stat-val">${S.fatGoal}g/j</span></div>
+    ` : '<div style="color:#999;font-size:11px;padding:8px 0">Calcule tes macros dans Corps → Calories</div>'}
+  </div>
+</div>
+
+${bc ? `
+<div class="section-title">⚖️ Composition corporelle</div>
+<div class="grid3">
+  <div class="card" style="text-align:center">
+    <div class="card-title">Poids</div>
+    <div style="font-size:24px;font-weight:800;color:#5BA8A0">${bc.poids}<span style="font-size:14px">kg</span></div>
+  </div>
+  <div class="card" style="text-align:center">
+    <div class="card-title">IMC</div>
+    <div style="font-size:24px;font-weight:800;color:#5BA8A0">${bc.imc}</div>
+    <div style="font-size:10px;color:#666">${bc.imc<18.5?'Insuffisant':bc.imc<25?'Normal ✅':bc.imc<30?'Surpoids':'Obésité'}</div>
+  </div>
+  ${bc.bf ? `<div class="card" style="text-align:center">
+    <div class="card-title">% Masse grasse</div>
+    <div style="font-size:24px;font-weight:800;color:#5BA8A0">${bc.bf}<span style="font-size:14px">%</span></div>
+    ${bc.leanMass ? `<div style="font-size:10px;color:#666">Masse maigre: ${bc.leanMass}kg</div>` : ''}
+  </div>` : '<div class="card"><div class="card-title">% Masse grasse</div><div style="color:#999;font-size:11px">Renseigner le tour de cou pour calculer</div></div>'}
+</div>` : ''}
+
+<div style="text-align:center;margin-top:20px">
+  <button onclick="window.print()" style="padding:10px 24px;background:#5BA8A0;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">🖨️ Imprimer / Enregistrer en PDF</button>
+</div>
+
+<div class="footer">
+  Généré par Coach Tracker Pro · ${today} · doncivo.github.io/coach-tracker-pro
+</div>
+
+
+<!-- ══ SCANNER CODE-BARRES ══ -->
+<div id="barcode-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:6000;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+  <div style="position:relative;width:min(340px,90vw);border-radius:16px;overflow:hidden;background:#000">
+    <video id="barcode-video" autoplay playsinline muted style="width:100%;display:block;aspect-ratio:4/3;object-fit:cover"></video>
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">
+      <div style="width:220px;height:120px;border:3px solid #5BA8A0;border-radius:8px;position:relative">
+        <div style="position:absolute;left:0;right:0;top:50%;height:2px;background:linear-gradient(90deg,transparent,#5BA8A0,transparent);animation:scan-anim 1.5s ease-in-out infinite"></div>
+      </div>
+    </div>
+  </div>
+  <div id="barcode-status" style="color:#fff;font-size:13px;text-align:center;padding:0 20px;font-weight:600">📷 Initialisation...</div>
+  <div id="barcode-manual" style="display:none;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;padding:0 16px">
+    <input id="barcode-manual-inp" type="text" inputmode="numeric" placeholder="Code-barres (ex: 3017620422003)"
+      style="padding:10px 14px;border-radius:10px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font-size:16px;width:min(260px,80vw)"
+      onkeydown="if(event.key==='Enter')manualBarcodeSearch()">
+    <button onclick="manualBarcodeSearch()" style="padding:10px 20px;border-radius:10px;border:none;background:#5BA8A0;color:#fff;font-weight:700;font-size:14px;cursor:pointer">Rechercher</button>
+  </div>
+  <button onclick="closeBarcodeScanner()" style="padding:10px 28px;border-radius:12px;border:1.5px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px">✕ Fermer</button>
+</div>
+<style>@keyframes scan-anim{0%,100%{opacity:0;transform:translateY(-40px)}50%{opacity:1;transform:translateY(40px)}}</style>
+
+</body>
+</html>`;
+
+  // Ouvrir dans un nouvel onglet
+  const win = window.open('', '_blank');
+  if (win) {
+    win.document.write(html);
+    win.document.close();
+    setTimeout(() => win.print(), 800);
+  } else {
+    // Fallback: téléchargement direct
+    const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = 'bilan-coach-tracker-'+localDateStr()+'.html';
+    a.click(); URL.revokeObjectURL(url);
+    showToast('📄 Bilan téléchargé — ouvre le fichier et imprime en PDF', 'ok', 5000);
+  }
+}
+
 function renderDayTabs(){
   const nav=document.getElementById('day-tabs');nav.innerHTML='';
   for(let i=0;i<7;i++){
@@ -5651,19 +6111,57 @@ function renderCalTracker() {
   barW.appendChild(barF);
 
   const macroRow = document.createElement('div'); macroRow.className = 'cal-macro-row';
+  const macroGoals = {
+    p: S.proteinGoal || 0,
+    c: S.carbsGoal   || 0,
+    f: S.fatGoal      || 0,
+  };
   [
-    {lbl:'Protéines', val:Math.round(totalP), unit:'g', color:'var(--purple)'},
-    {lbl:'Glucides',  val:Math.round(totalC), unit:'g', color:'var(--orange)'},
-    {lbl:'Lipides',   val:Math.round(totalF), unit:'g', color:'var(--blue)'},
-  ].forEach(({lbl, val, unit, color}) => {
+    {lbl:'Protéines', val:Math.round(totalP), goal:macroGoals.p, unit:'g', color:'var(--purple)'},
+    {lbl:'Glucides',  val:Math.round(totalC), goal:macroGoals.c, unit:'g', color:'var(--orange)'},
+    {lbl:'Lipides',   val:Math.round(totalF), goal:macroGoals.f, unit:'g', color:'var(--blue)'},
+  ].forEach(({lbl, val, goal, unit, color}) => {
     const mc = document.createElement('div'); mc.className = 'cal-macro-card';
     const mv = document.createElement('div'); mv.className = 'cal-macro-val'; mv.style.color = color; mv.textContent = val + unit;
     const ml = document.createElement('div'); ml.className = 'cal-macro-lbl'; ml.textContent = lbl;
-    mc.appendChild(mv); mc.appendChild(ml); macroRow.appendChild(mc);
+    mc.appendChild(mv); mc.appendChild(ml); // Progress bar vs goal
+    if(goal > 0) {
+      const pctM = Math.min(100, Math.round(val/goal*100));
+      const overM = val > goal;
+      const bw = document.createElement('div');
+      bw.style.cssText='background:var(--border);border-radius:4px;height:3px;margin-top:3px;overflow:hidden';
+      const bf = document.createElement('div');
+      bf.style.cssText=`width:${pctM}%;height:100%;background:${overM?'var(--red)':color};border-radius:4px`;
+      bw.appendChild(bf); mc.appendChild(bw);
+      const gl = document.createElement('div');
+      gl.style.cssText='font-size:9px;color:var(--muted);margin-top:1px;text-align:center';
+      gl.textContent=val+'/'+goal+'g';
+      mc.appendChild(gl);
+    }
+    macroRow.appendChild(mc);
   });
 
   totalBanner.appendChild(row1); totalBanner.appendChild(barW); totalBanner.appendChild(macroRow);
   content.appendChild(totalBanner);
+
+  // Macro auto-calc button
+  const macroGoals2 = { p:S.proteinGoal||0, c:S.carbsGoal||0, f:S.fatGoal||0 };
+  const macroCalcRow = document.createElement('div');
+  macroCalcRow.style.cssText='display:flex;gap:8px;align-items:center;margin:4px 0 8px;flex-wrap:wrap';
+  const macroCalcBtn = document.createElement('button');
+  macroCalcBtn.className='btn btn-ghost';
+  macroCalcBtn.style.cssText='font-size:11px;padding:5px 10px;min-height:30px';
+  macroCalcBtn.innerHTML='🧮 Calculer mes macros';
+  macroCalcBtn.title='Calcul automatique basé sur ton TDEE et ton objectif';
+  macroCalcBtn.addEventListener('click', applyMacroGoals);
+  const macroHint2 = document.createElement('span');
+  macroHint2.style.cssText='font-size:10px;color:var(--muted)';
+  macroHint2.textContent = macroGoals2.p>0
+    ? `Obj: P ${macroGoals2.p}g · G ${macroGoals2.c}g · L ${macroGoals2.f}g`
+    : 'Basé sur ton TDEE et objectif';
+  macroCalcRow.appendChild(macroCalcBtn);
+  macroCalcRow.appendChild(macroHint2);
+  content.appendChild(macroCalcRow);
 
   // Meals
   const mealsWrap = document.createElement('div');
@@ -5715,6 +6213,26 @@ function renderCalTracker() {
     const form = document.createElement('div');
     form.className = 'add-food-form';
     form.style.display = 'none';
+
+    // Scan button
+    const scanRow = document.createElement('div');
+    scanRow.style.cssText = 'display:flex;gap:6px;margin-bottom:8px';
+    const scanBtn = document.createElement('button');
+    scanBtn.className = 'btn btn-ghost';
+    scanBtn.style.cssText = 'font-size:11px;padding:5px 10px;min-height:30px;flex:1';
+    scanBtn.innerHTML = '📷 Scanner code-barres';
+    scanBtn.addEventListener('click', () => {
+      window._barcodeCb = (result) => {
+        nameInp.value   = result.name;
+        calInp.value    = result.cal;
+        protInp.value   = result.protein;
+        carbInp.value   = result.carbs;
+        fatInp.value    = result.fat;
+      };
+      openBarcodeScanner(window._barcodeCb);
+    });
+    scanRow.appendChild(scanBtn);
+    form.appendChild(scanRow);
 
     const nameInp = document.createElement('input'); nameInp.type='text'; nameInp.placeholder='Aliment (ex: Riz cuit, Poulet grillé...)'; nameInp.setAttribute('aria-label',"Nom de l'aliment");
     const macroRow2 = document.createElement('div'); macroRow2.className = 'macro-row';
@@ -6129,7 +6647,7 @@ function renderBilan(){
 }
 document.getElementById('bilan-prev').addEventListener('click',()=>{S.bilanOffset=(S.bilanOffset||0)-1;save();renderBilan();});
 document.getElementById('bilan-next').addEventListener('click',()=>{if((S.bilanOffset||0)<0){S.bilanOffset++;save();renderBilan();}});
-document.getElementById('export-pdf-btn').addEventListener('click',()=>{showToast('Astuce: utilisez Ctrl+P → Enregistrer en PDF','save',3000);window.print();});
+document.getElementById('export-pdf-btn').addEventListener('click', exportBilanPDF);
 
 /* ══ KPI ══ */
 function computeTonnageComp(){const cur=weekVol();const keys=Object.keys(S.history).sort();const lastKey=keys[keys.length-1];const prev={};if(lastKey){(S.history[lastKey].days||[]).forEach(d=>{(d.exercises||[]).filter(e=>!e.isWarmup).forEach(ex=>{const v=calcVol(ex);if(v&&ex.muscle)prev[ex.muscle]=(prev[ex.muscle]||0)+v;});});}return{cur,prev};}
@@ -6774,6 +7292,7 @@ updateWeekBadges();renderDayTabs();renderDayDetail(S.activeDay);renderGoals();
 document.getElementById('notes-area').value=S.notes||'';
 updateStats();updateChronoDsp();checkWeeklyAutoSave();checkAndAwardAchievements();checkOnboarding();
 _initRestTimerButtons();
+restoreReminder();
 // Start on dashboard (or restore last tab)
 const startTab = S._currentTab || 'dashboard';
 setTimeout(()=>switchTab(startTab),0);

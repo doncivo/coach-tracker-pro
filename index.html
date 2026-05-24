@@ -1308,6 +1308,177 @@ html { height: 100dvh; }
 .onboard-info-box{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6}
 @media(max-width:500px){.onboard-row{grid-template-columns:1fr}}
 
+
+/* ══ MINUTEUR DE REPOS ══ */
+#rest-timer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.rest-timer-card {
+  background: var(--surface);
+  border-radius: 24px;
+  padding: 28px 32px;
+  width: calc(100% - 48px);
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.4);
+  position: relative;
+}
+.rest-timer-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--muted);
+}
+.rest-timer-ex {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  max-width: 260px;
+}
+.rest-timer-ring {
+  position: relative;
+  width: 160px;
+  height: 160px;
+}
+.rest-timer-ring svg {
+  width: 160px;
+  height: 160px;
+  transform: rotate(-90deg);
+}
+.rest-timer-ring-bg {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 8;
+}
+.rest-timer-ring-fill {
+  fill: none;
+  stroke: var(--teal);
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset .9s linear, stroke .3s;
+}
+.rest-timer-display {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.rest-timer-time {
+  font-family: var(--mono);
+  font-size: 44px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+.rest-timer-label {
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+.rest-timer-presets {
+  display: flex;
+  gap: 8px;
+}
+.rest-timer-preset {
+  flex: 1;
+  padding: 8px 4px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+  text-align: center;
+  transition: all .15s;
+}
+.rest-timer-preset.active,
+.rest-timer-preset:hover {
+  border-color: var(--teal);
+  color: var(--teal-d);
+  background: var(--teal)18;
+}
+.rest-timer-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+.rest-timer-skip {
+  flex: 1;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .15s;
+}
+.rest-timer-skip:hover { border-color: var(--red); color: var(--red); }
+.rest-timer-next {
+  flex: 2;
+  padding: 12px;
+  border-radius: 14px;
+  border: none;
+  background: var(--teal);
+  color: #fff;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s;
+}
+.rest-timer-next:hover { background: var(--teal-d); }
+.rest-timer-add {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  color: var(--muted);
+  padding: 4px;
+  line-height: 1;
+}
+/* Alert quand repos terminé */
+@keyframes rest-pulse {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+.rest-timer-card.done-pulse {
+  animation: rest-pulse .5s ease 3;
+  border: 2px solid var(--green);
+}
+.rest-timer-ring-fill.done { stroke: var(--green); }
+@media(max-width:768px) {
+  .rest-timer-card { padding: 22px 20px; }
+  .rest-timer-ring { width: 140px; height: 140px; }
+  .rest-timer-ring svg { width: 140px; height: 140px; }
+  .rest-timer-time { font-size: 38px; }
+}
+
 </style>
   <link id="pwa-manifest" rel="manifest">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -1745,6 +1916,36 @@ html { height: 100dvh; }
     <div id="onboard-skip" style="font-size:11px;color:var(--muted);text-align:center;padding:0 24px 16px;cursor:pointer;text-decoration:underline">Passer la configuration</div>
   </div>
 </div>
+<!-- ══ MINUTEUR DE REPOS ══ -->
+<div id="rest-timer-overlay" style="display:none" role="dialog" aria-modal="true" aria-label="Minuteur de repos">
+  <div class="rest-timer-card" id="rest-timer-card">
+    <button class="rest-timer-add" id="rest-timer-add-btn" title="+15 secondes">+15s</button>
+    <div class="rest-timer-title">⏱ Repos</div>
+    <div class="rest-timer-ex" id="rest-timer-ex-name"></div>
+    <div class="rest-timer-ring">
+      <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+        <circle class="rest-timer-ring-bg" cx="80" cy="80" r="68"/>
+        <circle class="rest-timer-ring-fill" id="rest-ring-fill" cx="80" cy="80" r="68"
+          stroke-dasharray="427.3" stroke-dashoffset="0"/>
+      </svg>
+      <div class="rest-timer-display">
+        <div class="rest-timer-time" id="rest-timer-time">1:30</div>
+        <div class="rest-timer-label">restant</div>
+      </div>
+    </div>
+    <div class="rest-timer-presets">
+      <button class="rest-timer-preset" data-sec="45">45s</button>
+      <button class="rest-timer-preset active" data-sec="90">1:30</button>
+      <button class="rest-timer-preset" data-sec="120">2:00</button>
+      <button class="rest-timer-preset" data-sec="180">3:00</button>
+    </div>
+    <div class="rest-timer-actions">
+      <button class="rest-timer-skip" id="rest-timer-skip">✕ Passer</button>
+      <button class="rest-timer-next" id="rest-timer-next">▶ Série suivante</button>
+    </div>
+  </div>
+</div>
+
 <script>
 
 /* ╔══════════════════════════════════════════════════════════╗
@@ -2118,6 +2319,8 @@ function migrateState(raw) {
   if(!s._place)       s._place       = 'salle';
   if(!s._sleepGoal)   s._sleepGoal   = 8;
   if(!s._startDate)   s._startDate   = '';
+  if(!s._restDuration) s._restDuration = 90;
+  if(s._restBeep===undefined) s._restBeep = true;
   if(!s.mesures.cou)    s.mesures.cou    = [];
   if(!s.mesures.mollet) s.mesures.mollet = [];
   return s;
@@ -2147,6 +2350,8 @@ let S={
   sessStartTime:null,
   _schemaVersion:SCHEMA_VERSION,
   _currentTab:'weekly',
+  _restDuration:90,
+  _restBeep:true,
   _gender:'m', _dob:'', _level:'intermediaire',
   _daysPerWeek:4, _place:'salle', _sleepGoal:8, _startDate:'',
 };
@@ -2702,6 +2907,39 @@ function renderSettings() {
   wrap.appendChild(progSec);
 
   // ── APPARENCE ──
+  // ── Section Entraînement ──
+  const trainSec = _settingsSection('⚡ Entraînement');
+  _settingsRow(trainSec, 'Repos entre séries', 'Durée par défaut du minuteur de repos', () => {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap';
+    [{sec:45,lbl:'45s'},{sec:60,lbl:'1 min'},{sec:90,lbl:'1:30'},{sec:120,lbl:'2 min'},{sec:180,lbl:'3 min'}].forEach(({sec,lbl}) => {
+      const btn = document.createElement('button');
+      btn.className = 'rest-timer-preset' + (S._restDuration===sec?' active':'');
+      btn.textContent = lbl;
+      btn.style.cssText = 'padding:6px 12px;min-height:34px;font-size:12px';
+      btn.addEventListener('click', () => {
+        S._restDuration = sec;
+        save();
+        wrap.querySelectorAll('.rest-timer-preset').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        showToast('⏱ Repos par défaut : ' + lbl, 'ok', 2000);
+      });
+      wrap.appendChild(btn);
+    });
+    return wrap;
+  });
+  _settingsRow(trainSec, 'Son du minuteur', 'Bip sonore à la fin du repos', () => {
+    const tog = document.createElement('label');
+    tog.style.cssText = 'display:flex;align-items:center;gap:8px;cursor:pointer';
+    const inp = document.createElement('input'); inp.type='checkbox';
+    inp.checked = S._restBeep !== false;
+    inp.addEventListener('change', () => { S._restBeep = inp.checked; save(); });
+    const lbl = document.createElement('span'); lbl.style.fontSize='12px'; lbl.textContent = inp.checked ? '🔔 Activé' : '🔕 Désactivé';
+    inp.addEventListener('change', () => { lbl.textContent = inp.checked ? '🔔 Activé' : '🔕 Désactivé'; });
+    tog.appendChild(inp); tog.appendChild(lbl);
+    return tog;
+  });
+
   const appSec = _settingsSection('🎨 Apparence');
   _settingsRow(appSec, 'Mode sombre', 'Thème sombre pour économiser la batterie', () => {
     const label = document.createElement('label'); label.className='toggle-wrap';
@@ -3930,6 +4168,185 @@ function showOnboarding(){
 function checkOnboarding(){if(!localStorage.getItem(ONBOARD_KEY))setTimeout(showOnboarding,800);}
 function resetOnboarding(){localStorage.removeItem(ONBOARD_KEY);showOnboarding();}
 
+
+// ╔══════════════════════════════════════════════════════╗
+// ║  MINUTEUR DE REPOS                                   ║
+// ╚══════════════════════════════════════════════════════╝
+
+const RestTimer = {
+  _interval: null,
+  _total: 90,       // durée choisie
+  _remaining: 90,   // secondes restantes
+  _exName: '',      // nom de l'exercice
+  _nextSetCb: null, // callback quand on clique "Série suivante"
+  _beepCtx: null,   // AudioContext pour les bips
+
+  // ── Ouvrir le timer ──
+  start(durationSec, exName, onNextSet) {
+    this.stop();
+    this._total     = durationSec || (S._restDuration || 90);
+    this._remaining = this._total;
+    this._exName    = exName || '';
+    this._nextSetCb = onNextSet || null;
+
+    const overlay = document.getElementById('rest-timer-overlay');
+    const card    = document.getElementById('rest-timer-card');
+    const exEl    = document.getElementById('rest-timer-ex-name');
+    if(!overlay) return;
+
+    if(exEl) exEl.textContent = exName || '';
+    card.classList.remove('done-pulse');
+    document.getElementById('rest-ring-fill')?.classList.remove('done');
+
+    // Sync preset buttons to chosen duration
+    document.querySelectorAll('.rest-timer-preset').forEach(btn => {
+      btn.classList.toggle('active', parseInt(btn.dataset.sec) === this._total);
+    });
+
+    overlay.style.display = 'flex';
+    this._render();
+    this._interval = setInterval(() => this._tick(), 1000);
+  },
+
+  // ── Tick ──
+  _tick() {
+    this._remaining--;
+    this._render();
+    if(this._remaining <= 0) {
+      this._finish();
+    } else if(this._remaining <= 3) {
+      this._beep(880, 0.15); // bip de fin imminent
+    }
+  },
+
+  // ── Mettre à jour l'affichage ──
+  _render() {
+    const sec  = Math.max(0, this._remaining);
+    const min  = Math.floor(sec / 60);
+    const s    = sec % 60;
+    const disp = `${min}:${String(s).padStart(2,'0')}`;
+
+    const timeEl = document.getElementById('rest-timer-time');
+    if(timeEl) timeEl.textContent = disp;
+
+    // Anneau SVG
+    const circ = 2 * Math.PI * 68; // r=68
+    const fill = document.getElementById('rest-ring-fill');
+    if(fill) {
+      const pct  = Math.max(0, this._remaining / this._total);
+      const offset = circ * (1 - pct);
+      fill.style.strokeDashoffset = offset;
+      // Couleur selon temps restant
+      fill.style.stroke = pct > 0.5 ? 'var(--teal)' : pct > 0.25 ? 'var(--orange)' : 'var(--red)';
+    }
+  },
+
+  // ── Fin du repos ──
+  _finish() {
+    clearInterval(this._interval);
+    this._interval = null;
+
+    const card = document.getElementById('rest-timer-card');
+    const fill = document.getElementById('rest-ring-fill');
+    const timeEl = document.getElementById('rest-timer-time');
+
+    if(card) card.classList.add('done-pulse');
+    if(fill) { fill.style.stroke = 'var(--green)'; fill.classList.add('done'); }
+    if(timeEl) timeEl.textContent = '0:00';
+
+    // Bip triple de fin
+    if(S._restBeep!==false) this._beep(660, 0.2);
+    setTimeout(() => this._beep(880, 0.2), 200);
+    setTimeout(() => this._beep(1100, 0.3), 400);
+
+    // Notification si PWA
+    if(typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      try { new Notification('⏱ Repos terminé !', { body: 'Prêt pour la prochaine série de ' + (this._exName||''), icon:'./icons/icon-192.png', silent:true }); } catch(e){}
+    }
+  },
+
+  // ── Stopper ──
+  stop() {
+    clearInterval(this._interval);
+    this._interval = null;
+    const overlay = document.getElementById('rest-timer-overlay');
+    if(overlay) overlay.style.display = 'none';
+    const card = document.getElementById('rest-timer-card');
+    if(card) card.classList.remove('done-pulse');
+  },
+
+  // ── Ajouter du temps ──
+  addTime(sec) {
+    this._remaining = Math.min(this._remaining + sec, 600);
+    this._total = Math.max(this._total, this._remaining);
+    this._render();
+  },
+
+  // ── Changer la durée ──
+  setDuration(sec) {
+    this._total     = sec;
+    this._remaining = sec;
+    S._restDuration = sec;
+    save();
+    this._render();
+    // Restart interval
+    clearInterval(this._interval);
+    this._interval = setInterval(() => this._tick(), 1000);
+  },
+
+  // ── Son (WebAudio API) ──
+  _beep(freq, dur) {
+    try {
+      if(!this._beepCtx) this._beepCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const ctx = this._beepCtx;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + dur);
+    } catch(e) {}
+  }
+};
+
+// ── Liaisons des boutons du timer ──
+function _initRestTimerButtons() {
+  // Skip
+  document.getElementById('rest-timer-skip')?.addEventListener('click', () => {
+    RestTimer.stop();
+  });
+
+  // Série suivante
+  document.getElementById('rest-timer-next')?.addEventListener('click', () => {
+    RestTimer.stop();
+    if(RestTimer._nextSetCb) RestTimer._nextSetCb();
+  });
+
+  // +15s
+  document.getElementById('rest-timer-add-btn')?.addEventListener('click', () => {
+    RestTimer.addTime(15);
+  });
+
+  // Presets
+  document.querySelectorAll('.rest-timer-preset').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const sec = parseInt(btn.dataset.sec);
+      document.querySelectorAll('.rest-timer-preset').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      RestTimer.setDuration(sec);
+    });
+  });
+
+  // Fermer en cliquant sur le fond
+  document.getElementById('rest-timer-overlay')?.addEventListener('click', (e) => {
+    if(e.target.id === 'rest-timer-overlay') RestTimer.stop();
+  });
+}
+
 function renderDayTabs(){
   const nav=document.getElementById('day-tabs');nav.innerHTML='';
   for(let i=0;i<7;i++){
@@ -4634,6 +5051,17 @@ function renderSessExercise(d,exercises,vi){
       setD.done=!setD.done;valBtn.className='set-val-btn '+(setD.done?'validated':'pending');valBtn.textContent=setD.done?'✓':'✓ Go';
       snum.className='snum'+(setD.done?' snum-done':'');snum.textContent=setD.done?'✓':(si+1);
       tr.className=setD.done?'srow-done':'';
+      // ── Lancer le minuteur de repos si série validée ──
+      if(setD.done) {
+        const restSec = parseInt(ex.rest) || S._restDuration || 90;
+        const nextSetIdx = ex.setData.slice(0,nSets).findIndex((s,idx)=>idx>si&&!s.done);
+        const hasNextSet = nextSetIdx !== -1;
+        RestTimer.start(restSec, ex.name, hasNextSet ? () => {
+          // Scroller vers la prochaine série
+          const rows = setsArea.querySelectorAll('.srow-active, tr');
+          if(rows[nextSetIdx]) rows[nextSetIdx].scrollIntoView({behavior:'smooth', block:'nearest'});
+        } : null);
+      }
       const allDone2=ex.setData.filter(s=>s.done);d.exercises[realIdx].repsAchieved=allDone2.map(s=>s.reps).filter(Boolean).join('/');
       if(ex.setData.slice(0,nSets).every(s=>s.done)){
         const wasPR=checkPR(d.exercises[realIdx]);d.exercises[realIdx].done=true;
@@ -6345,6 +6773,7 @@ document.getElementById('darkmode-btn').textContent=S.darkMode?'☀️':'🌙';
 updateWeekBadges();renderDayTabs();renderDayDetail(S.activeDay);renderGoals();
 document.getElementById('notes-area').value=S.notes||'';
 updateStats();updateChronoDsp();checkWeeklyAutoSave();checkAndAwardAchievements();checkOnboarding();
+_initRestTimerButtons();
 // Start on dashboard (or restore last tab)
 const startTab = S._currentTab || 'dashboard';
 setTimeout(()=>switchTab(startTab),0);

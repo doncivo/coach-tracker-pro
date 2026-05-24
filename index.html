@@ -384,7 +384,7 @@ input,textarea,select{user-select:auto;-webkit-user-select:auto}
 .mesure-inp:focus{border-color:var(--teal)}
 .poids-big{font-size:30px;font-weight:700;font-family:var(--mono);color:var(--teal-d);line-height:1}
 .corps-canvas{width:100%;height:65px;display:block;margin-top:7px}
-.streak-heatmap{display:flex;flex-wrap:wrap;gap:2px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+.streak-heatmap{display:flex;flex-wrap:wrap;gap:3px}
 .sh-dot{width:10px;height:10px;border-radius:2px}
 /* Body diagram */
 .body-diagram-wrap{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap}
@@ -956,7 +956,7 @@ input,textarea,select{user-select:auto;-webkit-user-select:auto}
   #add-photo-btn{min-height:44px}
 
   /* Heatmap */
-  .sh-dot{width:calc((100% - 90px) / 15);max-width:9px;min-width:7px;height:8px;flex-shrink:0}
+  .sh-dot{width:8px;height:8px}
 }
 
 /* ── 6. BILAN ── */
@@ -1156,145 +1156,95 @@ input,textarea,select{user-select:auto;-webkit-user-select:auto}
 }
 
 
-/* ═══════════════════════════════════════════════════════════
-   MOBILE COMPLETE — iPhone 14/15/16 Pro Max optimized
-   ═══════════════════════════════════════════════════════════ */
-html { height: 100dvh; }
-
+/* ════════════════════════════════════════════════
+   MOBILE — iPhone 16 Pro Max
+   ════════════════════════════════════════════════ */
+html { height:100dvh; }
 @media screen and (max-width: 768px) {
-  html, body { height: 100dvh; overflow: hidden; }
-
-  /* Header: safe area Dynamic Island */
-  .hdr {
-    padding-top: max(12px, env(safe-area-inset-top, 12px)) !important;
-    padding-bottom: 8px !important;
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-    gap: 6px !important;
-    overflow: hidden;
-  }
-  .hdr h1 { font-size: 12px !important; white-space: nowrap; }
-  .hdr-sub { display: none !important; }
-  .hdr-desktop-only { display: none !important; }
-  #hdr-fitness-score { display: none !important; }
-
-  /* Desktop tabs hidden */
-  .tabs { display: none !important; }
-
-  /* Bottom nav */
-  .bottom-nav {
-    display: flex !important;
-    position: fixed !important;
-    bottom: 0 !important; left: 0 !important; right: 0 !important;
-    z-index: 500 !important;
-    background: var(--surface) !important;
-    border-top: 1px solid var(--border) !important;
-    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
-  }
-  .bottom-nav-inner {
-    display: flex !important;
-    width: 100% !important;
-    height: 54px !important;
-  }
-  .bnav-btn {
-    flex: 1 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 2px !important;
-    min-height: 54px !important;
-    border: none !important;
-    background: transparent !important;
-    padding: 6px 2px !important;
-  }
-  .bnav-icon { font-size: 20px !important; line-height: 1 !important; }
-  .bnav-label { font-size: 9px !important; font-weight: 600 !important; }
-
-  /* Content: between header and bottom nav */
-  .content {
-    flex: 1 !important;
-    overflow: hidden !important;
-    display: flex !important;
-    flex-direction: column !important;
-    padding-bottom: calc(54px + env(safe-area-inset-bottom, 0px)) !important;
-  }
-
-  /* Tab panes */
-  .tab-pane { display: none !important; flex-direction: column !important; overflow: hidden !important; flex: 1 !important; }
-  .tab-pane.active { display: flex !important; }
-
-  /* Planning: single column */
-  .weekly-wrap {
-    display: flex !important;
-    flex-direction: column !important;
-    flex: 1 !important;
-    overflow: hidden !important;
-    min-height: 0 !important;
-  }
-  .day-tabs {
-    display: flex !important;
-    flex-direction: row !important;
-    width: 100% !important;
-    height: auto !important;
-    min-height: 72px !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    padding: 6px 8px !important;
-    border-right: none !important;
-    border-bottom: 1px solid var(--border) !important;
-    gap: 6px !important;
-    flex-shrink: 0 !important;
-    -webkit-overflow-scrolling: touch !important;
-    scrollbar-width: none !important;
-  }
-  .day-tabs::-webkit-scrollbar { display: none !important; }
-  .day-tab { min-width: 66px !important; flex-shrink: 0 !important; padding: 6px 4px !important; border-radius: 10px !important; }
-  .side-panel { display: none !important; }
-  .day-panel { flex: 1 !important; overflow: hidden !important; min-height: 0 !important; }
-  .day-detail { height: 100% !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch !important; }
-
-  /* Session */
-  .session-wrap, .sess-wrap { flex-direction: column !important; flex: 1 !important; overflow: hidden !important; }
-  .sess-nav { flex-direction: row !important; overflow-x: auto !important; flex-shrink: 0 !important; border-right: none !important; border-bottom: 1px solid var(--border) !important; }
-
-  /* Scrollable content */
-  .dashboard-wrap, .prog-wrap, .corps-wrap, .kpi-wrap,
-  .bilan-wrap, .achievements-wrap, .lib-wrap, .cal-wrap, .settings-wrap {
-    flex: 1 !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    padding: 10px 12px !important;
-    min-height: 0 !important;
-  }
-
-  /* Dashboard */
-  .dash-quick-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
-
-  /* iOS: no zoom on input focus */
-  input, select, textarea { font-size: 16px !important; }
-
-  /* Modals */
-  .modal { width: calc(100vw - 32px) !important; max-height: 85vh !important; }
-  
-  /* Onboarding */
-  .onboard-card { border-radius: 16px !important; max-height: calc(100dvh - 32px) !important; }
+  html, body { height:100dvh; overflow:hidden; }
+  .hdr { padding-top:max(12px,env(safe-area-inset-top,12px)) !important; padding-bottom:8px !important; padding-left:12px !important; padding-right:12px !important; }
+  .hdr h1 { font-size:12px !important; white-space:nowrap; }
+  .hdr-sub { display:none !important; }
+  .hdr-desktop-only { display:none !important; }
+  #hdr-fitness-score { display:none !important; }
+  .tabs { display:none !important; }
+  .bottom-nav { display:flex !important; position:fixed !important; bottom:0 !important; left:0 !important; right:0 !important; z-index:500 !important; background:var(--surface) !important; border-top:1px solid var(--border) !important; padding-bottom:env(safe-area-inset-bottom,0px) !important; }
+  .bottom-nav-inner { display:flex !important; width:100% !important; height:54px !important; }
+  .bnav-btn { flex:1 !important; display:flex !important; flex-direction:column !important; align-items:center !important; justify-content:center !important; gap:2px !important; min-height:54px !important; border:none !important; background:transparent !important; padding:6px 2px !important; }
+  .bnav-icon { font-size:20px !important; line-height:1 !important; }
+  .bnav-label { font-size:9px !important; font-weight:600 !important; }
+  .content { flex:1 !important; overflow:hidden !important; display:flex !important; flex-direction:column !important; padding-bottom:calc(54px + env(safe-area-inset-bottom,0px)) !important; }
+  .tab-pane { display:none !important; flex-direction:column !important; overflow:hidden !important; flex:1 !important; }
+  .tab-pane.active { display:flex !important; }
+  .weekly-wrap { display:flex !important; flex-direction:column !important; flex:1 !important; overflow:hidden !important; min-height:0 !important; }
+  .day-tabs { display:flex !important; flex-direction:row !important; overflow-x:auto !important; padding:6px 8px !important; border-right:none !important; border-bottom:1px solid var(--border) !important; gap:6px !important; flex-shrink:0 !important; scrollbar-width:none !important; min-height:72px !important; }
+  .day-tabs::-webkit-scrollbar { display:none !important; }
+  .day-tab { min-width:66px !important; flex-shrink:0 !important; }
+  .side-panel { display:none !important; }
+  .day-panel { flex:1 !important; overflow:hidden !important; min-height:0 !important; }
+  .day-detail { height:100% !important; overflow-y:auto !important; -webkit-overflow-scrolling:touch !important; }
+  .session-wrap { flex-direction:column !important; flex:1 !important; overflow:hidden !important; }
+  .dashboard-wrap, .prog-wrap, .kpi-wrap, .bilan-wrap, .achievements-wrap, .lib-wrap, .cal-wrap, .settings-wrap { flex:1 !important; overflow-y:auto !important; -webkit-overflow-scrolling:touch !important; padding:10px 12px !important; min-height:0 !important; }
+  input, select, textarea { font-size:16px !important; }
+  .modal { width:calc(100vw - 32px) !important; max-height:85vh !important; }
+}
+@media screen and (min-width: 769px) {
+  .hdr-desktop-only { display:inline-flex !important; }
 }
 
-@media screen and (max-width: 430px) and (min-width: 390px) {
-  .bnav-icon { font-size: 22px !important; }
-  .bnav-label { font-size: 10px !important; }
-}
-@media screen and (max-width: 389px) {
-  .day-tab { min-width: 60px !important; }
-  .hdr h1 { font-size: 11px !important; }
-}
+/* ════════════════════════════════════════════════
+   CORPS SUB-NAVIGATION
+   ════════════════════════════════════════════════ */
+.corps-wrap { flex:1; overflow:hidden; display:flex; flex-direction:column; }
+.corps-subnav { display:flex; background:var(--surface); border-bottom:1px solid var(--border); overflow-x:auto; flex-shrink:0; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+.corps-subnav::-webkit-scrollbar { display:none; }
+.corps-subbtn { flex:1; min-width:80px; padding:11px 8px; border:none; background:transparent; font-family:var(--font); font-size:11px; font-weight:600; color:var(--muted); cursor:pointer; white-space:nowrap; border-bottom:3px solid transparent; transition:all .15s; min-height:44px; }
+.corps-subbtn.active { color:var(--teal-d); border-bottom-color:var(--teal); background:var(--teal)10; }
+.corps-section { display:none; flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; flex-direction:column; padding-bottom:20px; }
+.corps-section.active { display:flex; }
 
-/* hdr-desktop-only: visible only on desktop */
-@media screen and (min-width: 769px) { .hdr-desktop-only { display: inline-flex !important; } }
+/* ════════════════════════════════════════════════
+   MESURES
+   ════════════════════════════════════════════════ */
+.corps-grid { display:flex; flex-direction:column; gap:10px; }
+.corps-card { background:var(--card); border-radius:var(--r); box-shadow:var(--sh); border:1px solid var(--border); overflow:hidden; }
+.mesure-entry { display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--border); font-size:12px; }
+.mesure-date { color:var(--muted); font-size:11px; min-width:65px; }
+.mesure-val { font-family:var(--mono); font-weight:700; font-size:15px; color:var(--text); }
+.mesure-unit { color:var(--muted); font-size:11px; }
+.mesure-delta { font-size:10px; font-weight:700; margin-left:auto; }
+.mesure-del { background:none; border:none; color:var(--muted); cursor:pointer; font-size:18px; padding:0 6px; line-height:1; min-height:36px; }
+.mesure-inp { border:1.5px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text); font-family:var(--font); padding:8px 10px; }
+.mesure-inp:focus { outline:none; border-color:var(--teal); }
+.poids-big { font-family:var(--mono); font-size:32px; font-weight:800; color:var(--teal-d); line-height:1; padding:4px 0; }
 
+/* ════════════════════════════════════════════════
+   REST TIMER
+   ════════════════════════════════════════════════ */
+.rest-timer-card { background:var(--surface); border-radius:24px; padding:28px 32px; width:calc(100% - 48px); max-width:320px; display:flex; flex-direction:column; align-items:center; gap:16px; box-shadow:0 24px 60px rgba(0,0,0,.4); position:relative; }
+.rest-timer-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); }
+.rest-timer-ex { font-size:13px; font-weight:600; color:var(--text); text-align:center; max-width:260px; }
+.rest-timer-ring { position:relative; width:160px; height:160px; }
+.rest-timer-ring svg { width:160px; height:160px; transform:rotate(-90deg); }
+.rest-timer-ring-bg { fill:none; stroke:var(--border); stroke-width:8; }
+.rest-timer-ring-fill { fill:none; stroke:var(--teal); stroke-width:8; stroke-linecap:round; transition:stroke-dashoffset .9s linear, stroke .3s; }
+.rest-timer-display { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; }
+.rest-timer-time { font-family:var(--mono); font-size:44px; font-weight:700; color:var(--text); line-height:1; }
+.rest-timer-label { font-size:10px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.06em; }
+.rest-timer-presets { display:flex; gap:8px; width:100%; }
+.rest-timer-preset { flex:1; padding:8px 4px; border-radius:12px; border:1.5px solid var(--border); background:var(--bg); font-family:var(--font); font-size:12px; font-weight:700; color:var(--muted); cursor:pointer; text-align:center; transition:all .15s; }
+.rest-timer-preset.active, .rest-timer-preset:hover { border-color:var(--teal); color:var(--teal-d); }
+.rest-timer-actions { display:flex; gap:10px; width:100%; }
+.rest-timer-skip { flex:1; padding:12px; border-radius:14px; border:1.5px solid var(--border); background:var(--bg); font-family:var(--font); font-size:13px; font-weight:700; color:var(--muted); cursor:pointer; }
+.rest-timer-next { flex:2; padding:12px; border-radius:14px; border:none; background:var(--teal); color:#fff; font-family:var(--font); font-size:13px; font-weight:700; cursor:pointer; }
+.rest-timer-add { background:none; border:none; font-size:20px; cursor:pointer; position:absolute; top:12px; right:14px; color:var(--muted); padding:4px; line-height:1; font-family:var(--font); font-weight:700; }
+@keyframes rest-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
+.rest-timer-card.done-pulse { animation:rest-pulse .5s ease 3; border:2px solid var(--green); }
+@keyframes scan-anim { 0%,100%{opacity:0;transform:translateY(-40px)} 50%{opacity:1;transform:translateY(40px)} }
 
-/* ══ ONBOARDING ══ */
+/* ════════════════════════════════════════════════
+   ONBOARDING
+   ════════════════════════════════════════════════ */
 .onboard-chip{padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:12px;color:var(--muted);cursor:pointer;transition:all .15s;font-weight:500;display:inline-block}
 .onboard-chip.sel{background:var(--teal);color:#fff;border-color:var(--teal);font-weight:700}
 .onboard-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
@@ -1305,205 +1255,9 @@ html { height: 100dvh; }
 .onboard-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .onboard-step-dot{height:4px;flex:1;border-radius:4px;background:var(--border)}
 .onboard-step-dot.done{background:var(--teal)}
-.onboard-info-box{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6}
 @media(max-width:500px){.onboard-row{grid-template-columns:1fr}}
 
-
-/* ══ MINUTEUR DE REPOS ══ */
-#rest-timer-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.6);
-  z-index: 5000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-.rest-timer-card {
-  background: var(--surface);
-  border-radius: 24px;
-  padding: 28px 32px;
-  width: calc(100% - 48px);
-  max-width: 320px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  box-shadow: 0 24px 60px rgba(0,0,0,.4);
-  position: relative;
-}
-.rest-timer-title {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  color: var(--muted);
-}
-.rest-timer-ex {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-  text-align: center;
-  max-width: 260px;
-}
-.rest-timer-ring {
-  position: relative;
-  width: 160px;
-  height: 160px;
-}
-.rest-timer-ring svg {
-  width: 160px;
-  height: 160px;
-  transform: rotate(-90deg);
-}
-.rest-timer-ring-bg {
-  fill: none;
-  stroke: var(--border);
-  stroke-width: 8;
-}
-.rest-timer-ring-fill {
-  fill: none;
-  stroke: var(--teal);
-  stroke-width: 8;
-  stroke-linecap: round;
-  transition: stroke-dashoffset .9s linear, stroke .3s;
-}
-.rest-timer-display {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-}
-.rest-timer-time {
-  font-family: var(--mono);
-  font-size: 44px;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1;
-}
-.rest-timer-label {
-  font-size: 10px;
-  color: var(--muted);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-}
-.rest-timer-presets {
-  display: flex;
-  gap: 8px;
-}
-.rest-timer-preset {
-  flex: 1;
-  padding: 8px 4px;
-  border-radius: 12px;
-  border: 1.5px solid var(--border);
-  background: var(--bg);
-  font-family: var(--font);
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--muted);
-  cursor: pointer;
-  text-align: center;
-  transition: all .15s;
-}
-.rest-timer-preset.active,
-.rest-timer-preset:hover {
-  border-color: var(--teal);
-  color: var(--teal-d);
-  background: var(--teal)18;
-}
-.rest-timer-actions {
-  display: flex;
-  gap: 10px;
-  width: 100%;
-}
-.rest-timer-skip {
-  flex: 1;
-  padding: 12px;
-  border-radius: 14px;
-  border: 1.5px solid var(--border);
-  background: var(--bg);
-  font-family: var(--font);
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--muted);
-  cursor: pointer;
-  transition: all .15s;
-}
-.rest-timer-skip:hover { border-color: var(--red); color: var(--red); }
-.rest-timer-next {
-  flex: 2;
-  padding: 12px;
-  border-radius: 14px;
-  border: none;
-  background: var(--teal);
-  color: #fff;
-  font-family: var(--font);
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background .15s;
-}
-.rest-timer-next:hover { background: var(--teal-d); }
-.rest-timer-add {
-  background: none;
-  border: none;
-  font-size: 22px;
-  cursor: pointer;
-  position: absolute;
-  top: 12px;
-  right: 14px;
-  color: var(--muted);
-  padding: 4px;
-  line-height: 1;
-}
-/* Alert quand repos terminé */
-@keyframes rest-pulse {
-  0%,100% { transform: scale(1); }
-  50% { transform: scale(1.04); }
-}
-.rest-timer-card.done-pulse {
-  animation: rest-pulse .5s ease 3;
-  border: 2px solid var(--green);
-}
-.rest-timer-ring-fill.done { stroke: var(--green); }
-@media(max-width:768px) {
-  .rest-timer-card { padding: 22px 20px; }
-  .rest-timer-ring { width: 140px; height: 140px; }
-  .rest-timer-ring svg { width: 140px; height: 140px; }
-  .rest-timer-time { font-size: 38px; }
-}
-
-
-/* ══ CORPS PAGE FIXES ══ */
-.corps-wrap { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:10px 12px; display:flex; flex-direction:column; gap:10px; min-height:0; }
-.corps-grid { display:flex; flex-direction:column; gap:10px; }
-.corps-card { background:var(--card); border-radius:var(--r); box-shadow:var(--sh); border:1px solid var(--border); overflow:hidden; }
-.mesure-entry { display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--border); font-size:12px; }
-.mesure-date { color:var(--muted); font-size:11px; min-width:65px; }
-.mesure-val { font-family:var(--mono); font-weight:700; font-size:14px; color:var(--text); }
-.mesure-unit { color:var(--muted); font-size:11px; }
-.mesure-delta { font-size:10px; font-weight:700; margin-left:auto; }
-.mesure-del { background:none; border:none; color:var(--muted); cursor:pointer; font-size:16px; padding:0 4px; line-height:1; }
-.mesure-inp { border:1.5px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text); font-family:var(--font); }
-.mesure-inp:focus { outline:none; border-color:var(--teal); }
-.poids-big { font-family:var(--mono); font-size:28px; font-weight:800; color:var(--teal-d); }
-@media(max-width:768px) {
-  .corps-wrap { padding:8px 10px; gap:8px; }
-  .mesure-val { font-size:16px; }
-  .poids-big { font-size:24px; }
-}
-
 </style>
-  <link id="pwa-manifest" rel="manifest">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
 </head>
 <body>
 <div class="save-badge" id="save-badge">✓ Sauvegardé</div>
@@ -1513,11 +1267,11 @@ html { height: 100dvh; }
   <div class="hdr-right">
     <span class="hdr-badge" id="week-type-badge">A</span>
     <button class="hdr-btn" id="toggle-week-btn" title="Changer semaine A/B" aria-label="Changer semaine A/B">⇄</button>
-    <button class="hdr-btn hdr-desktop-only" id="archive-week-btn" title="Archiver la semaine" aria-label="Archiver"><span>📁</span></button>
+    <button class="hdr-btn hdr-desktop-only btn-archive" id="archive-week-btn" title="Archiver la semaine" aria-label="Archiver"><span>📁</span></button>
     <span class="hdr-badge badge-block" id="week-counter-badge">S1</span>
     <button class="hdr-btn" id="block-btn" title="Changer de bloc" aria-label="Bloc">📦</button>
-    <button class="hdr-btn hdr-desktop-only" id="export-btn" title="Exporter les données" aria-label="Exporter"><span>⬇</span></button>
-    <button class="hdr-btn hdr-desktop-only" id="import-btn" title="Importer des données" aria-label="Importer"><span>⬆</span></button>
+    <button class="hdr-btn hdr-desktop-only btn-export" id="export-btn" title="Exporter les données" aria-label="Exporter"><span>⬇</span></button>
+    <button class="hdr-btn hdr-desktop-only btn-import" id="import-btn" title="Importer des données" aria-label="Importer"><span>⬆</span></button>
     <button class="hdr-btn hdr-desktop-only" id="focus-btn" title="Mode focus" aria-label="Mode focus">🎯</button>
     <span id="hdr-fitness-score" style="display:none;cursor:pointer;font-family:var(--mono);font-size:12px;font-weight:700;padding:3px 8px;border-radius:12px;background:var(--teal);color:#fff" onclick="switchTab('dashboard')"></span>
     <button class="hdr-btn" id="darkmode-btn" aria-label="Mode sombre">🌙</button>
@@ -1529,8 +1283,7 @@ html { height: 100dvh; }
 <nav class="bottom-nav" role="navigation" aria-label="Navigation principale">
   <div class="bottom-nav-inner">
     <button class="bnav-btn" data-tab="dashboard" aria-label="Accueil">
-      <span class="bnav-icon">🏠</span>
-      <span class="bnav-label">Accueil</span>
+      <span class="bnav-icon">🏠</span><span class="bnav-label">Accueil</span>
     </button>
     <button class="bnav-btn" data-tab="weekly" aria-label="Planning">
       <span class="bnav-icon">📋</span>
@@ -1540,7 +1293,10 @@ html { height: 100dvh; }
       <span class="bnav-icon">⚡</span>
       <span class="bnav-label">Séance</span>
     </button>
-
+    <button class="bnav-btn" data-tab="progression" aria-label="Progression">
+      <span class="bnav-icon">📈</span>
+      <span class="bnav-label">Progrès</span>
+    </button>
     <button class="bnav-btn" data-tab="corps" aria-label="Corps">
       <span class="bnav-icon">💪</span>
       <span class="bnav-label">Corps</span>
@@ -1552,7 +1308,6 @@ html { height: 100dvh; }
   </div>
   <!-- "Plus" drawer -->
   <div class="bnav-more-menu" id="bnav-more-menu" role="menu">
-    <button class="bnav-more-btn" data-tab="progression" role="menuitem"><span style="font-size:16px">📈</span><span>Progrès</span></button>
     <button class="bnav-more-btn" data-tab="bilan" role="menuitem"><span style="font-size:16px">📊</span><span>Bilan</span></button>
     <button class="bnav-more-btn" data-tab="kpi" role="menuitem"><span style="font-size:16px">🎯</span><span>KPI</span></button>
     <button class="bnav-more-btn" data-tab="achievements" role="menuitem"><span style="font-size:16px">🏆</span><span>Objectifs</span></button>
@@ -1561,7 +1316,6 @@ html { height: 100dvh; }
   </div>
 </nav>
 <div class="tabs">
-  <button class="tab-btn" data-tab="dashboard">🏠 Accueil</button>
   <button class="tab-btn active" data-tab="weekly">📋 Planning</button>
   <button class="tab-btn" data-tab="session">⚡ Séance</button>
   <button class="tab-btn" data-tab="progression">📈 Progression</button>
@@ -1574,12 +1328,9 @@ html { height: 100dvh; }
 </div>
 <div class="content">
 
-<!-- DASHBOARD -->
-<div class="tab-pane" id="tab-dashboard">
-  <div class="dashboard-wrap" id="dash-wrap"></div>
-</div>
-
 <!-- WEEKLY -->
+<div class="tab-pane" id="tab-dashboard"><div class="dashboard-wrap" id="dash-wrap"></div></div>
+
 <div class="tab-pane active" id="tab-weekly">
   <div class="weekly-wrap">
     <nav class="day-tabs" id="day-tabs"></nav>
@@ -1680,7 +1431,6 @@ html { height: 100dvh; }
 <!-- PROGRESSION -->
 <div class="tab-pane" id="tab-progression">
   <div class="prog-wrap">
-    <div id="prog-charts-section"></div>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
       <span class="section-title">📈 Progression</span>
       <div class="prog-filter-row">
@@ -1698,93 +1448,116 @@ html { height: 100dvh; }
 <!-- CORPS -->
 <div class="tab-pane" id="tab-corps">
   <div class="corps-wrap">
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <span class="section-title">💪 Suivi corporel</span>
-      <div style="display:flex;align-items:center;gap:6px">
-        <label style="font-size:9px;font-weight:700;color:var(--muted)">Taille :</label>
-        <input type="number" id="profil-taille" class="mesure-inp" placeholder="cm" style="width:60px" min="100" max="250">
-        <span style="font-size:9px;color:var(--muted)">cm</span>
+
+    <!-- Sous-navigation Corps -->
+    <nav class="corps-subnav" id="corps-subnav">
+      <button class="corps-subbtn active" data-corps="nutrition">🍽️ Nutrition</button>
+      <button class="corps-subbtn" data-corps="mesures">📏 Mesures</button>
+      <button class="corps-subbtn" data-corps="activite">🏃 Activité</button>
+      <button class="corps-subbtn" data-corps="journal">📋 Journal</button>
+    </nav>
+
+    <!-- NUTRITION : Calories & Repas -->
+    <div class="corps-section active" id="corps-sect-nutrition">
+      <div class="card" style="margin:10px 12px 0">
+        <div class="card-hdr">
+          <div class="card-title">🍽️ Calories & Macros</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:11px;color:var(--muted)">Objectif :</span>
+            <input type="number" id="cal-goal-inp" class="steps-goal-inp" value="2500" min="500" max="6000" step="50">
+            <span style="font-size:11px;color:var(--muted)">kcal/j</span>
+          </div>
+        </div>
+        <div style="padding:0 12px 12px" id="cal-tracker-wrap">
+          <div class="cal-day-selector">
+            <button class="cal-day-nav" id="cal-day-prev">&#8249;</button>
+            <div class="cal-day-lbl" id="cal-day-lbl">Aujourd'hui</div>
+            <button class="cal-day-nav" id="cal-day-next">&#8250;</button>
+          </div>
+          <div id="cal-content"></div>
+        </div>
       </div>
-      <button class="btn btn-teal btn-sm" id="add-photo-btn">📸 Photo</button>
+      <div id="cal-chart-container" style="margin:8px 12px 0"></div>
     </div>
-    <!-- Steps tracker -->
-    <div class="card">
-      <div class="card-hdr">
-        <div class="card-title">👟 Pas quotidiens (7 derniers jours)</div>
+
+    <!-- MESURES corporelles -->
+    <div class="corps-section" id="corps-sect-mesures">
+      <div style="padding:10px 12px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span class="section-title">📏 Mensurations</span>
         <div style="display:flex;align-items:center;gap:6px">
-          <span style="font-size:11px;color:var(--muted)">Objectif :</span>
-          <input type="number" id="steps-goal-inp" class="steps-goal-inp" value="10000" min="1000" max="50000" step="500">
-          <span style="font-size:11px;color:var(--muted)">pas/jour</span>
+          <label style="font-size:11px;font-weight:700;color:var(--muted)">Taille :</label>
+          <input type="number" id="profil-taille" class="mesure-inp" placeholder="cm" style="width:70px;padding:6px 10px;font-size:15px" min="100" max="250">
+          <span style="font-size:11px;color:var(--muted)">cm</span>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="add-photo-btn">📸 Photo</button>
+      </div>
+      <div style="padding:8px 12px 12px">
+        <div class="corps-grid" id="corps-grid"></div>
+        <div id="corps-charts-weight" style="margin-top:10px"></div>
+      </div>
+    </div>
+
+    <!-- ACTIVITE : Pas + Sommeil + Régularité -->
+    <div class="corps-section" id="corps-sect-activite">
+      <div style="padding:10px 12px;display:flex;flex-direction:column;gap:10px">
+        <div class="card">
+          <div class="card-hdr">
+            <div class="card-title">👟 Pas quotidiens (7 j)</div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <input type="number" id="steps-goal-inp" class="steps-goal-inp" value="10000" min="1000" max="50000" step="500">
+              <span style="font-size:11px;color:var(--muted)">pas/j</span>
+            </div>
+          </div>
+          <div style="padding:12px">
+            <div class="steps-grid" id="steps-grid"></div>
+            <div id="steps-chart-container"></div>
+            <div class="steps-summary" id="steps-summary"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">😴 Sommeil & Énergie (7 j)</div></div>
+          <div style="padding:10px">
+            <div class="sleep-grid" id="sleep-grid"></div>
+            <div id="sleep-chart-container"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">🔥 Régularité — 90 jours</div></div>
+          <div style="padding:10px">
+            <div class="streak-heatmap" id="streak-heatmap"></div>
+            <div style="display:flex;gap:10px;margin-top:6px;font-size:9px;color:var(--muted)">
+              <span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--teal);margin-right:3px"></span>Séance</span>
+              <span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#d4e8f8;margin-right:3px"></span>Repos</span>
+              <span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--border);margin-right:3px"></span>Non renseigné</span>
+            </div>
+          </div>
+        </div>
+        <div id="corps-charts-steps"></div>
+        <div id="corps-charts-cal"></div>
+        <div id="corps-charts-sleep"></div>
+      </div>
+    </div>
+
+    <!-- JOURNAL : Nutrition + Douleurs -->
+    <div class="corps-section" id="corps-sect-journal">
+      <div style="padding:10px 12px;display:flex;flex-direction:column;gap:10px">
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">🥗 Macros — 7 derniers jours</div></div>
+          <div style="padding:10px" id="nutri-grid"></div>
+        </div>
+        <div class="card">
+          <div class="card-hdr">
+            <div class="card-title">🩺 Journal douleurs</div>
+            <button class="btn btn-ghost btn-sm" id="add-pain-btn">+ Ajouter</button>
+          </div>
+          <div style="padding:10px" id="pain-list"></div>
         </div>
       </div>
-      <div style="padding:12px">
-        <div class="steps-grid" id="steps-grid"></div>
-<div id="steps-chart-container"></div>
-        <div class="steps-summary" id="steps-summary"></div>
-      </div>
     </div>
-    <!-- Calories tracker -->
-    <div class="card">
-      <div class="card-hdr">
-        <div class="card-title">🍽️ Calories & Macros</div>
-        <div style="display:flex;align-items:center;gap:6px">
-          <span style="font-size:11px;color:var(--muted)">Objectif :</span>
-          <input type="number" id="cal-goal-inp" class="steps-goal-inp" value="2500" min="500" max="6000" step="50">
-          <span style="font-size:11px;color:var(--muted)">kcal/jour</span>
-        </div>
-      </div>
-      <div style="padding:12px" id="cal-tracker-wrap">
-        <div class="cal-day-selector">
-          <button class="cal-day-nav" id="cal-day-prev">&#8249;</button>
-          <div class="cal-day-lbl" id="cal-day-lbl">Aujourd'hui</div>
-          <button class="cal-day-nav" id="cal-day-next">&#8250;</button>
-        </div>
-        <div id="cal-content"></div>
-      </div>
-    </div>
-    <!-- Sleep tracker -->
-    <div class="card">
-      <div class="card-hdr"><div class="card-title">😴 Sommeil & Énergie (7 derniers jours)</div></div>
-      <div style="padding:10px"><div class="sleep-grid" id="sleep-grid"></div>
-<div id="sleep-chart-container"></div></div>
-    </div>
-    <!-- Nutrition tracker -->
-    <div class="card">
-      <div class="card-hdr"><div class="card-title">🥗 Nutrition (7 derniers jours)</div></div>
-      <div style="padding:10px" id="nutri-grid"></div>
-    </div>
-    <!-- Mesures -->
-    <div id="cal-chart-container"></div>
-    <div class="corps-grid" id="corps-grid"></div>
-    <!-- Pain journal -->
-    <div class="card">
-      <div class="card-hdr">
-        <div class="card-title">🩺 Journal douleurs</div>
-        <button class="btn btn-ghost btn-sm" id="add-pain-btn">+ Ajouter</button>
-      </div>
-      <div style="padding:10px" id="pain-list"></div>
-    </div>
-    <!-- Streak -->
-    <div class="card">
-      <div class="card-hdr"><div class="card-title">🔥 Régularité — 90 jours</div></div>
-      <div style="padding:10px">
-        <div class="streak-heatmap" id="streak-heatmap"></div>
-        <div style="display:flex;gap:10px;margin-top:6px;font-size:9px;color:var(--muted)">
-          <span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--teal);margin-right:3px"></span>Séance</span>
-          <span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#d4e8f8;margin-right:3px"></span>Repos</span>
-          <span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--border);margin-right:3px"></span>Non renseigné</span>
-        </div>
-      </div>
-    </div>
-    <!-- Chart containers for Corps -->
-    <div id="corps-charts-weight"></div>
-    <div id="corps-charts-steps"></div>
-    <div id="corps-charts-cal"></div>
-    <div id="corps-charts-sleep"></div>
+
   </div>
 </div>
 
-<!-- BILAN -->
 <div class="tab-pane" id="tab-bilan">
   <div class="bilan-wrap">
     <div class="bilan-header">
@@ -1838,7 +1611,6 @@ html { height: 100dvh; }
         </div>
       </div>
 
-      <div id="obj-milestones" style="padding:10px 18px 4px"></div>
       <!-- Vue édition — masquée par défaut -->
       <div id="obj-edit" style="display:none;padding:16px 18px;border-top:1px solid var(--border);background:var(--bg)">
         <div id="obj-edit-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
@@ -1888,8 +1660,6 @@ html { height: 100dvh; }
       <input type="text" id="lib-search" class="inp" placeholder="Rechercher un exercice..." style="width:200px">
       <select id="lib-filter-muscle" class="prog-filter-sel"><option value="">Tous les groupes</option></select>
       <select id="lib-filter-pattern" class="prog-filter-sel"><option value="">Tous les patterns</option><option value="push">Poussé</option><option value="pull">Tiré</option><option value="legs">Jambes</option><option value="core">Gainage</option></select>
-      <select id="lib-filter-equipment" class="prog-filter-sel" onchange="renderLibrary()"><option value="">Tout équipement</option><option value="barre">Barre</option><option value="haltères">Haltères</option><option value="machine">Machine</option><option value="câble">Câble</option><option value="poids du corps">Poids du corps</option></select>
-      <select id="lib-filter-difficulty" class="prog-filter-sel" onchange="renderLibrary()"><option value="">Tous niveaux</option><option value="débutant">Débutant</option><option value="intermédiaire">Intermédiaire</option><option value="avancé">Avancé</option></select>
     </div>
     <div class="lib-grid" id="lib-grid"></div>
   </div>
@@ -1904,40 +1674,23 @@ html { height: 100dvh; }
       <button class="cal-nav" id="next-month">&#8250;</button>
     </div>
     <div class="cal-grid" id="cal-grid"></div>
-    <div id="cal-legend" style="display:flex;flex-wrap:wrap;gap:8px;padding:10px 4px;font-size:11px"></div>
   </div>
 </div>
 
 </div>
-
-<!-- SETTINGS -->
-<div class="tab-pane" id="tab-settings">
-  <div class="settings-wrap" id="settings-wrap"></div>
-</div>
-
 <!-- Focus mode overlay -->
 <div id="focus-overlay" style="display:none" class="focus-overlay"></div>
 
-<div id="search-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;align-items:flex-start;justify-content:center;padding-top:80px"><div style="background:var(--surface);border-radius:16px;width:calc(100% - 32px);max-width:480px;padding:16px"><input id="search-input" type="text" placeholder="Rechercher..." class="inp" style="width:100%;box-sizing:border-box;font-size:16px"><div id="search-results" style="margin-top:12px;max-height:300px;overflow-y:auto"></div></div></div>
-<!-- ══ ONBOARDING WIZARD ══ -->
-<div id="onboard-overlay" class="onboard-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10000;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)" role="dialog" aria-modal="true">
-  <div class="onboard-card" style="background:var(--surface);border-radius:20px;width:100%;max-width:480px;max-height:90dvh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);display:flex;flex-direction:column">
-    <div style="background:linear-gradient(135deg,var(--teal),var(--teal-d));color:#fff;padding:24px 24px 20px;border-radius:20px 20px 0 0;text-align:center">
-      <div style="font-size:42px;margin-bottom:8px">🏋️</div>
-      <div style="font-size:22px;font-weight:800;margin-bottom:4px">Coach Tracker Pro</div>
-      <div style="font-size:13px;opacity:.85">Configurons votre suivi en 4 étapes rapides</div>
-    </div>
-    <div id="onboard-steps-bar" style="display:flex;gap:6px;padding:16px 24px 0"></div>
-    <div id="onboard-body" style="padding:20px 24px;flex:1;overflow-y:auto"></div>
-    <div style="padding:16px 24px 20px;display:flex;gap:10px;border-top:1px solid var(--border)">
-      <button id="onboard-back" style="display:none;padding:12px 20px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:14px;font-weight:600;color:var(--muted);cursor:pointer">← Retour</button>
-      <button id="onboard-next" style="flex:1;padding:12px 20px;border-radius:12px;border:none;background:var(--teal);color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer">Commencer →</button>
-    </div>
-    <div id="onboard-skip" style="font-size:11px;color:var(--muted);text-align:center;padding:0 24px 16px;cursor:pointer;text-decoration:underline">Passer la configuration</div>
+<!-- ══ SEARCH OVERLAY ══ -->
+<div id="search-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;align-items:flex-start;justify-content:center;padding-top:80px">
+  <div style="background:var(--surface);border-radius:16px;width:calc(100% - 32px);max-width:480px;padding:16px;box-shadow:0 24px 60px rgba(0,0,0,.3)">
+    <input id="search-input" type="text" placeholder="Rechercher un exercice, une date..." class="inp" style="width:100%;box-sizing:border-box;font-size:16px">
+    <div id="search-results" style="margin-top:12px;max-height:300px;overflow-y:auto"></div>
   </div>
 </div>
-<!-- ══ MINUTEUR DE REPOS ══ -->
-<div id="rest-timer-overlay" style="display:none" role="dialog" aria-modal="true" aria-label="Minuteur de repos">
+
+<!-- ══ REST TIMER OVERLAY ══ -->
+<div id="rest-timer-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:5000;align-items:center;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)" role="dialog">
   <div class="rest-timer-card" id="rest-timer-card">
     <button class="rest-timer-add" id="rest-timer-add-btn" title="+15 secondes">+15s</button>
     <div class="rest-timer-title">⏱ Repos</div>
@@ -1945,8 +1698,7 @@ html { height: 100dvh; }
     <div class="rest-timer-ring">
       <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
         <circle class="rest-timer-ring-bg" cx="80" cy="80" r="68"/>
-        <circle class="rest-timer-ring-fill" id="rest-ring-fill" cx="80" cy="80" r="68"
-          stroke-dasharray="427.3" stroke-dashoffset="0"/>
+        <circle class="rest-timer-ring-fill" id="rest-ring-fill" cx="80" cy="80" r="68" stroke-dasharray="427.3" stroke-dashoffset="0"/>
       </svg>
       <div class="rest-timer-display">
         <div class="rest-timer-time" id="rest-timer-time">1:30</div>
@@ -1966,7 +1718,44 @@ html { height: 100dvh; }
   </div>
 </div>
 
+<!-- ══ BARCODE SCANNER ══ -->
+<div id="barcode-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:6000;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+  <div style="position:relative;width:min(340px,90vw);border-radius:16px;overflow:hidden;background:#000">
+    <video id="barcode-video" autoplay playsinline muted style="width:100%;display:block;aspect-ratio:4/3;object-fit:cover"></video>
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">
+      <div style="width:220px;height:120px;border:3px solid #5BA8A0;border-radius:8px;position:relative">
+        <div style="position:absolute;left:0;right:0;top:50%;height:2px;background:linear-gradient(90deg,transparent,#5BA8A0,transparent);animation:scan-anim 1.5s ease-in-out infinite"></div>
+      </div>
+    </div>
+  </div>
+  <div id="barcode-status" style="color:#fff;font-size:13px;text-align:center;padding:0 20px;font-weight:600">📷 Initialisation...</div>
+  <div id="barcode-manual" style="display:none;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;padding:0 16px">
+    <input id="barcode-manual-inp" type="text" inputmode="numeric" placeholder="Code-barres (ex: 3017620422003)" style="padding:10px 14px;border-radius:10px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font-size:16px;width:min(260px,80vw)" onkeydown="if(event.key==='Enter')manualBarcodeSearch()">
+    <button onclick="manualBarcodeSearch()" style="padding:10px 20px;border-radius:10px;border:none;background:#5BA8A0;color:#fff;font-weight:700;font-size:14px;cursor:pointer">Rechercher</button>
+  </div>
+  <button onclick="closeBarcodeScanner()" style="padding:10px 28px;border-radius:12px;border:1.5px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:14px;font-weight:600;cursor:pointer">✕ Fermer</button>
+</div>
+
+<!-- ══ ONBOARDING ══ -->
+<div id="onboard-overlay" class="onboard-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10000;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)" role="dialog" aria-modal="true">
+  <div class="onboard-card" style="background:var(--surface);border-radius:20px;width:100%;max-width:480px;max-height:90dvh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);display:flex;flex-direction:column">
+    <div style="background:linear-gradient(135deg,var(--teal),var(--teal-d));color:#fff;padding:24px 24px 20px;border-radius:20px 20px 0 0;text-align:center">
+      <div style="font-size:42px;margin-bottom:8px">🏋️</div>
+      <div style="font-size:22px;font-weight:800;margin-bottom:4px">Coach Tracker Pro</div>
+      <div style="font-size:13px;opacity:.85">Configurons votre suivi en 4 étapes rapides</div>
+    </div>
+    <div id="onboard-steps-bar" style="display:flex;gap:6px;padding:16px 24px 0"></div>
+    <div id="onboard-body" style="padding:20px 24px;flex:1;overflow-y:auto"></div>
+    <div style="padding:16px 24px 20px;display:flex;gap:10px;border-top:1px solid var(--border)">
+      <button id="onboard-back" style="display:none;padding:12px 20px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:14px;font-weight:600;color:var(--muted);cursor:pointer">← Retour</button>
+      <button id="onboard-next" style="flex:1;padding:12px 20px;border-radius:12px;border:none;background:var(--teal);color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer">Commencer →</button>
+    </div>
+    <div id="onboard-skip" style="font-size:11px;color:var(--muted);text-align:center;padding:0 24px 16px;cursor:pointer;text-decoration:underline">Passer la configuration</div>
+  </div>
+</div>
+
 <script>
+
 
 /*
 
@@ -3110,7 +2899,18 @@ function switchTab(tabName) {
   if(tabName==='session')renderSession();
   if(tabName==='progression')renderProgression();
   if(tabName==='bilan')renderBilan();
-  if(tabName==='corps')renderCorps();
+  if(tabName==='corps'){
+    // Activate nutrition section by default
+    document.querySelectorAll('.corps-subbtn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.corps-section').forEach(s => s.classList.remove('active'));
+    const nutritionBtn = document.querySelector('.corps-subbtn[data-corps="nutrition"]');
+    const nutritionSect = document.getElementById('corps-sect-nutrition');
+    if(nutritionBtn) nutritionBtn.classList.add('active');
+    if(nutritionSect) nutritionSect.classList.add('active');
+    initCorpsSubNav();
+    renderCalTracker();
+    renderCorps();
+  }
   if(tabName==='kpi')renderKPI();
   if(tabName==='achievements')renderAchievements();
   if(tabName==='library')renderLibrary();if(tabName==='settings')renderSettings();
@@ -4828,6 +4628,24 @@ ${bc ? `
     a.click(); URL.revokeObjectURL(url);
     showToast('📄 Bilan téléchargé — ouvre le fichier et imprime en PDF', 'ok', 5000);
   }
+}
+
+
+// ── Corps sub-navigation ──
+function initCorpsSubNav() {
+  document.querySelectorAll('.corps-subbtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.corps-subbtn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.corps-section').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      const sect = document.getElementById('corps-sect-' + btn.dataset.corps);
+      if (sect) sect.classList.add('active');
+      if (btn.dataset.corps === 'nutrition') renderCalTracker();
+      if (btn.dataset.corps === 'mesures')   renderCorps();
+      if (btn.dataset.corps === 'activite')  { renderStepsGrid(); renderSleepGrid(); renderStreakHeatmap(); }
+      if (btn.dataset.corps === 'journal')   { renderNutriGrid(); renderPainList(); }
+    });
+  });
 }
 
 function renderDayTabs(){
@@ -7453,19 +7271,33 @@ if (new URLSearchParams(location.search).has('test')) {
   });
 }
 
+
 </script>
 
 <!-- PWA: Real manifest + Service Worker -->
 <script>
 (function() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => { try { r.unregister(); } catch(e){} });
-    });
-    navigator.serviceWorker.register('./sw.js?v=3', { scope: './' })
-      .then(reg => console.log('[CTP] SW registered:', reg.scope))
-      .catch(err => console.warn('[CTP] SW non disponible:', err));
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .then(reg => {
+        console.log('[CTP] SW registered:', reg.scope);
+        reg.addEventListener('updatefound', () => {
+          const nw = reg.installing;
+          nw.addEventListener('statechange', () => {
+            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+              showToast && showToast('Mise à jour disponible — rechargez la page', 'save', 5000);
+            }
+          });
+        });
+      })
+      .catch(err => console.warn('[CTP] SW non disponible (mode local):', err));
   }
+  // Handle ?tab= shortcut from manifest shortcuts
+  const urlParams = new URLSearchParams(location.search);
+  const tabParam = urlParams.get('tab');
+  if (tabParam) window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => typeof switchTab === 'function' && switchTab(tabParam), 100);
+  });
 })();
 </script>
 </body>

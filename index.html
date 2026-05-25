@@ -518,6 +518,21 @@
   </div>
 </div>
 
+
+  <!-- Debug console (retirer après correction) -->
+  <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
+  <script>
+    var vConsole = new VConsole({ theme: 'dark' });
+    // Capturer toutes les erreurs JS
+    window.onerror = function(msg, src, line, col, err) {
+      console.error('[ERREUR] ' + msg + ' — ' + src + ':' + line);
+      return false;
+    };
+    window.addEventListener('unhandledrejection', function(e) {
+      console.error('[PROMISE] ' + (e.reason && e.reason.message || e.reason));
+    });
+  </script>
+
   <!-- Modules JS — ordre de chargement respecte les dépendances -->
   <script src="js/constants.js"></script>
   <script src="js/state.js"></script>

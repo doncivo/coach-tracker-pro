@@ -22,16 +22,7 @@ function renderSession(){
   renderSessNav(d,exercises);renderSessExercise(d,exercises,_sessActiveEx);
 }
 
-function updateSessProgress(d,exercises){
-  const done=exercises.filter(e=>e.done).length;
-  const pb=document.getElementById('sess-prog-bar');const pe=document.getElementById('sess-prog-ex');
-  if(pb)pb.style.width=(exercises.length?Math.round(done/exercises.length*100):0)+'%';
-  if(pe)pe.textContent=done+'/'+exercises.length;
-  const vol=Object.values(dayVol(d)).reduce((a,b)=>a+b,0);
-  const vl=document.getElementById('sess-vol-live');if(vl)vl.innerHTML='📦 <strong>'+(vol>0?Math.round(vol/1000*10)/10+'t':'—')+'</strong>';
-  let best1rm=0;d.exercises.forEach(ex=>{const rm=calc1RM(ex.weight,ex.repsAchieved);if(rm>best1rm)best1rm=rm;});
-  const r1=document.getElementById('sess-1rm-live');if(r1)r1.innerHTML='🏋️ <strong>'+(best1rm?best1rm+'kg':'—')+'</strong>';
-}
+/* updateSessProgress défini dans module précédent */
 
 function renderSessNav(d,exercises){
   const nav=document.getElementById('sess-nav');nav.innerHTML='';

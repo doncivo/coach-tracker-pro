@@ -3,7 +3,7 @@
    Dépend de: compute.js, charts.js, utils.js
 ═══════════════════════════════════════ */
 
-const MEAL_NAMES = ['Petit-déjeuner 🌅', 'Déjeuner 🌞', 'Dîner 🌙', 'Collation 🍎'];
+/* MEAL_NAMES défini dans module précédent */
 
 function calDayKey(offset) {
   const d = new Date();
@@ -20,21 +20,7 @@ function calDayLabel(offset) {
   return d.toLocaleDateString('fr-FR', {weekday:'long', day:'2-digit', month:'long'});
 }
 
-function initCorpsSubNav() {
-  document.querySelectorAll('.corps-subbtn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.corps-subbtn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.corps-section').forEach(s => s.classList.remove('active'));
-      btn.classList.add('active');
-      const sect = document.getElementById('corps-sect-' + btn.dataset.corps);
-      if (sect) sect.classList.add('active');
-      if (btn.dataset.corps === 'nutrition') renderCalTracker();
-      if (btn.dataset.corps === 'mesures')   renderCorps();
-      if (btn.dataset.corps === 'activite')  { renderStepsGrid(); renderSleepGrid(); renderStreakHeatmap(); }
-      if (btn.dataset.corps === 'journal')   { renderNutriGrid(); renderPainList(); }
-    });
-  });
-}
+/* initCorpsSubNav défini dans module précédent */
 
 function renderStepsGrid() {
   const grid = document.getElementById('steps-grid');

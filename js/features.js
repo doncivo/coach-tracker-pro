@@ -5,7 +5,6 @@
 
 // Variables d'état
 let _barcodeStream = null;
-let _calDayOffset = 0;
 let _sessTimer = null;
 let _sessActiveEx = 0;
 
@@ -684,12 +683,8 @@ function scheduleTrainingReminder(hour, minute) {
   showToast(`🔔 Rappel planifié à ${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`, 'ok', 3000);
 }
 
-function cancelTrainingReminder() {
-  if (window._reminderTimeout) clearTimeout(window._reminderTimeout);
-  S._reminderHour = null; S._reminderMinute = null;
-  save();
-  showToast('🔕 Rappel annulé', 'warn', 2000);
-}
+// cancelTrainingReminder est dans utils.js
+
 
 function restoreReminder() {
   if (S._reminderHour != null && S._reminderMinute != null) {
@@ -730,58 +725,8 @@ function checkOnboarding(){if(!localStorage.getItem(ONBOARD_KEY))setTimeout(show
 
 function resetOnboarding(){localStorage.removeItem(ONBOARD_KEY);showOnboarding();}
 
-function switchTab(tabName) {
-  // Deactivate all panes
-  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.bnav-more-btn').forEach(b => b.classList.remove('active'));
-  // Activate target pane
-  const pane = document.getElementById('tab-' + tabName);
-  if (pane) pane.classList.add('active');
-  // Sync top tab
-  const topBtn = document.querySelector('.tab-btn[data-tab="' + tabName + '"]');
-  if (topBtn) topBtn.classList.add('active');
-  // Sync bottom nav — main items
-  const bnavBtn = document.querySelector('.bnav-btn[data-tab="' + tabName + '"]');
-  if (bnavBtn) {
-    bnavBtn.classList.add('active');
-  } else {
-    // It's in the "More" drawer
-    const moreBtn = document.querySelector('.bnav-more-btn[data-tab="' + tabName + '"]');
-    if (moreBtn) moreBtn.classList.add('active');
-    document.getElementById('bnav-more-btn').classList.add('active');
-  }
-  // Close more menu
-  const mm = document.getElementById('bnav-more-menu');
-  if (mm) { mm.classList.remove('open'); }
-  const mb = document.getElementById('bnav-more-btn');
-  if (mb) mb.setAttribute('aria-expanded','false');
-  // Render content
-  if(tabName==='dashboard')renderDashboard();
-  if(tabName==='weekly'){renderDayTabs();renderDayDetail(S.activeDay||0);}
-  if(tabName==='monthly')renderCalendar();
-  if(tabName==='session')renderSession();
-  if(tabName==='progression')renderProgression();
-  if(tabName==='bilan')renderBilan();
-  if(tabName==='corps'){
-    // Activate nutrition section by default
-    document.querySelectorAll('.corps-subbtn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.corps-section').forEach(s => s.classList.remove('active'));
-    const nutritionBtn = document.querySelector('.corps-subbtn[data-corps="nutrition"]');
-    const nutritionSect = document.getElementById('corps-sect-nutrition');
-    if(nutritionBtn) nutritionBtn.classList.add('active');
-    if(nutritionSect) nutritionSect.classList.add('active');
-    initCorpsSubNav();
-    renderCalTracker();
-    renderCorps();
-  }
-  if(tabName==='kpi')renderKPI();
-  if(tabName==='achievements')renderAchievements();
-  if(tabName==='library')renderLibrary();if(tabName==='settings')renderSettings();
-  // Store current tab
-  S._currentTab = tabName;
-}
+// switchTab est dans utils.js
+
 
 function initCorpsSubNav() {
   document.querySelectorAll('.corps-subbtn').forEach(btn => {
@@ -799,10 +744,8 @@ function initCorpsSubNav() {
   });
 }
 
-function updateWeekBadges(){
-  document.getElementById('week-type-badge').textContent='Sem. '+S.weekType;
-  document.getElementById('week-counter-badge').textContent='Sem. '+S.weekCount+' · '+S.currentBlock;
-}
+// updateWeekBadges est dans utils.js
+
 
 function startSessTimer(){if(!S.sessStartTime)S.sessStartTime=Date.now();clearInterval(_sessTimer);_sessTimer=setInterval(()=>{const dur=Math.round((Date.now()-S.sessStartTime)/60000);const el=document.getElementById('sess-duration');if(el)el.textContent=dur+' min';},30000);}
 
@@ -817,13 +760,8 @@ function updateSessProgress(d,exercises){
   const r1=document.getElementById('sess-1rm-live');if(r1)r1.innerHTML='🏋️ <strong>'+(best1rm?best1rm+'kg':'—')+'</strong>';
 }
 
-function checkWeeklyAutoSave(){
-  const today=new Date();if(today.getDay()===0){// Sunday
-    const key='lastAutoSave';const last=localStorage.getItem(key);
-    const todayStr=localDateStr(today);
-    if(last!==todayStr){archiveWeek();localStorage.setItem(key,todayStr);}
-  }
-}
+// checkWeeklyAutoSave est dans utils.js
+
 
 function checkAndAwardAchievements(){
   const streak=computeStreak();const adh=computeAdherence();
@@ -839,10 +777,7 @@ function checkAndAwardAchievements(){
   Object.entries(checks).forEach(([id,unlocked])=>{if(unlocked&&!S.achievements[id]){S.achievements[id]={unlockedAt:todayStr()};showToast('🏆 Badge débloqué: '+ACHIEVEMENTS_DEF.find(a=>a.id===id)?.name,'pr',4000);save();}});
 }
 
-function renderGoals(){
-  const list=document.getElementById('goals-list');list.innerHTML='';
-  S.goals.forEach((g,i)=>{const row=document.createElement('div');row.className='goal-row';const cb=document.createElement('input');cb.type='checkbox';cb.className='goal-cb';cb.checked=g.done;cb.addEventListener('change',e=>{S.goals[i].done=e.target.checked;save();});const inp=document.createElement('input');inp.type='text';inp.className='goal-inp';inp.placeholder='Objectif...';inp.value=g.text||'';inp.addEventListener('input',e=>{S.goals[i].text=e.target.value;save();});const del=document.createElement('button');del.className='goal-del';del.textContent='×';del.addEventListener('click',()=>{S.goals.splice(i,1);save();renderGoals();});row.appendChild(cb);row.appendChild(inp);row.appendChild(del);list.appendChild(row);});
-}
+/* renderGoals défini dans module précédent */
 
 function renderAlertsPanel(){
   const ap=document.getElementById('alerts-panel');if(!ap)return;
@@ -876,7 +811,7 @@ function renderAlertsPanel(){
 }
 
 // ── Swipe gesture between tabs ────────────────────────────────
-const TAB_ORDER = ['dashboard','weekly','session','progression','corps','bilan','kpi','achievements','library','monthly','settings'];
+
 let _swipeStartX = 0, _swipeStartY = 0, _swipeActive = false;
 document.addEventListener('touchstart', e => {
   _swipeStartX = e.touches[0].clientX;

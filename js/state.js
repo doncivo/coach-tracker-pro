@@ -95,3 +95,11 @@ function save(skipUndo) {
     if (b) { b.classList.add('show'); setTimeout(() => b.classList.remove('show'), 1200); }
   }, 400);
 }
+// Variables globales partagées entre modules
+let _calDayOffset = 0;
+let _exView = 'compact';
+let _searchOpen = false;
+let _swipeStartX = 0;
+let _obStep = 0;
+let _ci = null;
+

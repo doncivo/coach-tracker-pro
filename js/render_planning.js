@@ -53,7 +53,7 @@ function renderABCompare(container) {
   container.appendChild(legend);
 }
 
-function applySlotColor(sel,val){const m=MM[val];if(m){sel.style.background=m.calBg;sel.style.color=m.calColor;sel.style.borderColor=m.calColor;sel.classList.add('filled');}else{sel.style.background='var(--surface)';sel.style.color='var(--text)';sel.style.borderColor='var(--border)';sel.classList.remove('filled');}}
+/* applySlotColor défini dans module précédent */
 
 function renderDayTabs(){
   const nav=document.getElementById('day-tabs');nav.innerHTML='';

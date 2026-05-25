@@ -959,3 +959,69 @@ function activePains(){
 // ║  CHART ENGINE — reusable canvas charts               ║
 // ╚══════════════════════════════════════════════════════╝
 
+
+
+function updateStats(){
+  let done=0,total=0,active=0;
+  S.days.forEach(d=>{const exs=d.exercises.filter(e=>e.name.trim()&&!e.isWarmup);total+=exs.length;done+=exs.filter(e=>e.done).length;if(getDMS(d).some(k=>k&&k!=='rep'))active++;});
+  const setEl=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  setEl('stat-done',done);setEl('stat-total',total);setEl('stat-days',active);setEl('stat-pct',total>0?Math.round(done/total*100)+'%':'0%');
+  const vol=weekVol();const maxV=Math.max(...Object.values(vol),1);
+  const vd=document.getElementById('vol-bars');
+  if(vd){vd.innerHTML='';Object.entries(vol).sort((a,b)=>b[1]-a[1]).forEach(([k,vv])=>{const m=MM[k];if(!m)return;const row=document.createElement('div');row.className='vol-row';const lb=document.createElement('div');lb.className='vol-label';lb.textContent=m.label;lb.title=m.label;const bar=document.createElement('div');bar.className='bar-wrap';const fill=document.createElement('div');fill.className='bar-fill';fill.style.cssText=`width:${Math.round(vv/maxV*100)}%;background:${m.calColor}`;bar.appendChild(fill);const num=document.createElement('div');num.className='vol-num';num.textContent=Math.round(vv/1000*10)/10+'t';row.appendChild(lb);row.appendChild(bar);row.appendChild(num);vd.appendChild(row);});}
+  // Push/Pull
+  const pp=pushPull();const ppd=document.getElementById('push-pull-ratio');
+  if(ppd){ppd.innerHTML='';const tot=pp.push+pp.pull||1;const ppPct=Math.round(pp.push/tot*100),plPct=100-ppPct;const balanced=Math.abs(ppPct-50)<15;const row=document.createElement('div');row.className='vol-row';const lb=document.createElement('div');lb.className='vol-label';lb.textContent='Push/Pull';const dual=document.createElement('div');dual.style.cssText='flex:1;display:flex;height:6px;border-radius:3px;overflow:hidden';const p1=document.createElement('div');p1.style.cssText=`width:${ppPct}%;background:#ffe0ea`;const p2=document.createElement('div');p2.style.cssText=`width:${plPct}%;background:#e0d8ff`;dual.appendChild(p1);dual.appendChild(p2);const val=document.createElement('div');val.style.cssText='font-size:8px;font-family:var(--mono);color:var(--muted);width:36px;text-align:right';val.textContent=ppPct+'/'+plPct;row.appendChild(lb);row.appendChild(dual);row.appendChild(val);ppd.appendChild(row);const ok=document.createElement('div');ok.style.cssText=`font-size:9px;margin-top:3px;font-weight:600;color:${balanced?'var(--green)':'var(--red)'}`;ok.textContent=balanced?'✅ Équilibré':'⚠️ Déséquilibré';ppd.appendChild(ok);}
+  // PR panel
+  const prp=document.getElementById('pr-panel');
+  if(prp){
+    const prs=S.days.flatMap(d=>d.exercises).filter(checkPR);
+    prp.innerHTML='';
+    if(!prs.length){prp.innerHTML='<span style="color:var(--muted)">—</span>';}
+    else{prs.forEach(e=>{const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:5px;padding:2px 0;border-bottom:1px solid var(--border);font-size:10px';const ico=document.createElement('span');ico.textContent='🏆';const nm=document.createElement('span');nm.style.cssText='flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';nm.textContent=e.name;row.appendChild(ico);row.appendChild(nm);prp.appendChild(row);});}
+  }
+  // Alerts panel
+  renderAlertsPanel();
+
+  // Update header fitness score badge
+  try{
+    const fsEl = document.getElementById('hdr-fitness-score');
+    if(fsEl){
+      const fs = computeFitnessScore();
+      const color = fs.score>=80?'#4CAF50':fs.score>=60?'var(--teal)':fs.score>=40?'var(--orange)':'var(--red)';
+      fsEl.textContent = '⚡ '+fs.score;
+      fsEl.style.background = color;
+    }
+  }catch(e){}
+
+}
+
+function updateChronoDsp(){
+  ['chrono-display','focus-chrono-time'].forEach(id=>{const el=document.getElementById(id);if(!el)return;const m=Math.floor(_cs/60),s=_cs%60;el.textContent=m+':'+(s<10?'0':'')+s;el.className=el.className.replace(/warning|done-clr|pulsing/g,'').trim();if(_ct>0){const rem=_ct-_cs;if(rem<=10&&rem>0)el.className+=' warning';if(rem<=0)el.className+=' done-clr';}});
+}
+
+function resetChrono(){pauseChrono();_cs=0;_ct=0;updateChronoDsp();document.querySelectorAll('.rp-act').forEach(b=>b.classList.remove('rp-act'));}
+
+function startChrono(){
+  if(_cr)return;_cr=true;
+  _ci=setInterval(()=>{_cs++;updateChronoDsp();
+    if(_ct>0&&_cs>=_ct){clearInterval(_ci);_cr=false;document.getElementById('chrono-start').textContent='▶';
+      ['chrono-display','focus-chrono-time'].forEach(id=>{const el=document.getElementById(id);if(el)el.className+=' pulsing';});
+      // Flash screen
+      document.body.style.boxShadow='inset 0 0 0 4px var(--green)';setTimeout(()=>document.body.style.boxShadow='',600);
+      navigator.vibrate&&navigator.vibrate([200,100,200,100,200]);
+      // Scroll to next exercise
+      const next=document.querySelector('.sess-nav-item:not(.done-nav)');if(next)next.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }
+  },1000);
+  document.getElementById('chrono-start').textContent='⏸';
+}
+
+function cancelTrainingReminder() {
+  if (window._reminderTimeout) clearTimeout(window._reminderTimeout);
+  S._reminderHour = null; S._reminderMinute = null;
+  save();
+  showToast('🔕 Rappel annulé', 'warn', 2000);
+}
+
+function pauseChrono(){clearInterval(_ci);_cr=false;document.getElementById('chrono-start').textContent='▶';}

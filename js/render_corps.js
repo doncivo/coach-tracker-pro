@@ -3,6 +3,23 @@
    Dépend de: compute.js, charts.js, utils.js
 ═══════════════════════════════════════ */
 
+const MEAL_NAMES = ['Petit-déjeuner 🌅', 'Déjeuner 🌞', 'Dîner 🌙', 'Collation 🍎'];
+
+function calDayKey(offset) {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return localDateStr(d);
+}
+
+function calDayLabel(offset) {
+  if (offset === 0) return "Aujourd'hui";
+  if (offset === -1) return 'Hier';
+  if (offset === 1) return 'Demain';
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return d.toLocaleDateString('fr-FR', {weekday:'long', day:'2-digit', month:'long'});
+}
+
 function initCorpsSubNav() {
   document.querySelectorAll('.corps-subbtn').forEach(btn => {
     btn.addEventListener('click', () => {

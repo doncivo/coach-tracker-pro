@@ -238,3 +238,187 @@ function renderGoals(){
   S.goals.forEach((g,i)=>{const row=document.createElement('div');row.className='goal-row';const cb=document.createElement('input');cb.type='checkbox';cb.className='goal-cb';cb.checked=g.done;cb.addEventListener('change',e=>{S.goals[i].done=e.target.checked;save();});const inp=document.createElement('input');inp.type='text';inp.className='goal-inp';inp.placeholder='Objectif...';inp.value=g.text||'';inp.addEventListener('input',e=>{S.goals[i].text=e.target.value;save();});const del=document.createElement('button');del.className='goal-del';del.textContent='×';del.addEventListener('click',()=>{S.goals.splice(i,1);save();renderGoals();});row.appendChild(cb);row.appendChild(inp);row.appendChild(del);list.appendChild(row);});
 }
 
+
+
+async function buildExRow(di,ei,d,onUpdate,isDetail){
+  const ex=d.exercises[ei];
+  const tr=document.createElement('tr');
+  if(ex.done)tr.classList.add('done-row');
+  if(shouldOverload(ex))tr.classList.add('overload-row');
+  if(checkPR(ex))tr.classList.add('pr-row');
+  if(isPlateau(ex.name))tr.classList.add('plateau-row');
+  if(isFailure(ex))tr.classList.add('fail-row');
+  if(ex.isWarmup)tr.classList.add('srow-warmup');
+  if(ex.supersetGroup){tr.style.borderLeft='3px solid var(--purple)';}
+
+  function td(el,style,label){const t=document.createElement('td');if(style)t.style.cssText=style;if(label)t.setAttribute('data-label',label);if(el instanceof HTMLElement)t.appendChild(el);else if(el!=null)t.textContent=String(el);return t;}
+
+  // Checkbox
+  const cb=document.createElement('input');cb.type='checkbox';cb.className='ex-cb';cb.checked=ex.done;cb.setAttribute('aria-label','Exercice terminé');
+  cb.addEventListener('change',e=>{
+    ex.done=e.target.checked;tr.classList.toggle('done-row',e.target.checked);
+    if(d.exercises.filter(e=>e.name.trim()&&!e.isWarmup).every(e=>e.done))showSessionComplete(di,d);
+    onUpdate();save();renderDayTabs();checkAndAwardAchievements();
+  });
+  tr.appendChild(td(cb,'text-align:center'));
+
+  // Name with badges
+  const nameWrap=document.createElement('div');nameWrap.style.cssText='display:flex;align-items:center;gap:4px;min-width:0';
+  // Drag handle for reorder
+  const dh=document.createElement('span');dh.className='drag-handle';dh.textContent='⠿';dh.title='Glisser pour réordonner';
+  dh.draggable=true;
+  dh.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',String(ei));tr.classList.add('dragging');});
+  dh.addEventListener('dragend',()=>tr.classList.remove('dragging'));
+  tr.addEventListener('dragover',e=>{e.preventDefault();});
+  tr.addEventListener('drop',e=>{
+    e.preventDefault();const fromIdx=parseInt(e.dataTransfer.getData('text/plain'));
+    if(fromIdx===ei||isNaN(fromIdx))return;
+    const moved=d.exercises.splice(fromIdx,1)[0];d.exercises.splice(ei,0,moved);
+    save();buildExTable(di,tbody_ref,d,onUpdate);
+  });
+  // tbody_ref resolved lazily via closure (tr not in DOM yet when buildExRow is called)
+  const ni=document.createElement('input');ni.type='text';ni.className='ex-name-inp';ni.placeholder=ex.isWarmup?'Échauffement...':'Exercice';ni.value=ex.name||'';
+  ni.setAttribute('aria-label','Nom de l exercice');
+  ni.addEventListener('input',e=>{ex.name=e.target.value;onUpdate();save();renderDayTabs();});
+  // Autocomplete from library
+  ni.addEventListener('keyup',e=>{if(ni.value.length<2)return;const match=EXERCISE_LIBRARY.filter(l=>l.name.toLowerCase().includes(ni.value.toLowerCase())).slice(0,4);if(match.length&&e.key!=='Enter'){/* could show dropdown */}});
+  nameWrap.appendChild(dh);
+  if(ex.isWarmup){const wb=document.createElement('span');wb.className='warmup-badge';wb.textContent='Éch.';nameWrap.appendChild(wb);}
+  if(ex.supersetGroup){const sb=document.createElement('span');sb.className='superset-badge';sb.textContent='SS-'+ex.supersetGroup;nameWrap.appendChild(sb);}
+  nameWrap.appendChild(ni);
+  if(checkPR(ex)){const prb=document.createElement('span');prb.className='pr-badge-sm';prb.textContent='PR';nameWrap.appendChild(prb);}
+  if(isPlateau(ex.name)){const pb=document.createElement('span');pb.style.cssText='font-size:8px;color:var(--red);font-weight:700';pb.textContent='Plateau';nameWrap.appendChild(pb);}
+  tr.appendChild(td(nameWrap));
+
+  // Muscle
+  const ms=document.createElement('select');ms.className='ex-muscle-sel';
+  const mn=document.createElement('option');mn.value='';mn.textContent='—';ms.appendChild(mn);
+  MUSCLES.forEach(m=>{const o=document.createElement('option');o.value=m.key;o.textContent=(getDMS(d).includes(m.key)?'★ ':'')+m.label;if(m.key===ex.muscle)o.selected=true;ms.appendChild(o);});
+  function applyMC(){const m=MM[ms.value];if(m){ms.style.background=m.calBg;ms.style.color=m.calColor;}else{ms.style.background='transparent';ms.style.color='var(--muted)';}}
+  applyMC();ms.addEventListener('change',e=>{ex.muscle=e.target.value;applyMC();save();syncMuscles(di);});
+  tr.appendChild(td(ms));
+
+  // Weight
+  const wi=document.createElement('input');wi.type='text';wi.className='ex-num-inp';wi.placeholder='kg';wi.value=ex.weight||'';
+  wi.setAttribute('aria-label','Poids en kg');wi.title='Poids (kg)';
+  wi.addEventListener('input',e=>{ex.weight=e.target.value;refreshCells();onUpdate();save();});
+  tr.appendChild(td(wi));
+
+  // Sets — always shown
+  {const si=document.createElement('input');si.type='text';si.className='ex-num-inp';si.placeholder='x';si.value=ex.sets||'';si.style.width='32px';si.addEventListener('input',e=>{ex.sets=e.target.value;refreshCells();onUpdate();save();});tr.appendChild(td(si));}
+
+  // Reps target — always shown
+  {const ri=document.createElement('input');ri.type='text';ri.className='ex-num-inp';ri.placeholder='6–12';ri.value=ex.reps||'';ri.style.cssText='color:var(--muted);width:50px';ri.addEventListener('input',e=>{ex.reps=e.target.value;save();});tr.appendChild(td(ri));}
+
+  // Tempo + Rest — detail only
+  if(false){/* placeholder */}
+
+  // Reps achieved
+  const rai=document.createElement('input');rai.type='text';rai.className='ex-num-inp';rai.placeholder=isDetail?'réalisé':`${ex.sets||'?'}×`;rai.value=ex.repsAchieved||'';rai.style.fontWeight='700';rai.setAttribute('aria-label','Répétitions réalisées');
+  rai.addEventListener('input',e=>{
+    const wasPR=checkPR(ex);ex.repsAchieved=e.target.value;
+    tr.classList.toggle('overload-row',shouldOverload(ex)&&!ex.isWarmup);
+    tr.classList.toggle('pr-row',checkPR(ex));tr.classList.toggle('fail-row',isFailure(ex));
+    if(!wasPR&&checkPR(ex))showPRToast(ex.name);
+    refreshCells();onUpdate();save();
+  });
+  tr.appendChild(td(rai));
+
+  // RPE
+  const rpeSel=document.createElement('select');rpeSel.className='ex-rpe-sel';
+  RPE_OPTS.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;if(v===ex.rpe)o.selected=true;rpeSel.appendChild(o);});
+  function applyRpeC(){const cls=rpeColor(rpeSel.value);rpeSel.className='ex-rpe-sel '+(cls==='rpe-easy'?'':cls==='rpe-target'?'':cls==='rpe-hard'?'':'');rpeSel.style.color=parseFloat(rpeSel.value)>8.5?'var(--red)':parseFloat(rpeSel.value)>7&&parseFloat(rpeSel.value)>0?'var(--orange)':parseFloat(rpeSel.value)>0?'var(--green)':'var(--muted)';}
+  applyRpeC();rpeSel.addEventListener('change',e=>{ex.rpe=e.target.value;applyRpeC();save();});
+  tr.appendChild(td(rpeSel));
+
+  // RIR
+  const rirSel=document.createElement('select');rirSel.className='ex-rir-sel';
+  RIR_OPTS.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;if(v===ex.rir)o.selected=true;rirSel.appendChild(o);});
+  rirSel.addEventListener('change',e=>{ex.rir=e.target.value;save();});
+  tr.appendChild(td(rirSel));
+
+  // Tempo (detail)
+  if(isDetail){const tempoInp=document.createElement('input');tempoInp.type='text';tempoInp.className='ex-num-inp';tempoInp.placeholder='3-1-1';tempoInp.value=ex.tempo||'';tempoInp.addEventListener('input',e=>{ex.tempo=e.target.value;save();});tr.appendChild(td(tempoInp));}
+
+  // Rest (detail)
+  if(isDetail){const ri2=document.createElement('input');ri2.type='text';ri2.className='ex-num-inp';ri2.placeholder='s';ri2.value=ex.rest||'';ri2.addEventListener('input',e=>{ex.rest=e.target.value;save();});tr.appendChild(td(ri2));}
+
+  // Volume / 1RM (detail)
+  const volTd=document.createElement('td');volTd.className='ex-vol';if(isDetail)tr.appendChild(volTd);
+  const rmTd=document.createElement('td');rmTd.className='ex-1rm';if(isDetail)tr.appendChild(rmTd);
+
+  // Previous + next weight
+  const prevTd=document.createElement('td');prevTd.className='ex-prev';
+  function refreshPrev(){
+    const lw=lastW(ex.name);
+    if(shouldOverload(ex)&&!ex.isWarmup){const cw=parseFloat(ex.weight)||0;prevTd.innerHTML=`<span class="overload-hint">↑${Math.round((cw*1.025)/2.5)*2.5}?</span>`;}
+    else if(isFailure(ex)){const cw=parseFloat(ex.weight)||0;prevTd.innerHTML=`<span class="fail-hint">↓${Math.round((cw*0.975)/2.5)*2.5}?</span>`;}
+    else if(isPlateau(ex.name)){prevTd.innerHTML=`<span class="plateau-hint">⚠ Plateau</span>`;}
+    else{prevTd.textContent=lw||'—';}
+  }
+  tr.appendChild(prevTd);
+
+  // Suggested next weight (detail)
+  if(isDetail){
+    const nextTd=document.createElement('td');nextTd.style.cssText='font-size:8px;color:var(--purple);font-family:var(--mono);text-align:center';
+    nextTd.textContent=ex.suggestedNextWeight?'→'+ex.suggestedNextWeight:'—';
+    tr.appendChild(nextTd);
+  }
+
+  // Note (detail)
+  if(isDetail){const noteInp=document.createElement('input');noteInp.type='text';noteInp.className='ex-note-inp';noteInp.placeholder='Note...';noteInp.value=ex.note||'';noteInp.addEventListener('input',e=>{ex.note=e.target.value;save();});tr.appendChild(td(noteInp));}
+
+  function refreshCells(){
+    if(!ex.isWarmup){
+      const v=calcVol(ex);if(volTd)volTd.textContent=v>0?Math.round(v).toLocaleString('fr')+'kg':'—';
+      const rm=calc1RM(ex.weight,ex.repsAchieved||ex.reps);if(rmTd)rmTd.textContent=rm?rm+'kg':'—';
+    }
+    refreshPrev();
+  }
+  refreshCells();
+
+  // Strength standard badge (detail)
+  if(isDetail&&ex.weight){
+    const lastPoids=(S.mesures.poids||[]).slice(-1)[0];
+    if(lastPoids){const std=strengthStandard(ex,parseFloat(lastPoids.val));if(std){const sb=document.createElement('span');sb.style.cssText=`font-size:7px;font-weight:700;padding:1px 4px;border-radius:4px;background:rgba(0,0,0,.06);color:${std.color};margin-left:3px`;sb.textContent=std.level;nameWrap.appendChild(sb);}}
+  }
+
+  // Copy to another day button
+  const copyBtn=document.createElement('button');
+  copyBtn.className='ex-del';copyBtn.title='Copier vers…';copyBtn.textContent='📋';
+  copyBtn.style.cssText='font-size:11px;opacity:.7;margin-right:2px';
+  copyBtn.addEventListener('click',async()=>{
+    const dayNames=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+    const choices=dayNames.map((n,idx)=>({label:n,value:idx})).filter(ch=>ch.value!==di);
+    const result=await Modal.form('📋 Copier vers quel jour?',[
+      {type:'select',name:'targetDay',label:'Jour',options:choices.map(ch=>({label:ch.label,value:String(ch.value)}))}
+    ]);
+    if(!result) return;
+    const targetDi=parseInt(result.targetDay);
+    if(isNaN(targetDi)) return;
+    const exCopy=JSON.parse(JSON.stringify(d.exercises[ei]));
+    exCopy.done=false; exCopy.repsAchieved='';
+    if(!S.days[targetDi].exercises) S.days[targetDi].exercises=[];
+    S.days[targetDi].exercises.push(exCopy);
+    save(); renderDayTabs(); renderDayDetail(targetDi);
+    showToast('📋 Exercice copié vers '+dayNames[targetDi],'ok',2500);
+  });
+  tr.appendChild(td(copyBtn));
+
+  // Delete
+  const del=document.createElement('button');del.className='ex-del';del.textContent='×';
+  del.addEventListener('click',()=>{d.exercises.splice(ei,1);save();buildExTable(di,tr.closest('tbody'),d,onUpdate);renderDayTabs();onUpdate();});
+  tr.appendChild(td(del));
+
+  // Drop target for reorder
+  tr.addEventListener('drop',e=>{
+    e.preventDefault();const fromIdx=parseInt(e.dataTransfer.getData('text/plain'));
+    if(fromIdx===ei||isNaN(fromIdx))return;
+    const moved=d.exercises.splice(fromIdx,1)[0];d.exercises.splice(ei,0,moved);
+    save();
+    // Use tr.closest instead of stale tbody_ref
+    const tb=tr.closest('tbody');if(tb)buildExTable(di,tb,d,onUpdate);
+  });
+  tr.addEventListener('dragover',e=>e.preventDefault());
+  return tr;
+}

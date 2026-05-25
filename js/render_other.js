@@ -264,3 +264,305 @@ function renderCalendar(){
 
 }
 
+
+
+function _bindObjectiveButtons() {
+  const editBtn   = document.getElementById('obj-edit-btn');
+  const saveBtn   = document.getElementById('obj-save-btn');
+  const cancelBtn = document.getElementById('obj-cancel-btn');
+  const editPane  = document.getElementById('obj-edit');
+  const viewPane  = document.getElementById('obj-view');
+  if (!editBtn || !saveBtn || !cancelBtn || !editPane || !viewPane) return;
+
+  function openEdit() {
+    _objEditing = true;
+    // Pre-fill inputs with current values
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+    set('obj-inp-text',     S.objective.text        || '');
+    set('obj-inp-date',     S.objective.targetDate  || '');
+    set('obj-inp-weight',   S.objective.targetWeight|| '');
+    set('obj-inp-exercise', S.objective.targetExercise || '');
+    set('obj-inp-load',     S.objective.targetLoad  || '');
+    editPane.style.display = 'block';
+    editBtn.style.display  = 'none';
+    saveBtn.style.display  = 'inline-flex';
+    cancelBtn.style.display = 'inline-flex';
+    // Focus first input
+    const first = document.getElementById('obj-inp-text');
+    if (first) setTimeout(() => first.focus(), 50);
+  }
+
+  function closeEdit() {
+    _objEditing = false;
+    editPane.style.display  = 'none';
+    editBtn.style.display   = 'inline-flex';
+    saveBtn.style.display   = 'none';
+    cancelBtn.style.display = 'none';
+  }
+
+  function saveObj() {
+    const get = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+    const text = get('obj-inp-text');
+    if (!text) { showToast('Renseignez au minimum votre objectif principal.', 'warn'); return; }
+    S.objective = {
+      text,
+      targetDate:     get('obj-inp-date'),
+      targetWeight:   get('obj-inp-weight'),
+      targetExercise: get('obj-inp-exercise'),
+      targetLoad:     get('obj-inp-load'),
+    };
+    save();
+    showToast('Objectif enregistré ✓', 'save');
+    closeEdit();
+    _renderObjectiveView();
+    _renderObjectiveProgress();
+  }
+
+  // Rebind each time (onclick avoids duplicate listeners)
+  editBtn.onclick   = openEdit;
+  cancelBtn.onclick = closeEdit;
+  saveBtn.onclick   = saveObj;
+
+  // Enter key on inputs
+  ['obj-inp-text','obj-inp-date','obj-inp-weight','obj-inp-exercise','obj-inp-load'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); saveObj(); } };
+  });
+
+  // If no objective yet, auto-open edit mode on first visit
+  if (!_objEditing && !S.objective.text) {
+    // Don't auto-open, just highlight the button
+    editBtn.style.animation = 'pulse-btn 1.5s ease 2';
+  }
+}
+
+function _renderBadges() {
+  const grid = document.getElementById('ach-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  let unlockedCount = 0;
+  ACHIEVEMENTS_DEF.forEach(ach => {
+    const unlocked = !!S.achievements[ach.id];
+    if (unlocked) unlockedCount++;
+    const card = document.createElement('div');
+    card.className = 'ach-card ' + (unlocked ? 'unlocked' : 'locked');
+    card.title = unlocked ? ('Débloqué le ' + S.achievements[ach.id].unlockedAt) : 'Non débloqué';
+    // Safe DOM construction
+    const iconEl = document.createElement('div');iconEl.className = 'ach-icon';iconEl.textContent = ach.icon;
+    const nameEl = document.createElement('div');nameEl.className = 'ach-name';nameEl.textContent = ach.name;
+    const descEl = document.createElement('div');descEl.className = 'ach-desc';descEl.textContent = ach.desc;
+    card.appendChild(iconEl);card.appendChild(nameEl);card.appendChild(descEl);
+    if (unlocked) {
+      const dateEl = document.createElement('div');dateEl.className = 'ach-date';dateEl.textContent = S.achievements[ach.id].unlockedAt;
+      card.appendChild(dateEl);
+    } else {
+      const lockEl = document.createElement('div');lockEl.style.cssText = 'font-size:9px;color:var(--muted)';lockEl.textContent = '🔒';
+      card.appendChild(lockEl);
+    }
+    grid.appendChild(card);
+  });
+  const cnt = document.getElementById('ach-unlocked-count');
+  if (cnt) cnt.textContent = unlockedCount;
+}
+
+function _renderObjectiveProgress() {
+  const card = document.getElementById('obj-progress-card');
+  const body = document.getElementById('obj-progress-body');
+  if (!card || !body) return;
+
+  if (!S.objective || !S.objective.text) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = 'block';
+  body.innerHTML = '';
+
+  // Weight progress
+  if (S.objective.targetWeight) {
+    const target = parseFloat(S.objective.targetWeight) || 0;
+    const entries = (S.mesures.poids || []).slice().sort((a, b) => a.date.localeCompare(b.date));
+    if (entries.length >= 1) {
+      const current = parseFloat(entries[entries.length - 1].val) || 0;
+      const start   = parseFloat(entries[0].val) || current;
+      const totalToLose = start - target; // positive if losing weight
+      const done    = totalToLose > 0 ? Math.max(0, start - current) : Math.max(0, current - start);
+      const pct     = totalToLose !== 0 ? Math.min(100, Math.round(done / Math.abs(totalToLose) * 100)) : 0;
+      const row     = mkObjStatRow('⚖️ Poids', current + ' kg → ' + target + ' kg (' + pct + '%)');
+      const barWrap = document.createElement('div');
+      barWrap.className = 'obj-progress-bar-wrap';
+      const bar = document.createElement('div');
+      bar.className = 'obj-progress-bar';
+      bar.style.width = pct + '%';
+      barWrap.appendChild(bar);
+      body.appendChild(row);
+      body.appendChild(barWrap);
+    }
+  }
+
+  // Exercise progress
+  if (S.objective.targetExercise && S.objective.targetLoad) {
+    const target = parseFloat(S.objective.targetLoad) || 0;
+    const exH    = exHist(S.objective.targetExercise);
+    const current = exH.length ? parseFloat(exH[exH.length - 1].weight) || 0 : 0;
+    const start   = exH.length > 1 ? parseFloat(exH[0].weight) || 0 : current * 0.7;
+    const totalGain = target - start;
+    const done    = totalGain > 0 ? Math.max(0, current - start) : 0;
+    const pct     = totalGain > 0 ? Math.min(100, Math.round(done / totalGain * 100)) : (current >= target ? 100 : 0);
+    const row     = mkObjStatRow('🏋️ ' + S.objective.targetExercise, (current || '?') + ' kg → ' + target + ' kg (' + pct + '%)');
+    const barWrap = document.createElement('div');
+    barWrap.className = 'obj-progress-bar-wrap';
+    const bar = document.createElement('div');
+    bar.className = 'obj-progress-bar';
+    bar.style.width = pct + '%';
+    barWrap.appendChild(bar);
+    body.appendChild(row);
+    body.appendChild(barWrap);
+  }
+
+  // Days elapsed / remaining
+  if (S.objective.targetDate) {
+    const target   = new Date(S.objective.targetDate);
+    const today    = new Date();
+    const total    = Math.ceil((target - new Date(S.objective._createdAt || localDateStr())) / 86400000);
+    const elapsed  = Math.ceil((today - new Date(S.objective._createdAt || localDateStr())) / 86400000);
+    const daysLeft = Math.ceil((target - today) / 86400000);
+    const pct      = total > 0 ? Math.min(100, Math.round(elapsed / total * 100)) : 100;
+    body.appendChild(mkObjStatRow('📅 Temps écoulé', (daysLeft >= 0 ? daysLeft + ' jours restants' : 'Échéance dépassée')));
+    const bw = document.createElement('div');bw.className='obj-progress-bar-wrap';
+    const b  = document.createElement('div');b.className='obj-progress-bar';b.style.cssText='width:'+pct+'%;background:linear-gradient(90deg,var(--orange),var(--red))';
+    bw.appendChild(b);body.appendChild(bw);
+  }
+
+  if (!body.children.length) {
+    const nd = document.createElement('div');nd.style.cssText='color:var(--muted);font-size:11px';nd.textContent='Renseignez des mesures et des données pour voir votre progression.';body.appendChild(nd);
+  }
+}
+
+function _renderObjectiveView() {
+  const hasObj = S.objective && S.objective.text;
+  const viewEmpty   = document.getElementById('obj-view-empty');
+  const viewContent = document.getElementById('obj-view-content');
+  if (!viewEmpty || !viewContent) return;
+
+  if (hasObj) {
+    viewEmpty.style.display   = 'none';
+    viewContent.style.display = 'block';
+
+    // Title
+    const titleEl = document.getElementById('obj-view-title');
+    if (titleEl) titleEl.textContent = S.objective.text;
+
+    // Countdown
+    const countdown = document.getElementById('obj-view-countdown');
+    if (countdown && S.objective.targetDate) {
+      const daysLeft = Math.ceil((new Date(S.objective.targetDate) - Date.now()) / 86400000);
+      countdown.style.display = 'inline-flex';
+      countdown.textContent   = daysLeft >= 0 ? '⏳ ' + daysLeft + ' jours restants' : '⚠️ Échéance dépassée';
+      countdown.style.cssText += ';background:' + (daysLeft < 30 ? 'rgba(229,62,62,.1)' : 'rgba(91,168,160,.1)') +
+        ';border:1px solid ' + (daysLeft < 30 ? 'var(--red)' : 'var(--teal)') +
+        ';color:' + (daysLeft < 30 ? 'var(--red)' : 'var(--teal-d)');
+    } else if (countdown) countdown.style.display = 'none';
+
+    // Weight
+    const weightEl = document.getElementById('obj-view-weight');
+    if (weightEl) {
+      if (S.objective.targetWeight) {
+        weightEl.style.display = 'block';
+        weightEl.textContent   = '⚖️ Poids cible : ' + S.objective.targetWeight + ' kg';
+        // Compare with latest weight
+        const latest = (S.mesures.poids || []).slice(-1)[0];
+        if (latest) {
+          const diff = Math.round((parseFloat(S.objective.targetWeight) - parseFloat(latest.val)) * 10) / 10;
+          weightEl.textContent += '  (actuel : ' + latest.val + ' kg, écart : ' + (diff > 0 ? '+' : '') + diff + ' kg)';
+        }
+      } else weightEl.style.display = 'none';
+    }
+
+    // Exercise
+    const exEl = document.getElementById('obj-view-exercise');
+    if (exEl) {
+      if (S.objective.targetExercise && S.objective.targetLoad) {
+        exEl.style.display = 'block';
+        exEl.textContent   = '🏋️ ' + S.objective.targetExercise + ' → ' + S.objective.targetLoad + ' kg';
+        // Compare with current weight for this exercise
+        const exH = S.days.flatMap(d => d.exercises).find(e => e.name === S.objective.targetExercise);
+        if (exH && exH.weight) {
+          const diff = Math.round((parseFloat(S.objective.targetLoad) - parseFloat(exH.weight)) * 10) / 10;
+          exEl.textContent += '  (actuel : ' + exH.weight + ' kg, manque : ' + diff + ' kg)';
+        }
+      } else exEl.style.display = 'none';
+    }
+
+    // ── Milestones ──
+    const milestonesEl = document.getElementById('obj-milestones');
+    if(milestonesEl && S.objective){
+      milestonesEl.innerHTML = '';
+      const milestones = [];
+      
+      // Weight milestones
+      if(S.objective.targetWeight){
+        const targetW = parseFloat(S.objective.targetWeight);
+        const latestW = parseFloat((S.mesures.poids||[]).slice(-1)[0]?.val)||0;
+        const startW = parseFloat((S.mesures.poids||[])[0]?.val)||latestW;
+        if(latestW>0 && startW!==targetW){
+          const totalChange = targetW-startW;
+          const currentChange = latestW-startW;
+          const pct = Math.min(100,Math.max(0,Math.round(Math.abs(currentChange)/Math.abs(totalChange)*100)));
+          // Milestones at 25%, 50%, 75%, 100%
+          [25,50,75,100].forEach(milestone=>{
+            const achieved = pct>=milestone;
+            const milestoneW = startW + (totalChange*milestone/100);
+            const row = document.createElement('div');
+            row.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px';
+            row.innerHTML = `<span style="font-size:16px">${achieved?'✅':'⭕'}</span>
+              <div style="flex:1">
+                <div style="font-weight:600;color:var(--text)">${milestone}% — ${milestoneW.toFixed(1)} kg</div>
+                <div style="background:var(--border);border-radius:4px;height:4px;margin-top:3px;overflow:hidden">
+                  <div style="width:${achieved?100:0}%;height:100%;background:${achieved?'var(--green)':'var(--border)'};border-radius:4px"></div>
+                </div>
+              </div>
+              <span style="color:${achieved?'var(--green)':'var(--muted)'};font-size:11px;font-weight:600">${achieved?'Atteint':'En cours'}</span>`;
+            milestones.push(row);
+          });
+        }
+      }
+      
+      // Sessions milestone
+      const totalSessions = Object.values(S.history||{}).reduce((a,day)=>{
+        if(Array.isArray(day)) return a+day.filter(e=>e.volume>0).length;
+        return a+(day&&day.days?1:0);
+      },0);
+      const sessGoals = [10,25,50,100,200];
+      const nextSessGoal = sessGoals.find(g=>g>totalSessions)||sessGoals[sessGoals.length-1];
+      const sessMilestone = document.createElement('div');
+      sessMilestone.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px';
+      sessMilestone.innerHTML = `<span style="font-size:16px">💪</span>
+        <div style="flex:1">
+          <div style="font-weight:600;color:var(--text)">${totalSessions} séances — prochain objectif: ${nextSessGoal}</div>
+          <div style="background:var(--border);border-radius:4px;height:4px;margin-top:3px;overflow:hidden">
+            <div style="width:${Math.round(totalSessions/nextSessGoal*100)}%;height:100%;background:var(--teal);border-radius:4px;transition:width .6s"></div>
+          </div>
+        </div>
+        <span style="color:var(--muted);font-size:11px">${Math.round(totalSessions/nextSessGoal*100)}%</span>`;
+      milestones.push(sessMilestone);
+      
+      if(milestones.length){
+        const title = document.createElement('div');
+        title.style.cssText = 'font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--teal-d);margin-bottom:8px';
+        title.textContent = '🎯 Jalons de progression';
+        milestonesEl.appendChild(title);
+        milestones.forEach(m=>milestonesEl.appendChild(m));
+      }
+    }
+  } else {
+    viewEmpty.style.display   = 'block';
+    viewContent.style.display = 'none';
+  }
+}
+
+function mkObjStatRow(lbl, val) {
+  const row = document.createElement('div');row.className = 'obj-stat-row';
+  const l   = document.createElement('span');l.className = 'obj-stat-lbl';l.textContent = lbl;
+  const v   = document.createElement('span');v.className = 'obj-stat-val';v.textContent = val;
+  row.appendChild(l);row.appendChild(v);return row;
+}

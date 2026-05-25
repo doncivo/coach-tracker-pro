@@ -246,3 +246,55 @@ function render1RMChart(container, exerciseName, color) {
   ChartEngine.line(container, [{data, color: color||'var(--teal)', fill: true}], {height: 80, yLabel: true});
 }
 
+
+
+function showSessionComplete(di,d){
+  const existing=document.getElementById('sess-complete-'+di);if(existing)return;
+  const vol=Object.values(dayVol(d)).reduce((a,b)=>a+b,0);
+  const prs=d.exercises.filter(checkPR).map(e=>e.name);
+  const dur=S.sessStartTime?Math.round((Date.now()-S.sessStartTime)/60000):0;
+  const popup=document.createElement('div');popup.id='sess-complete-'+di;popup.className='sess-complete-popup';
+  // Build popup safely — no user data in innerHTML
+  popup.innerHTML='';
+  function _mkStat(val,lbl){const d=document.createElement('div');d.style.textAlign='center';const v=document.createElement('div');v.style.cssText='font-size:22px;font-weight:700;font-family:var(--mono)';v.textContent=val;const l=document.createElement('div');l.style.cssText='font-size:9px;opacity:.8';l.textContent=lbl;d.appendChild(v);d.appendChild(l);return d;}
+  const hd=document.createElement('div');hd.style.cssText='font-size:20px;margin-bottom:6px';hd.textContent='🎉 Séance terminée !';popup.appendChild(hd);
+  const sub=document.createElement('div');sub.style.cssText='font-size:11px;opacity:.85;margin-bottom:10px';sub.textContent=DAYS[di]+' — Sem. '+S.weekType+' · '+S.currentBlock;popup.appendChild(sub);
+  const stats=document.createElement('div');stats.style.cssText='display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:10px';
+  stats.appendChild(_mkStat(Math.round(vol/1000*10)/10+'t','Volume'));
+  if(dur)stats.appendChild(_mkStat(dur+"'",'Durée'));
+  if(prs.length)stats.appendChild(_mkStat('🏆'+prs.length,'PR'));
+  popup.appendChild(stats);
+  if(prs.length){const pl=document.createElement('div');pl.style.cssText='font-size:10px;opacity:.9;margin-bottom:10px';prs.forEach(n=>{const s=document.createElement('span');s.textContent='🏆 '+n+' ';pl.appendChild(s);});popup.appendChild(pl);}
+  const closeBtn=document.createElement('button');closeBtn.style.cssText='background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 16px;border-radius:10px;cursor:pointer;font-family:var(--font);font-weight:600;font-size:11px';closeBtn.textContent='Fermer';closeBtn.addEventListener('click',()=>popup.remove());
+  const shareBtn=document.createElement('button');shareBtn.style.cssText='background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.4);color:#fff;padding:5px 16px;border-radius:10px;cursor:pointer;font-family:var(--font);font-weight:600;font-size:11px;margin-left:8px';shareBtn.textContent='📤 Partager';shareBtn.addEventListener('click',()=>shareSess(di,exercises,vol,dur));
+  const btnRow2=document.createElement('div');btnRow2.style.cssText='display:flex;gap:6px;justify-content:center;flex-wrap:wrap';btnRow2.appendChild(closeBtn);btnRow2.appendChild(shareBtn);popup.appendChild(btnRow2);
+  const detail=document.getElementById('day-detail');if(detail)detail.prepend(popup);
+  // Save session summary to history
+  const sessDate = localDateStr();
+  if(!S.history) S.history = {};
+  if(!S.history[sessDate]) S.history[sessDate] = [];
+  // Store session summary as a special entry
+  const sessVol2 = Object.values(dayVol(d)).reduce((a,b)=>a+b,0);
+  const sessDur2 = S.sessStartTime?Math.round((Date.now()-S.sessStartTime)/60000):0;
+  const sessSets2 = (d.exercises||[]).reduce((a,ex)=>a+(ex.repsAchieved&&ex.repsAchieved!==''?1:0),0);
+  // Enrich history with session data
+  const histEntry = {
+    name: DAYS[di]||'Séance',
+    date: sessDate,
+    volume: sessVol2,
+    duration: sessDur2,
+    sets: sessSets2,
+    exercises: (d.exercises||[]).map(e=>({
+      name:e.name, muscle:e.muscle, weight:e.weight,
+      sets:e.sets, reps:e.reps, repsAchieved:e.repsAchieved||'',
+      done:e.done, isWarmup:e.isWarmup||false
+    }))
+  };
+  // Avoid duplicates — replace if same date+name
+  const existIdx = S.history[sessDate].findIndex(h=>h.name===histEntry.name);
+  if(existIdx>=0) S.history[sessDate][existIdx] = histEntry;
+  else S.history[sessDate].push(histEntry);
+  S.sessStartTime = null;
+  save();
+  checkAndAwardAchievements();
+}

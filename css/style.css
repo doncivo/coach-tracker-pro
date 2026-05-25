@@ -104,6 +104,7 @@ a{color:var(--teal);text-decoration:none}
   display:none;flex-direction:column;
 }
 .bnav-more-menu.open{display:flex}
+.bnav-more-menu.open .bnav-more-btn{display:flex}
 @media(max-width:768px){
   .tabs{display:none}
   .bottom-nav{display:block}

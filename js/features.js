@@ -3,11 +3,271 @@
    Dépend de: tous les modules précédents
 ═══════════════════════════════════════ */
 
-// Variables d'état des features
+// Variables d'état
 let _barcodeStream = null;
 let _calDayOffset = 0;
 let _sessTimer = null;
 let _sessActiveEx = 0;
+
+const MEAL_NAMES = ['Petit-déjeuner 🌅', 'Déjeuner 🌞', 'Dîner 🌙', 'Collation 🍎'];
+
+const ONBOARD_KEY = 'ctp_onboard_done_v2';
+
+const ONBOARD_STEPS = [
+  { id:'identity', icon:'👤', title:'Votre profil',
+    sub:'Ces données servent au calcul de votre IMC et TDEE',
+    fields:()=>`
+      <div class="onboard-row">
+        <div class="onboard-field"><label class="onboard-label">⚧ Sexe</label>
+          <select class="onboard-inp" id="ob-gender"><option value="m">Homme</option><option value="f">Femme</option></select></div>
+        <div class="onboard-field"><label class="onboard-label">📅 Âge</label>
+          <input type="number" class="onboard-inp" id="ob-age" placeholder="30" min="10" max="100"></div>
+      </div>
+      <div class="onboard-row">
+        <div class="onboard-field"><label class="onboard-label">📏 Taille (cm)</label>
+          <input type="number" class="onboard-inp" id="ob-height" placeholder="175" min="130" max="230"></div>
+        <div class="onboard-field"><label class="onboard-label">⚖️ Poids (kg)</label>
+          <input type="number" class="onboard-inp" id="ob-weight" placeholder="75" min="30" max="300" step="0.1"></div>
+      </div>
+      <div id="ob-bmi-box" style="display:none;margin-top:10px;background:var(--bg);border:1px solid var(--teal);border-radius:10px;padding:10px 14px;font-size:12px">
+        IMC : <strong id="ob-bmi-val"></strong> — <span id="ob-bmi-cat"></span>
+      </div>`,
+    onShow:()=>{
+      const calc=()=>{
+        const h=parseFloat(document.getElementById('ob-height')?.value);
+        const w=parseFloat(document.getElementById('ob-weight')?.value);
+        if(h>100&&w>20){
+          const bmi=Math.round(w/(h/100)**2*10)/10;
+          const cat=bmi<18.5?'Insuffisant':bmi<25?'Normal ✅':bmi<30?'Surpoids':'Obésité';
+          document.getElementById('ob-bmi-val').textContent=bmi;
+          document.getElementById('ob-bmi-cat').textContent=cat;
+          document.getElementById('ob-bmi-box').style.display='block';
+        }
+      };
+      document.getElementById('ob-height')?.addEventListener('input',calc);
+      document.getElementById('ob-weight')?.addEventListener('input',calc);
+    },
+    save:()=>{
+      const h=parseInt(document.getElementById('ob-height')?.value)||0;
+      const w=parseFloat(document.getElementById('ob-weight')?.value)||0;
+      const g=document.getElementById('ob-gender')?.value||'m';
+      const a=parseInt(document.getElementById('ob-age')?.value)||30;
+      if(h>0) S.profilTaille=h;
+      if(w>0){ if(!S.mesures.poids)S.mesures.poids=[];
+        const td=localDateStr(); if(!S.mesures.poids.find(e=>e.date===td)) S.mesures.poids.push({date:td,val:String(w)});}
+      S._gender=g; S._age=a; save();
+    }
+  },
+  { id:'measures', icon:'📏', title:'Mensurations',
+    sub:'Pour le suivi corporel et le % de masse grasse (US Navy)',
+    fields:()=>`
+      <div class="onboard-row">
+        <div class="onboard-field"><label class="onboard-label">🎽 Poitrine (cm)</label>
+          <input type="number" class="onboard-inp" id="ob-chest" placeholder="100" min="50" max="200" step="0.5"></div>
+        <div class="onboard-field"><label class="onboard-label">👔 Taille (cm)</label>
+          <input type="number" class="onboard-inp" id="ob-waist" placeholder="85" min="50" max="200" step="0.5"></div>
+      </div>
+      <div class="onboard-row">
+        <div class="onboard-field"><label class="onboard-label">🍑 Hanches (cm)</label>
+          <input type="number" class="onboard-inp" id="ob-hips" placeholder="95" min="50" max="200" step="0.5"></div>
+        <div class="onboard-field"><label class="onboard-label">📏 Tour de cou (cm)</label>
+          <input type="number" class="onboard-inp" id="ob-neck" placeholder="38" min="20" max="60" step="0.5"></div>
+      </div>
+      <div class="onboard-row">
+        <div class="onboard-field"><label class="onboard-label">💪 Bras contracté (cm)</label>
+          <input type="number" class="onboard-inp" id="ob-arm" placeholder="35" min="15" max="70" step="0.5"></div>
+        <div class="onboard-field"><label class="onboard-label">🦵 Cuisse (cm)</label>
+          <input type="number" class="onboard-inp" id="ob-thigh" placeholder="58" min="20" max="100" step="0.5"></div>
+      </div>
+      <div class="onboard-info-box">💡 Toutes les mesures sont optionnelles. La formule US Navy utilise taille + tour de taille + tour de cou.</div>`,
+    onShow:()=>{},
+    save:()=>{
+      const today=localDateStr();
+      [{id:'ob-chest',key:'poitrine'},{id:'ob-waist',key:'taille'},{id:'ob-hips',key:'hanches'},
+       {id:'ob-arm',key:'bras'},{id:'ob-thigh',key:'cuisse'},{id:'ob-neck',key:'cou'}].forEach(({id,key})=>{
+        const v=document.getElementById(id)?.value;
+        if(v&&parseFloat(v)>0){if(!S.mesures[key])S.mesures[key]=[];
+          if(!S.mesures[key].find(e=>e.date===today))S.mesures[key].push({date:today,val:v});}
+      }); save();
+    }
+  },
+  { id:'goals', icon:'🎯', title:'Vos objectifs',
+    sub:"Définissez votre objectif principal",
+    fields:()=>`
+      <div class="onboard-field"><label class="onboard-label">🏆 Objectif principal</label>
+        <div class="onboard-chips" id="ob-goal-chips">
+          <div class="onboard-chip" data-val="prise_masse">💪 Prise de masse</div>
+          <div class="onboard-chip" data-val="perte_poids">🔥 Perte de poids</div>
+          <div class="onboard-chip" data-val="force">🏋️ Force</div>
+          <div class="onboard-chip" data-val="sante">❤️ Santé</div>
+          <div class="onboard-chip" data-val="recompo">⚡ Recomposition</div>
+        </div>
+      </div>
+      <div class="onboard-row">
+        <div class="onboard-field"><label class="onboard-label">⚖️ Poids cible (kg)</label>
+          <input type="number" class="onboard-inp" id="ob-target-weight" placeholder="70" min="30" max="300" step="0.1"></div>
+        <div class="onboard-field"><label class="onboard-label">📅 Date cible</label>
+          <input type="date" class="onboard-inp" id="ob-target-date" min="${new Date().toISOString().slice(0,10)}"></div>
+      </div>
+      <div class="onboard-field"><label class="onboard-label">👣 Objectif pas/jour</label>
+        <div class="onboard-chips" id="ob-steps-chips">
+          <div class="onboard-chip" data-val="5000">5 000</div>
+          <div class="onboard-chip sel" data-val="10000">10 000</div>
+          <div class="onboard-chip" data-val="12000">12 000</div>
+          <div class="onboard-chip" data-val="15000">15 000</div>
+        </div>
+      </div>
+      <div class="onboard-field"><label class="onboard-label">🔥 Calories/jour</label>
+        <input type="number" class="onboard-inp" id="ob-cal-goal" placeholder="2500" min="1000" max="6000" step="50">
+        <div id="ob-tdee-hint" style="font-size:11px;color:var(--muted);margin-top:4px"></div>
+      </div>`,
+    onShow:()=>{
+      document.getElementById('ob-goal-chips')?.addEventListener('click',e=>{
+        const ch=e.target.closest('.onboard-chip');if(!ch)return;
+        document.querySelectorAll('#ob-goal-chips .onboard-chip').forEach(x=>x.classList.remove('sel'));
+        ch.classList.add('sel');
+      });
+      document.getElementById('ob-steps-chips')?.addEventListener('click',e=>{
+        const ch=e.target.closest('.onboard-chip');if(!ch)return;
+        document.querySelectorAll('#ob-steps-chips .onboard-chip').forEach(x=>x.classList.remove('sel'));
+        ch.classList.add('sel');
+      });
+      try{const td=computeTDEE();if(td.tdee>0){
+        const hint=document.getElementById('ob-tdee-hint');
+        if(hint)hint.textContent='TDEE estimé: ~'+td.tdee+' kcal/j';
+        const inp=document.getElementById('ob-cal-goal');
+        if(inp&&!inp.value)inp.value=td.tdee;
+      }}catch(e){}
+    },
+    save:()=>{
+      const gc=document.querySelector('#ob-goal-chips .onboard-chip.sel');
+      const sc=document.querySelector('#ob-steps-chips .onboard-chip.sel');
+      const tw=document.getElementById('ob-target-weight')?.value;
+      const td=document.getElementById('ob-target-date')?.value;
+      const cg=parseInt(document.getElementById('ob-cal-goal')?.value)||0;
+      if(gc){const gm={prise_masse:'Prise de masse musculaire',perte_poids:'Perte de poids',force:'Force et performance',sante:'Santé générale',recompo:'Recomposition corporelle'};
+        S.objective=S.objective||{};S.objective.text=gm[gc.dataset.val]||gc.textContent.trim();
+        if(tw)S.objective.targetWeight=tw;if(td)S.objective.targetDate=td;S.objective._createdAt=localDateStr();}
+      if(sc)S.stepsGoal=parseInt(sc.dataset.val)||10000;
+      if(cg>0)S.caloriesGoal=cg; save();
+    }
+  },
+  { id:'training', icon:'💪', title:'Entraînement',
+    sub:'Pour personnaliser votre planning',
+    fields:()=>`
+      <div class="onboard-field"><label class="onboard-label">📅 Date de début</label>
+        <input type="date" class="onboard-inp" id="ob-start-date" value="${new Date().toISOString().slice(0,10)}"></div>
+      <div class="onboard-field"><label class="onboard-label">⚡ Niveau</label>
+        <div class="onboard-chips" id="ob-level-chips">
+          <div class="onboard-chip" data-val="debutant">🌱 Débutant</div>
+          <div class="onboard-chip sel" data-val="intermediaire">💪 Intermédiaire</div>
+          <div class="onboard-chip" data-val="avance">🔥 Avancé</div>
+        </div>
+      </div>
+      <div class="onboard-field"><label class="onboard-label">📆 Jours / semaine</label>
+        <div class="onboard-chips" id="ob-days-chips">
+          <div class="onboard-chip" data-val="2">2j</div><div class="onboard-chip" data-val="3">3j</div>
+          <div class="onboard-chip sel" data-val="4">4j</div><div class="onboard-chip" data-val="5">5j</div>
+          <div class="onboard-chip" data-val="6">6j</div>
+        </div>
+      </div>
+      <div class="onboard-field"><label class="onboard-label">🏠 Lieu</label>
+        <div class="onboard-chips" id="ob-place-chips">
+          <div class="onboard-chip sel" data-val="salle">🏋️ Salle</div>
+          <div class="onboard-chip" data-val="maison">🏠 Maison</div>
+          <div class="onboard-chip" data-val="mixte">⚡ Mixte</div>
+        </div>
+      </div>
+      <div class="onboard-info-box">🎉 <strong>Tout est prêt !</strong> Vous pouvez modifier ces données à tout moment dans Corps et Paramètres.</div>`,
+    onShow:()=>{
+      ['ob-level-chips','ob-days-chips','ob-place-chips'].forEach(cid=>{
+        document.getElementById(cid)?.addEventListener('click',e=>{
+          const ch=e.target.closest('.onboard-chip');if(!ch)return;
+          document.querySelectorAll('#'+cid+' .onboard-chip').forEach(x=>x.classList.remove('sel'));
+          ch.classList.add('sel');
+        });
+      });
+    },
+    save:()=>{
+      const lc=document.querySelector('#ob-level-chips .onboard-chip.sel');
+      const dc=document.querySelector('#ob-days-chips .onboard-chip.sel');
+      const pc=document.querySelector('#ob-place-chips .onboard-chip.sel');
+      const sd=document.getElementById('ob-start-date')?.value;
+      if(lc)S._level=lc.dataset.val;
+      if(dc)S._daysPerWeek=parseInt(dc.dataset.val)||4;
+      if(pc)S._place=pc.dataset.val;
+      if(sd)S._startDate=sd;
+      save();
+    }
+  }
+];
+
+const ACHIEVEMENTS_DEF=[
+  {id:'first_session',icon:'🎯',name:'Première séance',desc:'Terminer sa première séance'},
+  {id:'week_streak_3',icon:'🔥',name:'3 jours d\'affilée',desc:'3 séances consécutives'},
+  {id:'week_streak_7',icon:'⚡',name:'Semaine parfaite',desc:'7 jours consécutifs'},
+  {id:'first_pr',icon:'🏆',name:'Premier PR',desc:'Battre son record personnel'},
+  {id:'pr_5',icon:'👑',name:'5 PR',desc:'Battre 5 records personnels'},
+  {id:'vol_50t',icon:'💪',name:'50 tonnes',desc:'50t de volume cumulé'},
+  {id:'vol_100t',icon:'🦁',name:'100 tonnes',desc:'100t de volume cumulé'},
+  {id:'sessions_10',icon:'📈',name:'10 séances',desc:'Compléter 10 séances'},
+  {id:'sessions_50',icon:'🚀',name:'50 séances',desc:'Compléter 50 séances'},
+  {id:'perfect_week',icon:'⭐',name:'Semaine parfaite',desc:'Tous les exercices faits sur une semaine'},
+  {id:'consistency_4',icon:'🗓️',name:'4 semaines',desc:'Adhérence >80% sur 4 semaines'},
+  {id:'first_deload',icon:'🔄',name:'Premier deload',desc:'Compléter un bloc de 4 semaines'},
+  {id:'sleep_7',icon:'😴',name:'Sommeil optimal',desc:'7j de sommeil ≥7h'},
+  {id:'no_pain',icon:'🩺',name:'Sans douleur',desc:'Aucune douleur signalée depuis 4 semaines'
+
+},
+];
+
+function _initRestTimerButtons() {
+  // Skip
+  document.getElementById('rest-timer-skip')?.addEventListener('click', () => {
+    RestTimer.stop();
+  });
+
+  // Série suivante
+  document.getElementById('rest-timer-next')?.addEventListener('click', () => {
+    RestTimer.stop();
+    if(RestTimer._nextSetCb) RestTimer._nextSetCb();
+  });
+
+  // +15s
+  document.getElementById('rest-timer-add-btn')?.addEventListener('click', () => {
+    RestTimer.addTime(15);
+  });
+
+  // Presets
+  document.querySelectorAll('.rest-timer-preset').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const sec = parseInt(btn.dataset.sec);
+      document.querySelectorAll('.rest-timer-preset').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      RestTimer.setDuration(sec);
+    });
+  });
+
+  // Fermer en cliquant sur le fond
+  document.getElementById('rest-timer-overlay')?.addEventListener('click', (e) => {
+    if(e.target.id === 'rest-timer-overlay') RestTimer.stop();
+  });
+}
+
+function applyMacroGoals() {
+  const mg = computeMacroGoals();
+  S.caloriesGoal  = mg.calories;
+  S.proteinGoal   = mg.protein;
+  S.carbsGoal     = mg.carbs;
+  S.fatGoal       = mg.fat;
+  save();
+  showToast(
+    `🎯 Macros calculées : ${mg.calories} kcal · P ${mg.protein}g · G ${mg.carbs}g · L ${mg.fat}g`,
+    'ok', 5000
+  );
+  renderCalTracker();
+}
+
 
 const RestTimer = {
   _interval: null,
@@ -148,54 +408,6 @@ const RestTimer = {
     } catch(e) {}
   }
 };
-
-function _initRestTimerButtons() {
-  // Skip
-  document.getElementById('rest-timer-skip')?.addEventListener('click', () => {
-    RestTimer.stop();
-  });
-
-  // Série suivante
-  document.getElementById('rest-timer-next')?.addEventListener('click', () => {
-    RestTimer.stop();
-    if(RestTimer._nextSetCb) RestTimer._nextSetCb();
-  });
-
-  // +15s
-  document.getElementById('rest-timer-add-btn')?.addEventListener('click', () => {
-    RestTimer.addTime(15);
-  });
-
-  // Presets
-  document.querySelectorAll('.rest-timer-preset').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const sec = parseInt(btn.dataset.sec);
-      document.querySelectorAll('.rest-timer-preset').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      RestTimer.setDuration(sec);
-    });
-  });
-
-  // Fermer en cliquant sur le fond
-  document.getElementById('rest-timer-overlay')?.addEventListener('click', (e) => {
-    if(e.target.id === 'rest-timer-overlay') RestTimer.stop();
-  });
-}
-
-function applyMacroGoals() {
-  const mg = computeMacroGoals();
-  S.caloriesGoal  = mg.calories;
-  S.proteinGoal   = mg.protein;
-  S.carbsGoal     = mg.carbs;
-  S.fatGoal       = mg.fat;
-  save();
-  showToast(
-    `🎯 Macros calculées : ${mg.calories} kcal · P ${mg.protein}g · G ${mg.carbs}g · L ${mg.fat}g`,
-    'ok', 5000
-  );
-  renderCalTracker();
-}
-
 async function openBarcodeScanner(onResult) {
   // Demander accès caméra
   if (!navigator.mediaDevices?.getUserMedia) {
@@ -472,6 +684,13 @@ function scheduleTrainingReminder(hour, minute) {
   showToast(`🔔 Rappel planifié à ${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`, 'ok', 3000);
 }
 
+function cancelTrainingReminder() {
+  if (window._reminderTimeout) clearTimeout(window._reminderTimeout);
+  S._reminderHour = null; S._reminderMinute = null;
+  save();
+  showToast('🔕 Rappel annulé', 'warn', 2000);
+}
+
 function restoreReminder() {
   if (S._reminderHour != null && S._reminderMinute != null) {
     scheduleTrainingReminder(S._reminderHour, S._reminderMinute);
@@ -491,6 +710,21 @@ function showOnboarding(){
     document.getElementById('onboard-skip')?.addEventListener('click',()=>{ONBOARD_STEPS[_obStep].save();_obFinish();});
   }
 }
+
+function _obRender(){
+  const step=ONBOARD_STEPS[_obStep];
+  const bar=document.getElementById('onboard-steps-bar');
+  if(bar){bar.innerHTML='';ONBOARD_STEPS.forEach((_,i)=>{const d=document.createElement('div');d.className='onboard-step-dot'+(i<=_obStep?' done':'');bar.appendChild(d);});}
+  const body=document.getElementById('onboard-body');
+  if(body){body.innerHTML=`<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">${step.icon} ${step.title}</div><div style="font-size:12px;color:var(--muted);margin-bottom:18px">${step.sub}</div>${step.fields()}`;
+    setTimeout(()=>step.onShow(),50);}
+  const back=document.getElementById('onboard-back');
+  const next=document.getElementById('onboard-next');
+  if(back)back.style.display=_obStep>0?'block':'none';
+  if(next)next.textContent=_obStep===ONBOARD_STEPS.length-1?'🚀 Démarrer !':'Suivant →';
+}
+
+function _obFinish(){localStorage.setItem(ONBOARD_KEY,'1');const ov=document.getElementById('onboard-overlay');if(ov)ov.style.display='none';save();try{updateStats();renderDashboard();}catch(e){}showToast('✅ Configuration terminée ! Bienvenue 🏋️','ok',4000);}
 
 function checkOnboarding(){if(!localStorage.getItem(ONBOARD_KEY))setTimeout(showOnboarding,800);}
 

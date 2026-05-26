@@ -1,4 +1,4 @@
-const CACHE = 'ctp-v17';
+const CACHE = 'ctp-v18';
 const ASSETS = [
   './', './index.html',
   './design/tokens.css', './css/style.css',
@@ -10,7 +10,10 @@ const ASSETS = [
   './js/core/router.js', './js/utils.js', './js/charts.js',
   './js/render_dashboard.js', './js/render_planning.js',
   './js/render_session.js', './js/render_corps.js',
-  './js/render_bilan.js', './js/render_other.js', './js/init.js'
+  './js/render_bilan.js', './js/render_other.js',
+  './js/views/library.js', './js/views/calendar.js',
+  './js/views/achievements.js', './js/views/settings.js',
+  './js/init.js'
 ];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));

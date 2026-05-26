@@ -29,10 +29,10 @@ Router.register('progression', () => renderProgression());
 Router.register('corps',       () => { renderCalTracker(); renderCorps(); });
 Router.register('bilan',       () => renderBilan());
 Router.register('kpi',         () => renderKPI());
-Router.register('achievements',() => renderAchievements());
-Router.register('library',     () => renderLibrary());
-Router.register('monthly',     () => renderCalendar());
-Router.register('settings',    () => renderSettings());
+Router.register('achievements',() => AchievementsView.render());
+Router.register('library',     () => LibraryView.render());
+Router.register('monthly',     () => CalendarView.render());
+Router.register('settings',    () => SettingsView.render());
 
 /* ── 5. Initialiser le router (event listeners nav) ── */
 Router.init();

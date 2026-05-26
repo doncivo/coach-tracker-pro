@@ -94,6 +94,8 @@ const Router = (() => {
     if (mm) mm.classList.remove('open');
     const mb = document.getElementById('bnav-more-btn');
     if (mb) mb.setAttribute('aria-expanded', 'false');
+    const bd = document.getElementById('bnav-backdrop');
+    if (bd) bd.style.display = 'none';
 
     // 6. Gérer Corps (sous-nav spéciale)
     if (tabName === 'corps') {
@@ -211,27 +213,45 @@ const Router = (() => {
     // Bouton "Plus" (ouvrir/fermer drawer)
     const moreBtnToggle = document.getElementById('bnav-more-btn');
     if (moreBtnToggle) {
-      moreBtnToggle.addEventListener('click', function(e) {
-        e.stopPropagation(); // empêche la fermeture immédiate par le handler document
+      function _toggleMore(e) {
+        e.preventDefault();
+        e.stopPropagation();
         const menu = document.getElementById('bnav-more-menu');
         if (!menu) return;
         const isOpen = menu.classList.toggle('open');
         moreBtnToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-      });
+        // Backdrop
+        const bd = document.getElementById('bnav-backdrop');
+        if (bd) bd.style.display = isOpen ? 'block' : 'none';
+      }
+      moreBtnToggle.addEventListener('click',      _toggleMore);
+      moreBtnToggle.addEventListener('touchstart', _toggleMore, { passive: false });
     }
 
-    // Fermer le drawer en cliquant dehors (compatible iOS Safari)
-    document.addEventListener('click', function(e) {
+    // Backdrop — fermer le drawer
+    const _backdrop = document.createElement('div');
+    _backdrop.id    = 'bnav-backdrop';
+    _backdrop.style.cssText = 'display:none;position:fixed;inset:0;z-index:8999;background:transparent';
+    _backdrop.addEventListener('click', function() {
       const menu = document.getElementById('bnav-more-menu');
       const btn  = document.getElementById('bnav-more-btn');
-      if (!menu || !menu.classList.contains('open')) return;
-      // Vérifier via composedPath pour iOS Safari
-      const path = e.composedPath ? e.composedPath() : [e.target];
-      const clickedInMenu = path.some(el => el === menu);
-      const clickedOnBtn  = path.some(el => el === btn);
-      if (!clickedInMenu && !clickedOnBtn) {
-        menu.classList.remove('open');
-        if (btn) btn.setAttribute('aria-expanded', 'false');
+      if (menu) menu.classList.remove('open');
+      if (btn)  btn.setAttribute('aria-expanded', 'false');
+      _backdrop.style.display = 'none';
+    });
+    document.body.appendChild(_backdrop);
+
+    // Fermer aussi sur Escape (desktop)
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        const menu = document.getElementById('bnav-more-menu');
+        const btn  = document.getElementById('bnav-more-btn');
+        if (menu && menu.classList.contains('open')) {
+          menu.classList.remove('open');
+          if (btn) btn.setAttribute('aria-expanded', 'false');
+          const bd = document.getElementById('bnav-backdrop');
+          if (bd) bd.style.display = 'none';
+        }
       }
     });
 

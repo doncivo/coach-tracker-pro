@@ -12,9 +12,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- Debug (retirer après correction) -->
-  <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
-</head>
-<body>
 </head>
 <body>
 <div class="save-badge" id="save-badge">✓ Sauvegardé</div>
@@ -557,8 +554,7 @@
   <script src="js/views/settings.js"></script>
   <script src="js/init.js"></script>
   <script>
-    // vConsole uniquement en mode debug (?debug=1)
-    var vConsole = location.search.includes('debug=1') ? new VConsole({ theme: 'dark' }) : null;
+    // Debug: ajouter ?debug=1 à l'URL pour les logs
     // Errors.init() appelé après chargement des scripts
     window.onerror = function(msg, src, line, col, err) {
       console.error('[ERR] ' + msg + ' — ' + (src||'').split('/').pop() + ':' + line);

@@ -297,24 +297,6 @@ function _copyToClipboard(text) {
 }
 
 /* ══ NOTIFICATIONS ══ */
-async function requestNotifPermission() {
-  if (!('Notification' in window)) { showToast('Notifications non supportées sur ce navigateur', 'warn'); return false; }
-  const perm = await Notification.requestPermission();
-  if (perm === 'granted') { showToast('✅ Notifications activées !', 'save'); return true; }
-  else { showToast('Notifications refusées', 'warn'); return false; }
-}
-
-function sendLocalNotif(title, body, icon) {
-  if (Notification.permission === 'granted') {
-    new Notification(title, { body, icon: icon || './icons/icon-192.png', badge: './icons/favicon-32.png' });
-  }
-}
-
-function scheduleRestNotif(seconds) {
-  if (Notification.permission === 'granted') {
-    setTimeout(() => sendLocalNotif('⏰ Repos terminé !', 'Prêt pour la série suivante ?'), seconds * 1000);
-  }
-}
 
 function switchTab(tabName) {
   // Deactivate all panes
@@ -559,7 +541,6 @@ function activePains(){
 // ╔══════════════════════════════════════════════════════╗
 // ║  CHART ENGINE — reusable canvas charts               ║
 // ╚══════════════════════════════════════════════════════╝
-
 
 /* ── Fonctions restaurées ── */
 function computeAdherence(){const programmed=S.days.filter(d=>getDMS(d).some(k=>k&&k!=='rep')).length;const completed=S.days.filter(d=>{const exs=d.exercises.filter(e=>e.name.trim()&&!e.isWarmup);return exs.length>0&&exs.every(e=>e.done);}).length;let p4=0,c4=0;Object.values(S.history).slice(-4).forEach(wk=>{(wk.days||[]).forEach(d=>{const muscles=(d.muscles||[]).filter(Boolean);if(muscles.some(k=>k!=='rep'))p4++;if((d.exercises||[]).filter(e=>e.name&&!e.isWarmup).every(e=>e.done)&&(d.exercises||[]).some(e=>e.name&&!e.isWarmup))c4++;});});return{programmed,completed,prog4:p4||programmed,comp4:c4||completed};}

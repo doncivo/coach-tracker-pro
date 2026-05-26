@@ -55,6 +55,7 @@ if (_notesArea) _notesArea.value = S.notes || '';
 updateStats();
 updateChronoDsp();
 checkWeeklyAutoSave();
+  Notify.restore(); // Restaurer le rappel quotidien
 checkAndAwardAchievements();
 checkOnboarding();
 _initRestTimerButtons();

@@ -1,13 +1,13 @@
-const CACHE = 'ctp-v26';
+const CACHE = 'ctp-v27';
 const ASSETS = [
   './', './index.html',
   './design/tokens.css', './css/style.css',
   './js/core/errors.js',
-  './js/data/constants.js', './js/data/exercises.js',
+  './js/data/constants.js', './js/data/exercises.js', './js/data/programs.js',
   './js/core/store.js',
   './js/store/training.js', './js/store/activity.js',
   './js/store/body.js', './js/store/goals.js', './js/store/app.js',
-  './js/services/persist.js', './js/services/compute.js',
+  './js/services/persist.js', './js/services/compute.js', './js/services/notify.js',
   './js/core/state-bridge.js', './js/core/router.js',
   './js/utils.js', './js/charts.js',
   './js/render_dashboard.js', './js/render_planning.js',

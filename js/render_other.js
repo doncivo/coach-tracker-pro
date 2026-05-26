@@ -670,4 +670,35 @@ function renderABCompare(container) {
     li.appendChild(dot); li.appendChild(document.createTextNode(l)); legend.appendChild(li);
   });
   container.appendChild(legend);
+
+  // ── PROGRAMMES PRÉDÉFINIS ──
+  if (typeof PROGRAMS !== 'undefined') {
+    const progSec = _settingsSection('📋 Programme d\'entraînement');
+    wrap.appendChild(progSec);
+
+    _settingsRow(progSec, 'Charger un programme prédéfini',
+      'Remplace ton planning par un programme complet', () => {
+      const container = document.createElement('div');
+      container.style.cssText = 'display:flex;flex-direction:column;gap:8px;margin-top:4px';
+
+      PROGRAMS.forEach(prog => {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-ghost';
+        btn.style.cssText = 'text-align:left;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-md)';
+        btn.innerHTML = '<span style="font-size:18px;margin-right:8px">' + prog.icon + '</span>' +
+          '<span><strong>' + prog.label + '</strong><br>' +
+          '<span style="font-size:11px;color:var(--color-text-muted)">' + prog.description + '</span></span>';
+        btn.addEventListener('click', () => {
+          if (typeof loadProgram === 'function') {
+            loadProgram(prog.id);
+            if (typeof renderDayTabs === 'function') renderDayTabs();
+            if (typeof renderDayDetail === 'function') renderDayDetail(0);
+          }
+        });
+        container.appendChild(btn);
+      });
+      return container;
+    });
+  }
+
 }

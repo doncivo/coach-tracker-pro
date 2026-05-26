@@ -556,82 +556,66 @@
   <script src="js/views/achievements.js"></script>
   <script src="js/views/settings.js"></script>
   <script src="js/init.js"></script>
+
   <script>
-    // Debug: ajouter ?debug=1 Ã  l'URL pour les logs
-    // Errors.init() appelÃ© aprÃ¨s chargement des scripts
+    // Gestion globale des erreurs — console uniquement
     window.onerror = function(msg, src, line, col, err) {
-      console.error('[ERR] ' + msg + ' â€” ' + (src||'').split('/').pop() + ':' + line);
+      console.error('[CTP ERR] ' + msg + ' — ' + (src||'').split('/').pop() + ':' + line);
+      return false;
     };
     window.addEventListener('unhandledrejection', function(e) {
-      console.error('[PROMISE] ' + (e.reason && e.reason.stack || e.reason));
+      console.error('[CTP PROMISE] ' + (e.reason && e.reason.stack || e.reason));
     });
   </script>
-<script>
-(function() {
-  const SW_VERSION = 'ctp-v35';
-  if ('serviceWorker' in navigator) {
-    // DÃ©sinscrire tous les anciens SW et vider les caches
-    navigator.serviceWorker.getRegistrations().then(regs => {
-      const hasOld = regs.some(r => !r.active || !r.active.scriptURL.includes('sw.js'));
-      Promise.all([
-        // Vider tous les anciens caches
-        caches.keys().then(keys =>
-          Promise.all(keys.filter(k => k !== SW_VERSION).map(k => caches.delete(k)))
-        ),
-        // DÃ©sinscrire les vieux SW
-        Promise.all(regs.map(r => r.active &&
-          r.active.scriptURL && !r.active.scriptURL.endsWith('sw.js') ?
-          r.unregister() : Promise.resolve()
-        ))
-      ]).then(() => {
-        // Enregistrer le nouveau SW
-        return navigator.serviceWorker.register('./sw.js?v=1779795824', { scope: './' });
-      }).then(reg => {
-        console.log('[CTP] SW v35 registered');
-        reg.update();
-        if (reg.waiting) {
-          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-        }
-        reg.addEventListener('updatefound', () => {
-          const nw = reg.installing;
-          nw.addEventListener('statechange', () => {
-            if (nw.state === 'installed') {
-              nw.postMessage({ type: 'SKIP_WAITING' });
-            }
-            if (nw.state === 'activated') {
-              window.location.reload();
-            }
-          });
-        });
-      }).catch(err => console.warn('[CTP] SW:', err));
-    });
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (!sessionStorage.getItem('sw-reloaded')) {
-        sessionStorage.setItem('sw-reloaded', '1');
-        window.location.reload();
-      }
-    });
-  }
-  // Handle ?tab= shortcut from manifest shortcuts
-  const urlParams = new URLSearchParams(location.search);
-  const tabParam = urlParams.get('tab');
-  if (tabParam) window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => typeof switchTab === 'function' && switchTab(tabParam), 100);
-  });
-})();
-</script>
 
-  <!-- DEBUG TEMP - retirer après fix -->
   <script>
-    window.onerror = function(msg, src, line) {
-      var d = document.createElement('div');
-      d.style = 'position:fixed;top:0;left:0;right:0;background:#c0392b;color:#fff;padding:12px 10px;z-index:99999;font-size:13px;font-family:monospace;word-break:break-all';
-      d.innerHTML = '<b>⚠️ ERREUR</b> : ' + msg + '<br><small>' + (src||'').split('/').pop() + ' — ligne ' + line + '</small>';
-      document.body ? document.body.prepend(d) : document.addEventListener("DOMContentLoaded",()=>document.body.prepend(d));
-    };
-    window.addEventListener('unhandledrejection', function(e) {
-      window.onerror('Promise rejetée : ' + (e.reason?.message || e.reason), location.href, 0);
-    });
+    // Enregistrement Service Worker v37 — sans boucle de reload
+    (function() {
+      if (!('serviceWorker' in navigator)) return;
+
+      navigator.serviceWorker.register('./sw.js', { scope: './' })
+        .then(function(reg) {
+          console.log('[CTP] SW ctp-v37 enregistré');
+          reg.update();
+
+          // SW déjà en attente (rechargement de page rapide)
+          if (reg.waiting) {
+            reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+          }
+
+          // Nouveau SW trouvé
+          reg.addEventListener('updatefound', function() {
+            var nw = reg.installing;
+            nw.addEventListener('statechange', function() {
+              // Quand installé ET qu'un ancien SW contrôle déjà la page → update
+              if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+                nw.postMessage({ type: 'SKIP_WAITING' });
+              }
+              // NE PAS recharger ici → boucle infinie
+              // Le rechargement est géré par controllerchange ci-dessous
+            });
+          });
+        })
+        .catch(function(err) { console.warn('[CTP] SW error:', err); });
+
+      // Rechargement unique quand le nouveau SW prend le contrôle
+      navigator.serviceWorker.addEventListener('controllerchange', function() {
+        if (!sessionStorage.getItem('sw-reloaded')) {
+          sessionStorage.setItem('sw-reloaded', '1');
+          window.location.reload();
+        }
+      });
+
+      // Shortcut ?tab= depuis le manifest
+      var tabParam = new URLSearchParams(location.search).get('tab');
+      if (tabParam) {
+        window.addEventListener('DOMContentLoaded', function() {
+          setTimeout(function() {
+            typeof switchTab === 'function' && switchTab(tabParam);
+          }, 100);
+        });
+      }
+    })();
   </script>
 </body>
 </html>

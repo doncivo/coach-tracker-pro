@@ -1,8 +1,10 @@
-const CACHE = 'ctp-v25';
+const CACHE = 'ctp-v26';
 const ASSETS = [
   './', './index.html',
   './design/tokens.css', './css/style.css',
-  './js/core/errors.js', './js/constants.js', './js/core/store.js',
+  './js/core/errors.js',
+  './js/data/constants.js', './js/data/exercises.js',
+  './js/core/store.js',
   './js/store/training.js', './js/store/activity.js',
   './js/store/body.js', './js/store/goals.js', './js/store/app.js',
   './js/services/persist.js', './js/services/compute.js',

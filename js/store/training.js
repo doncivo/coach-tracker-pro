@@ -91,12 +91,19 @@ const Training = (() => {
   function _dayVol(d) {
     const v = {};
     (d.exercises || []).forEach(ex => {
-      if (!ex.name || ex.isWarmup) return;
-      const m = ex.muscle || 'autre';
-      const sets = ex.setData
-        ? ex.setData.filter(s => s && s.done).length
-        : (parseInt(ex.sets) || 0);
-      v[m] = (v[m] || 0) + sets;
+      if (!ex.name || ex.isWarmup || !ex.muscle) return;
+      const m   = ex.muscle;
+      // Utiliser calcVol (poids × séries × reps) si disponible
+      // Sinon fallback sur le nombre de séries
+      let vol;
+      if (typeof Compute !== 'undefined') {
+        vol = Compute.calcVol(ex);
+      } else {
+        vol = ex.setData
+          ? ex.setData.filter(s => s && s.done).length
+          : (parseInt(ex.sets) || 0);
+      }
+      if (vol > 0) v[m] = (v[m] || 0) + vol;
     });
     return v;
   }

@@ -1,4 +1,4 @@
-const CACHE = 'ctp-v28';
+const CACHE = 'ctp-v29';
 const ASSETS = [
   './', './index.html',
   './design/tokens.css', './css/style.css',

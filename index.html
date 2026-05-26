@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <!-- Debug (retirer après correction) -->
+  <!-- v36-1779795824 -->
 </head>
 <body>
 <div class="save-badge" id="save-badge">✓ Sauvegardé</div>
@@ -585,7 +585,7 @@
         ))
       ]).then(() => {
         // Enregistrer le nouveau SW
-        return navigator.serviceWorker.register('./sw.js?v=1779795157', { scope: './' });
+        return navigator.serviceWorker.register('./sw.js?v=1779795824', { scope: './' });
       }).then(reg => {
         console.log('[CTP] SW v35 registered');
         reg.update();

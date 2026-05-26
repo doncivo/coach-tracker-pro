@@ -565,27 +565,48 @@
   </script>
 <script>
 (function() {
+  const SW_VERSION = 'ctp-v35';
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js', { scope: './' })
-      .then(reg => {
-        console.log('[CTP] SW registered:', reg.scope);
-        // Forcer la mise à jour immédiate
+    // Désinscrire tous les anciens SW et vider les caches
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      const hasOld = regs.some(r => !r.active || !r.active.scriptURL.includes('sw.js'));
+      Promise.all([
+        // Vider tous les anciens caches
+        caches.keys().then(keys =>
+          Promise.all(keys.filter(k => k !== SW_VERSION).map(k => caches.delete(k)))
+        ),
+        // Désinscrire les vieux SW
+        Promise.all(regs.map(r => r.active &&
+          r.active.scriptURL && !r.active.scriptURL.endsWith('sw.js') ?
+          r.unregister() : Promise.resolve()
+        ))
+      ]).then(() => {
+        // Enregistrer le nouveau SW
+        return navigator.serviceWorker.register('./sw.js?v=35', { scope: './' });
+      }).then(reg => {
+        console.log('[CTP] SW v35 registered');
         reg.update();
+        if (reg.waiting) {
+          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        }
         reg.addEventListener('updatefound', () => {
           const nw = reg.installing;
           nw.addEventListener('statechange', () => {
             if (nw.state === 'installed') {
-              // Activer immédiatement le nouveau SW sans attendre
               nw.postMessage({ type: 'SKIP_WAITING' });
+            }
+            if (nw.state === 'activated') {
               window.location.reload();
             }
           });
         });
-      })
-      .catch(err => console.warn('[CTP] SW non disponible:', err));
-    // Recharger quand le nouveau SW prend le contrôle
+      }).catch(err => console.warn('[CTP] SW:', err));
+    });
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      window.location.reload();
+      if (!sessionStorage.getItem('sw-reloaded')) {
+        sessionStorage.setItem('sw-reloaded', '1');
+        window.location.reload();
+      }
     });
   }
   // Handle ?tab= shortcut from manifest shortcuts

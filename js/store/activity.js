@@ -294,6 +294,62 @@ const Activity = (() => {
       }
     },
 
+    /** Calculer et appliquer les macros automatiquement selon TDEE + objectif */
+    setMacrosFromObjective(objective) {
+      const state    = Store.getState();
+      const body     = state.body;
+      const app      = state.app;
+      const training = state.training;
+
+      const poids  = parseFloat((body.mesures.poids || []).slice(-1)[0]?.value || 70);
+      const taille = parseFloat(body.profilTaille) || 175;
+      const gender = app._gender || 'm';
+      let age = 30;
+      if (app._dob) {
+        const dob = new Date(app._dob);
+        age = Math.floor((Date.now() - dob) / (1000 * 60 * 60 * 24 * 365.25));
+      }
+
+      const bmr  = Compute.calcBMR(poids, taille, age, gender);
+      const days7 = Compute.lastNDays(7);
+      const sessions = days7.filter(d =>
+        training.history[d] &&
+        training.history[d].days &&
+        training.history[d].days.some(day =>
+          day.exercises && day.exercises.some(e => e.done)
+        )
+      ).length;
+      const { tdee } = Compute.calcTDEE(bmr, sessions);
+
+      // Objectif → ajustement calorique
+      const obj      = objective || state.goals.objective;
+      const goalText = ((obj && obj.text) || '').toLowerCase();
+      let targetCal  = tdee;
+      if      (goalText.includes('prise') || goalText.includes('muscle') || goalText.includes('bulk'))
+        targetCal = Math.round(tdee * 1.10);
+      else if (goalText.includes('perte') || goalText.includes('sèche') || goalText.includes('cut'))
+        targetCal = Math.round(tdee * 0.82);
+
+      const goal   = goalText.includes('muscle') || goalText.includes('bulk') ? 'bulk'
+                   : goalText.includes('perte')  || goalText.includes('sèche') ? 'cut'
+                   : 'maint';
+      const macros = Compute.calcMacros(targetCal, goal);
+
+      Store.dispatch({ type: 'ACTIVITY_SET_CALORIES_GOAL', payload: targetCal });
+      Store.dispatch({ type: 'ACTIVITY_SET_MACRO_GOALS', payload: {
+        protein: macros.prot,
+        carbs:   macros.carbs,
+        fat:     macros.fat,
+      }});
+
+      if (typeof showToast === 'function') {
+        const msg = 'Macros: ' + macros.prot + 'g prot · ' + macros.carbs + 'g gluc · ' +
+                    macros.fat + 'g lip (' + targetCal + ' kcal)';
+        showToast('🥗 ' + msg, 'save', 4000);
+      }
+      return { tdee, targetCal, macros };
+    },
+
   };
 
   /* ─────────────────────────────────────────────
@@ -324,6 +380,7 @@ const Activity = (() => {
     addMealItem:   thunks.addMealItem,
     removeMealItem: thunks.removeMealItem,
     setGoals:      thunks.setGoals,
+    setMacrosFromObjective: thunks.setMacrosFromObjective,
 
     // Helpers exposés
     calForDay:    (dateStr) => _calForDay(Store.getState().activity, dateStr),

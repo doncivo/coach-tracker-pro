@@ -468,6 +468,17 @@ function renderSettings() {
     inp.addEventListener('change', e => { S.caloriesGoal=parseInt(e.target.value)||2500; save(); });
     return inp;
   });
+  _settingsRow(profSec, '🧮 Calculer mes macros', 'Calcul automatique depuis ton TDEE + objectif', () => {
+    const btn = document.createElement('button'); btn.className='btn btn-teal btn-sm';
+    btn.textContent = 'Calculer automatiquement';
+    btn.addEventListener('click', () => {
+      if (typeof Activity !== 'undefined') {
+        Activity.setMacrosFromObjective();
+        setTimeout(() => renderSettings(), 300);
+      }
+    });
+    return btn;
+  });
   wrap.appendChild(profSec);
 
   // ── PROGRAMME ──

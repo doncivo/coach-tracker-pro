@@ -1,9 +1,10 @@
-const CACHE = 'ctp-v9';
+const CACHE = 'ctp-v10';
 const ASSETS = [
   './',
   './index.html',
   './css/style.css',
   './js/constants.js',
+  './js/core/store.js',
   './js/utils.js',
   './js/charts.js',
   './js/render_dashboard.js',

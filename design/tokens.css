@@ -1,0 +1,231 @@
+/* ================================================================
+   design/tokens.css — Source unique de vérité CSS
+   Coach Tracker Pro
+
+   RÈGLE: Aucune valeur hardcodée dans les composants.
+   Tout changement de design passe par ce fichier uniquement.
+   ================================================================ */
+
+/* ─────────────────────────────────────────────
+   COULEURS — palette complète
+───────────────────────────────────────────── */
+:root {
+
+  /* Brand */
+  --color-brand:          #5ba8a0;
+  --color-brand-dark:     #4a9089;
+  --color-brand-light:    #e8f5f4;
+
+  /* Sémantiques */
+  --color-success:        #38a169;
+  --color-success-light:  #f0fff8;
+  --color-warning:        #d97706;
+  --color-warning-light:  #fffdf0;
+  --color-danger:         #e53e3e;
+  --color-danger-light:   #fff0f4;
+  --color-info:           #3182ce;
+  --color-info-light:     #f0f7ff;
+  --color-purple:         #805ad5;
+  --color-purple-light:   #f5f0ff;
+
+  /* Surfaces — mode clair (défaut) */
+  --color-bg:             #f2f4f7;
+  --color-surface:        #ffffff;
+  --color-card:           #ffffff;
+  --color-border:         #e2e8f0;
+  --color-border-strong:  #cbd5e0;
+
+  /* Texte */
+  --color-text:           #2d3748;
+  --color-text-muted:     #718096;
+  --color-text-faint:     #a0aec0;
+  --color-text-inverse:   #ffffff;
+
+  /* Muscles — fonds de badges planning */
+  --color-muscle-pec:     #fff0f4;
+  --color-muscle-dos:     #f5f0ff;
+  --color-muscle-jam:     #f0fff8;
+  --color-muscle-ep:      #fff4ec;
+  --color-muscle-bic:     #fffdf0;
+  --color-muscle-tri:     #f0f7ff;
+  --color-muscle-abd:     #fff2ee;
+  --color-muscle-bas:     #e8f5f4;
+}
+
+/* ─────────────────────────────────────────────
+   COULEURS — mode sombre
+───────────────────────────────────────────── */
+[data-theme="dark"] {
+  --color-bg:             #1a202c;
+  --color-surface:        #2d3748;
+  --color-card:           #2d3748;
+  --color-border:         #4a5568;
+  --color-border-strong:  #718096;
+  --color-text:           #f7fafc;
+  --color-text-muted:     #a0aec0;
+  --color-text-faint:     #718096;
+}
+
+/* ─────────────────────────────────────────────
+   ESPACEMENT — échelle cohérente
+───────────────────────────────────────────── */
+:root {
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Raccourcis sémantiques */
+  --space-xs:  var(--space-1);
+  --space-sm:  var(--space-2);
+  --space-md:  var(--space-3);
+  --space-lg:  var(--space-4);
+  --space-xl:  var(--space-6);
+}
+
+/* ─────────────────────────────────────────────
+   BORDER-RADIUS — échelle
+───────────────────────────────────────────── */
+:root {
+  --radius-xs:   4px;
+  --radius-sm:   6px;
+  --radius-md:   8px;
+  --radius-lg:  10px;
+  --radius-xl:  14px;
+  --radius-2xl: 18px;
+  --radius-full: 9999px;  /* pilule */
+  --radius-circle: 50%;
+}
+
+/* ─────────────────────────────────────────────
+   TYPOGRAPHIE
+───────────────────────────────────────────── */
+:root {
+  --font-sans:  'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:  'DM Mono', 'Fira Code', monospace;
+
+  /* Tailles */
+  --text-xs:   9px;
+  --text-sm:  11px;
+  --text-md:  13px;
+  --text-base: 14px;
+  --text-lg:  16px;
+  --text-xl:  18px;
+  --text-2xl: 22px;
+  --text-3xl: 28px;
+
+  /* Poids */
+  --weight-regular: 400;
+  --weight-medium:  600;
+  --weight-bold:    700;
+  --weight-black:   800;
+
+  /* Line height */
+  --leading-tight:  1.2;
+  --leading-normal: 1.5;
+  --leading-loose:  1.7;
+}
+
+/* ─────────────────────────────────────────────
+   OMBRES
+───────────────────────────────────────────── */
+:root {
+  --shadow-sm:  0 1px 3px rgba(0,0,0,.06);
+  --shadow-md:  0 2px 8px rgba(0,0,0,.08);
+  --shadow-lg:  0 6px 24px rgba(0,0,0,.12);
+  --shadow-xl:  0 12px 40px rgba(0,0,0,.16);
+}
+
+[data-theme="dark"] {
+  --shadow-sm:  0 1px 3px rgba(0,0,0,.2);
+  --shadow-md:  0 2px 8px rgba(0,0,0,.25);
+  --shadow-lg:  0 6px 24px rgba(0,0,0,.35);
+  --shadow-xl:  0 12px 40px rgba(0,0,0,.45);
+}
+
+/* ─────────────────────────────────────────────
+   TRANSITIONS
+───────────────────────────────────────────── */
+:root {
+  --transition-fast:   all .1s ease;
+  --transition-base:   all .15s ease;
+  --transition-slow:   all .3s ease;
+  --transition-color:  color .15s ease, background-color .15s ease, border-color .15s ease;
+  --transition-layout: width .4s ease, height .4s ease;
+}
+
+/* ─────────────────────────────────────────────
+   LAYOUT — constantes de mise en page
+───────────────────────────────────────────── */
+:root {
+  --header-height:    54px;
+  --bottom-nav-h:     54px;
+  --top-tabs-h:       38px;
+  --sidebar-width:    190px;
+  --sidebar-mobile:   0px;
+
+  /* Safe areas iOS */
+  --safe-top:    env(safe-area-inset-top,    0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left:   env(safe-area-inset-left,   0px);
+  --safe-right:  env(safe-area-inset-right,  0px);
+}
+
+/* ─────────────────────────────────────────────
+   Z-INDEX — hiérarchie des calques
+───────────────────────────────────────────── */
+:root {
+  --z-base:     1;
+  --z-dropdown: 100;
+  --z-sticky:   200;
+  --z-overlay:  300;
+  --z-modal:    400;
+  --z-toast:    500;
+  --z-debug:    9000;   /* vConsole */
+}
+
+/* ─────────────────────────────────────────────
+   COMPATIBILITÉ — alias vers l'ancien système
+   Garde les anciennes variables fonctionnelles
+   pendant la migration progressive des composants
+───────────────────────────────────────────── */
+:root {
+  /* Ancien système → nouveaux tokens */
+  --teal:    var(--color-brand);
+  --teal-d:  var(--color-brand-dark);
+  --teal-l:  var(--color-brand-light);
+  --green:   var(--color-success);
+  --orange:  var(--color-warning);
+  --red:     var(--color-danger);
+  --blue:    var(--color-info);
+  --purple:  var(--color-purple);
+
+  --bg:      var(--color-bg);
+  --surface: var(--color-surface);
+  --card:    var(--color-card);
+  --border:  var(--color-border);
+  --text:    var(--color-text);
+  --muted:   var(--color-text-muted);
+
+  --sh:      var(--shadow-md);
+  --sh2:     var(--shadow-lg);
+
+  --r:       var(--radius-lg);
+  --rs:      var(--radius-sm);
+  --font:    var(--font-sans);
+  --mono:    var(--font-mono);
+
+  /* Couleurs muscle (anciennes clés c0-c6, t0-t6) */
+  --c0: var(--color-muscle-pec);
+  --c1: var(--color-muscle-dos);
+  --c2: var(--color-muscle-jam);
+  --c3: var(--color-muscle-ep);
+  --c4: var(--color-muscle-bic);
+  --c5: var(--color-muscle-tri);
+  --c6: var(--color-muscle-abd);
+}

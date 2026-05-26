@@ -52,7 +52,7 @@ function renderDayDetail(i){
     const ok=await Modal.confirm('Réinitialiser '+DAYS[i]+' ?');
     if(!ok)return;
     save(); // snapshot BEFORE reset (for undo)
-    S.days[i]=mkDay(i,S.weekType);
+    Store.dispatch({type:"TRAINING_UPDATE_DAY",payload:{dayIndex:i,changes:mkDay(i,S.weekType)}});
     save(true); // skipUndo=true to avoid double snapshot
     renderDayTabs();renderDayDetail(i);
   });
@@ -488,7 +488,7 @@ function renderGoals(){
   const list=document.getElementById('goals-list');list.innerHTML='';
   S.goals.forEach((g,i)=>{const row=document.createElement('div');row.className='goal-row';const cb=document.createElement('input');cb.type='checkbox';cb.className='goal-cb';cb.checked=g.done;cb.addEventListener('change',e=>{S.goals[i].done=e.target.checked;save();});const inp=document.createElement('input');inp.type='text';inp.className='goal-inp';inp.placeholder='Objectif...';inp.value=g.text||'';inp.addEventListener('input',e=>{S.goals[i].text=e.target.value;save();});const del=document.createElement('button');del.className='goal-del';del.textContent='×';del.addEventListener('click',()=>{S.goals.splice(i,1);save();renderGoals();});row.appendChild(cb);row.appendChild(inp);row.appendChild(del);list.appendChild(row);});
 }
-document.getElementById('add-goal-btn').addEventListener('click',()=>{S.goals.push({text:'',done:false});renderGoals();save();});
+document.getElementById('add-goal-btn').addEventListener('click',()=>{Store.dispatch({type:'GOALS_ADD_GOAL',payload:''});renderGoals();});
 document.getElementById('notes-area').addEventListener('input',e=>{S.notes=e.target.value;save();});
 
 /* ══ CHRONO ══ */

@@ -60,7 +60,7 @@ function renderStepsGrid() {
     inp.setAttribute('aria-label', 'Pas du ' + DAYS[( d.getDay() + 6) % 7]);
     inp.addEventListener('change', e => {
       if (!S.steps) S.steps = {};
-      S.steps[ds] = parseInt(e.target.value) || 0;
+      Store.dispatch({type:'ACTIVITY_SET_STEPS',payload:{date:ds,value:parseInt(e.target.value)||0}});
       save(); renderStepsGrid();
     });
 
@@ -152,7 +152,9 @@ function renderCalTracker() {
 
   const dk = calDayKey(_calDayOffset);
   if (!S.calories) S.calories = {};
-  if (!S.calories[dk]) S.calories[dk] = { meals: [{items:[]},{items:[]},{items:[]},{items:[]}] };
+  if (!S.calories[dk]) {
+        Store.dispatch({type:'ACTIVITY_SET_NUTRITION',payload:{[dk]:{meals:[{items:[]},{items:[]},{items:[]},{items:[]}]}}},{skipUndo:true});
+      }
   // Ensure 4 meals
   while (S.calories[dk].meals.length < 4) S.calories[dk].meals.push({items:[]});
 
@@ -459,7 +461,7 @@ function renderCorps(){
     addBtn.style.cssText='flex:1;min-height:40px;font-size:13px;font-weight:700';
     addBtn.textContent='+ Ajouter';
     valInp.addEventListener('keydown',e=>{if(e.key==='Enter')addBtn.click();});
-    addBtn.addEventListener('click',()=>{if(!valInp.value)return;if(!S.mesures[key])S.mesures[key]=[];S.mesures[key].push({date:dateInp.value,val:valInp.value});S.mesures[key].sort((a,b)=>a.date.localeCompare(b.date));valInp.value='';save();renderCorps();});
+    addBtn.addEventListener('click',()=>{if(!valInp.value)return;if(!S.mesures[key])S.mesures[key]=[];Store.dispatch({type:'BODY_ADD_MESURE',payload:{key:key,entry:{value:parseFloat(valInp.value),date:todayStr()}}});S.mesures[key].sort((a,b)=>a.date.localeCompare(b.date));valInp.value='';save();renderCorps();});
     form.appendChild(dateInp);form.appendChild(valInp);form.appendChild(addBtn);body.appendChild(form);card.appendChild(body);grid.appendChild(card);
   });
   renderStreakHeatmap();
@@ -534,7 +536,7 @@ function renderSleepGrid(){
     const inp=document.createElement('input');inp.type='number';inp.className='sleep-inp';inp.value=dayData.hours||'';inp.placeholder='h';inp.min=0;inp.max=12;inp.step=0.5;
     inp.addEventListener('change',e=>{if(!S.sleep[ds])S.sleep[ds]={hours:'',quality:0};S.sleep[ds].hours=e.target.value;save();});
     const qualRow=document.createElement('div');qualRow.className='sleep-qual-row';
-    ['😴','😐','🔥'].forEach((emoji,qi)=>{const btn=document.createElement('button');btn.className='sleep-qual-btn'+(dayData.quality===qi+1?' sel':'');btn.textContent=emoji;btn.addEventListener('click',()=>{if(!S.sleep[ds])S.sleep[ds]={hours:'',quality:0};S.sleep[ds].quality=qi+1;save();qualRow.querySelectorAll('.sleep-qual-btn').forEach((b,bi)=>b.classList.toggle('sel',bi===qi));});qualRow.appendChild(btn);});
+    ['😴','😐','🔥'].forEach((emoji,qi)=>{const btn=document.createElement('button');btn.className='sleep-qual-btn'+(dayData.quality===qi+1?' sel':'');btn.textContent=emoji;btn.addEventListener('click',()=>{if(!S.sleep[ds])S.sleep[ds]={hours:'',quality:0};Store.dispatch({type:'ACTIVITY_SET_SLEEP',payload:{date:ds,value:{hours:(S.sleep[ds]||{}).hours||0,quality:qi+1}}});qualRow.querySelectorAll('.sleep-qual-btn').forEach((b,bi)=>b.classList.toggle('sel',bi===qi));});qualRow.appendChild(btn);});
     const dateDisp=document.createElement('div');dateDisp.style.cssText='font-size:8px;color:var(--muted);font-family:var(--mono)';dateDisp.textContent=d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'});
     card.appendChild(lbl);card.appendChild(dateDisp);card.appendChild(inp);card.appendChild(qualRow);grid.appendChild(card);
   }
@@ -616,7 +618,7 @@ document.getElementById('add-pain-btn').addEventListener('click',async()=>{
   const idx=parseInt(_painForm.part)-1;if(idx<0||idx>=BODY_PARTS.length)return;
   const level=parseInt(_painForm.level)||1;
   const note=_painForm.note||'';
-  S.painLog.push({part:BODY_PARTS[idx],level:Math.min(3,Math.max(1,level)),date:todayStr(),note});
+  Store.dispatch({type:'BODY_ADD_PAIN',payload:{part:BODY_PARTS[idx],level:Math.min(3,Math.max(1,level)),date:todayStr(),note}});
   save();renderPainList();showToast('Douleur enregistrée','save');
 });
 document.getElementById('add-photo-btn').addEventListener('click',()=>{

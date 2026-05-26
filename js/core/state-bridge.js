@@ -168,4 +168,38 @@
 
   console.log('[CTP] State bridge actif — S est maintenant un proxy réactif');
 
+  /* ─────────────────────────────────────────────
+     HOOK SAVE — mutations profondes (S.days[i].xxx = val)
+     
+     Quand du code fait S.days[i].date = val puis save(),
+     le Store ne sait pas que ses données ont changé.
+     Ce hook force une synchronisation depuis le fallback.
+  ───────────────────────────────────────────── */
+  const _origSave = window.save;
+  window.save = function(skipUndo) {
+    // Récupérer les mutations profondes depuis le fallback
+    // et les synchroniser vers le Store via un batch dispatch
+    const fb = _fallback;
+    const state = Store.getState();
+    
+    // Si days a été muté en place, forcer la resync
+    if (fb.days && fb.days !== state.training.days) {
+      // Les jours ont été remplacés (mkDay, etc.)
+      fb.days.forEach((day, i) => {
+        if (JSON.stringify(day) !== JSON.stringify(state.training.days[i])) {
+          Store.dispatch({
+            type: 'TRAINING_UPDATE_DAY',
+            payload: { dayIndex: i, changes: day }
+          }, { skipUndo: true });
+        }
+      });
+    }
+    
+    // Appel original (persist.js)
+    if (_origSave) _origSave.call(this, skipUndo);
+    else if (typeof Persist !== 'undefined') {
+      Persist.save(Store.getState(), { skipUndo: !!skipUndo });
+    }
+  };
+
 })();

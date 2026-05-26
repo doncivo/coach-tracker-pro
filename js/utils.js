@@ -584,7 +584,7 @@ function renderSettings() {
   _settingsRow(dataSec, 'Espace utilisé', 'localStorage', () => {
     const sp = document.createElement('span'); sp.style.cssText='font-family:var(--mono);font-size:12px;color:var(--muted)';
     try {
-      const used = new Blob([JSON.stringify(S)]).size;
+      const used = new Blob([JSON.stringify(Store.bridge())]).size;
       sp.textContent = (used/1024).toFixed(1) + ' KB / ~5 MB';
     } catch(e) { sp.textContent = '—'; }
     return sp;

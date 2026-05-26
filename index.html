@@ -569,16 +569,24 @@
     navigator.serviceWorker.register('./sw.js', { scope: './' })
       .then(reg => {
         console.log('[CTP] SW registered:', reg.scope);
+        // Forcer la mise à jour immédiate
+        reg.update();
         reg.addEventListener('updatefound', () => {
           const nw = reg.installing;
           nw.addEventListener('statechange', () => {
-            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-              showToast && showToast('Mise à jour disponible — rechargez la page', 'save', 5000);
+            if (nw.state === 'installed') {
+              // Activer immédiatement le nouveau SW sans attendre
+              nw.postMessage({ type: 'SKIP_WAITING' });
+              window.location.reload();
             }
           });
         });
       })
-      .catch(err => console.warn('[CTP] SW non disponible (mode local):', err));
+      .catch(err => console.warn('[CTP] SW non disponible:', err));
+    // Recharger quand le nouveau SW prend le contrôle
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      window.location.reload();
+    });
   }
   // Handle ?tab= shortcut from manifest shortcuts
   const urlParams = new URLSearchParams(location.search);

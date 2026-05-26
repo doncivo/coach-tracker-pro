@@ -8,9 +8,10 @@
   <meta name="theme-color" content="#5ba8a0">
   <title>Coach Tracker Pro</title>
   <link rel="stylesheet" href="css/style.css">
-  <!-- Polices -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Debug (retirer après correction) -->
+  <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
 </head>
 <body>
 </head>
@@ -518,28 +519,10 @@
   </div>
 </div>
 
-
-  <!-- Debug console (retirer après correction) -->
-  <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
-  <script>
-    var vConsole = new VConsole({ theme: 'dark' });
-    // Capturer toutes les erreurs JS
-    window.onerror = function(msg, src, line, col, err) {
-      console.error('[ERREUR] ' + msg + ' — ' + src + ':' + line);
-      return false;
-    };
-    window.addEventListener('unhandledrejection', function(e) {
-      console.error('[PROMISE] ' + (e.reason && e.reason.message || e.reason));
-    });
-  </script>
-
-  <!-- Modules JS — ordre de chargement respecte les dépendances -->
+  <!-- Modules JS dans l'ordre de dépendance -->
   <script src="js/constants.js"></script>
-  <script src="js/state.js"></script>
   <script src="js/utils.js"></script>
-  <script src="js/compute.js"></script>
   <script src="js/charts.js"></script>
-  <script src="js/features.js"></script>
   <script src="js/render_dashboard.js"></script>
   <script src="js/render_planning.js"></script>
   <script src="js/render_session.js"></script>
@@ -547,6 +530,15 @@
   <script src="js/render_bilan.js"></script>
   <script src="js/render_other.js"></script>
   <script src="js/init.js"></script>
+  <script>
+    var vConsole = new VConsole({ theme: 'dark' });
+    window.onerror = function(msg, src, line, col, err) {
+      console.error('[ERR] ' + msg + ' — ' + (src||'').split('/').pop() + ':' + line);
+    };
+    window.addEventListener('unhandledrejection', function(e) {
+      console.error('[PROMISE] ' + (e.reason && e.reason.stack || e.reason));
+    });
+  </script>
 <script>
 (function() {
   if ('serviceWorker' in navigator) {

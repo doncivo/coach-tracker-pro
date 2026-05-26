@@ -1,92 +1,8 @@
-/* ═══════════════════════════════════════
-   render_bilan.js — Pages Bilan, KPI, Progression
-   Dépend de: compute.js, charts.js
-═══════════════════════════════════════ */
+/* ============================================================
+   render_bilan.js — Bilan + KPI + Progression
+============================================================ */
 
-function renderProgression(){
-  const mf=document.getElementById('prog-muscle-filter');const cv=mf.value;mf.innerHTML='<option value="">Tous les groupes</option>';
-  MUSCLES.filter(m=>m.key!=='rep').forEach(m=>{const o=document.createElement('option');o.value=m.key;o.textContent=m.label;if(m.key===cv)o.selected=true;mf.appendChild(o);});
-  const wLimit=document.getElementById('prog-weeks-filter').value;
-  const cards=document.getElementById('prog-cards');
-  // Render summary charts in progression tab
-  const progChartsSection = document.getElementById('prog-charts-section');
-  if(progChartsSection){
-    progChartsSection.innerHTML='';
-    // Weekly volume trend
-    const volWrap = document.createElement('div');
-    progChartsSection.appendChild(volWrap);
-    const volData = computeWeeklyVolume(12);
-    const {wrap:vw,canvas:vc}=mkChartWrap('prog-vol','📊 Volume hebdomadaire (12 semaines)','kg·reps');
-    volWrap.appendChild(vw);
-    setTimeout(()=>Charts.barChart(vc,volData,{height:140,yFmt:v=>v>=1000?Math.round(v/1000)+'k':Math.round(v)}),50);
-
-    // Poids evolution
-    const weightEntries=(S.mesures.poids||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));
-    if(weightEntries.length>1){
-      const wWrap=document.createElement('div');
-      progChartsSection.appendChild(wWrap);
-      const {wrap:ww,canvas:wc}=mkChartWrap('prog-weight','⚖️ Poids corporel',`Objectif: ${S.objective?.targetWeight||'—'}kg`);
-      wWrap.appendChild(ww);
-      const targetW=parseFloat(S.objective&&S.objective.targetWeight)||null;
-      setTimeout(()=>Charts.lineChart(wc,[{label:'Poids',values:weightEntries.map(e=>({x:e.date,y:parseFloat(e.val)||0})),color:'--teal'}],{height:130,goal:targetW||undefined,yFmt:v=>v.toFixed(1)+'kg'}),50);
-    }
-  }
-
-cards.innerHTML='';
-  const allNames=new Set();
-  Object.values(S.history).forEach(wk=>(wk.days||[]).forEach(d=>(d.exercises||[]).forEach(ex=>{if(ex.name&&ex.weight&&!ex.isWarmup)allNames.add(ex.name);})));
-  S.days.forEach(d=>d.exercises.filter(e=>!e.isWarmup).forEach(ex=>{if(ex.name&&ex.weight)allNames.add(ex.name);}));
-  if(!allNames.size){cards.innerHTML='<div class="prog-no-data">💡 Aucune donnée. Renseignez des poids ou cliquez "Données démo".</div>';return;}
-  const filter=mf.value;
-  const filteredNames=[...allNames].filter(name=>{if(!filter)return true;return S.days.some(d=>d.exercises.some(e=>e.name===name&&e.muscle===filter));});
-  filteredNames.forEach(name=>{
-    let hist=exHist(name);
-    S.days.forEach(d=>d.exercises.filter(e=>!e.isWarmup).forEach(ex=>{if(ex.name===name&&ex.weight)hist.push({weekKey:'current',weekCount:S.weekCount,weight:ex.weight,repsAchieved:ex.repsAchieved,sets:ex.sets,reps:ex.reps,done:ex.done});}));
-    if(wLimit!=='all')hist=hist.slice(-parseInt(wLimit));if(!hist.length)return;
-    const ex0=S.days.flatMap(d=>d.exercises).find(e=>e.name===name)||{};const m=MM[ex0.muscle||''];
-    const isPlat=isPlateau(name);
-    const card=document.createElement('div');card.className='prog-card';
-    const hdr=document.createElement('div');hdr.className='prog-card-hdr';
-    const nm=document.createElement('div');nm.className='prog-card-name';nm.textContent=name;nm.title=name;
-    let best1rm=0;hist.forEach(r=>{const rm=calc1RM(r.weight,r.repsAchieved||r.reps);if(rm>best1rm)best1rm=rm;});
-    const pill=document.createElement('span');if(m){pill.style.cssText=`background:${m.calBg};color:${m.calColor};font-size:8px;font-weight:700;padding:2px 6px;border-radius:8px`;pill.textContent=m.label;}
-    const rm1=document.createElement('span');rm1.style.cssText='font-size:9px;color:var(--purple);font-weight:700;flex-shrink:0';if(best1rm)rm1.textContent='1RM≈'+best1rm+'kg';
-    if(isPlat){const pb=document.createElement('span');pb.className='badge-plateau';pb.textContent='⚠ Plateau';hdr.appendChild(pb);}
-    hdr.appendChild(nm);hdr.appendChild(pill);hdr.appendChild(rm1);card.appendChild(hdr);
-    const body=document.createElement('div');body.className='prog-card-body';
-    // Overload badge
-    const curEx=S.days.flatMap(d=>d.exercises).find(e=>e.name===name&&!e.isWarmup);
-    if(curEx&&shouldOverload(curEx)){const cw=parseFloat(curEx.weight)||0;const sug=Math.round((cw*1.025)/2.5)*2.5;const badge=document.createElement('div');badge.className='badge-overload';badge.style.marginBottom='6px';badge.textContent='⬆ Surcharge: '+sug+'kg (+2.5%)';body.appendChild(badge);}
-    if(curEx&&checkPR(curEx)){const pb=document.createElement('div');pb.className='badge-pr';pb.style.marginBottom='6px';pb.textContent='🏆 PR actuel';body.appendChild(pb);}
-    if(isPlat){const tips=document.createElement('div');tips.style.cssText='font-size:9px;color:var(--muted);margin-bottom:6px;font-style:italic';tips.textContent='💡 Suggestions: changer la fourchette de reps, modifier le tempo, varier l\'angle.';body.appendChild(tips);}
-    // Strength standard
-    const lastPoids=(S.mesures.poids||[]).slice(-1)[0];
-    if(lastPoids&&curEx&&curEx.weight){const std=strengthStandard(curEx,parseFloat(lastPoids.val));if(std){const sb=document.createElement('div');sb.className='std-comparison';sb.textContent=`Niveau: ${std.level} (${Math.round((parseFloat(curEx.weight)||0)/parseFloat(lastPoids.val)*100)}% du poids corporel)`;body.appendChild(sb);}}
-    // Prediction (linear regression)
-    if(hist.length>=3){
-      const weights=hist.map((r,i)=>({x:i,y:parseFloat(r.weight)||0})).filter(p=>p.y>0);
-      if(weights.length>=3){
-        const n=weights.length;const sumX=weights.reduce((a,p)=>a+p.x,0);const sumY=weights.reduce((a,p)=>a+p.y,0);const sumXY=weights.reduce((a,p)=>a+p.x*p.y,0);const sumX2=weights.reduce((a,p)=>a+p.x*p.x,0);
-        const slope=(n*sumXY-sumX*sumY)/(n*sumX2-sumX*sumX);const intercept=(sumY-slope*sumX)/n;
-        const pred4=Math.round((slope*(n+3)+intercept)*10)/10;const pred8=Math.round((slope*(n+7)+intercept)*10)/10;
-        if(slope>0&&pred4>0){const pred=document.createElement('div');pred.style.cssText='font-size:9px;color:var(--purple);margin-bottom:6px;font-style:italic';pred.textContent=`📈 Projection: +4 sem. → ${pred4}kg · +8 sem. → ${pred8}kg`;body.appendChild(pred);}
-      }
-    }
-    // History table
-    // 1RM chart
-    if(hist.length>1){const chartDiv=document.createElement('div');chartDiv.style.cssText='height:80px;margin-bottom:8px';body.appendChild(chartDiv);setTimeout(()=>render1RMChart(chartDiv,name,m?m.calColor:'var(--teal)'),50);}
-    const t=document.createElement('table');t.className='prog-table';t.innerHTML='<thead><tr><th>Sem.</th><th>Poids</th><th>Sér.</th><th>Reps</th><th>1RM</th><th>Δ</th><th>RPE moy.</th></tr></thead>';
-    const tb=document.createElement('tbody');
-    hist.forEach((row,ri)=>{const tr2=document.createElement('tr');const prev=ri>0?hist[ri-1]:null;const wC=parseFloat(row.weight)||0;const wP=prev?parseFloat(prev.weight)||0:0;const delta=prev?(wC-wP):0;const rm=calc1RM(row.weight,row.repsAchieved||row.reps);const wkLbl=row.weekKey==='current'?'<span style="color:var(--teal-d);font-weight:700">Actuel</span>':'S'+row.weekCount;const deltaHtml=ri===0?'<span class="prog-delta-eq">—</span>':delta>0?`<span class="prog-delta-up">+${delta}kg</span>`:delta<0?`<span class="prog-delta-down">${delta}kg</span>`:'<span class="prog-delta-eq">—</span>';tr2.innerHTML=`<td class="prog-table td">${wkLbl}</td><td>${row.weight}</td><td>${row.sets||'—'}</td><td>${row.repsAchieved||row.reps||'—'}</td><td style="color:var(--purple)">${rm||'—'}</td><td>${deltaHtml}</td><td style="color:var(--muted)">—</td>`;tb.appendChild(tr2);});
-    t.appendChild(tb);body.appendChild(t);
-    // Canvas chart
-    if(hist.length>1){const canvas=document.createElement('canvas');canvas.className='prog-canvas';canvas.height=55;body.appendChild(canvas);setTimeout(()=>{const W=canvas.offsetWidth||270;canvas.width=W;const ctx=canvas.getContext('2d');const weights=hist.map(r=>parseFloat(r.weight)||0);const minW=Math.min(...weights),maxW=Math.max(...weights);const pad=8,cH=48;ctx.clearRect(0,0,W,55);ctx.strokeStyle=m?m.calColor:'var(--teal)';ctx.lineWidth=2;ctx.lineJoin='round';ctx.beginPath();const step=(W-pad*2)/(hist.length-1||1);weights.forEach((w,i)=>{const x=pad+i*step;const y=maxW===minW?cH/2:pad+(1-(w-minW)/(maxW-minW))*(cH-pad*2);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.stroke();// Prediction dotted line
-    weights.forEach((w,i)=>{const x=pad+i*step;const y=maxW===minW?cH/2:pad+(1-(w-minW)/(maxW-minW))*(cH-pad*2);ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fillStyle=m?m.calColor:'var(--teal)';ctx.fill();ctx.fillStyle='#999';ctx.font='8px DM Mono,monospace';ctx.textAlign='center';ctx.fillText(w,x,53);});},100);}
-    card.appendChild(body);cards.appendChild(card);
-  });
-  if(!cards.children.length)cards.innerHTML='<div class="prog-no-data">Aucun exercice correspondant.</div>';
-}
-
+/* ══ BILAN ══ */
 function renderBilan(){
   const offset=S.bilanOffset||0;const lbl=document.getElementById('bilan-week-lbl');
   lbl.textContent=offset===0?'Semaine courante':offset===-1?'Semaine précédente':'Sem. '+Math.abs(offset)+' avant';
@@ -210,6 +126,65 @@ function renderBilan(){
   cont.appendChild(bilanChartsDiv);
 });
 }
+document.getElementById('bilan-prev').addEventListener('click',()=>{S.bilanOffset=(S.bilanOffset||0)-1;save();renderBilan();});
+document.getElementById('bilan-next').addEventListener('click',()=>{if((S.bilanOffset||0)<0){S.bilanOffset++;save();renderBilan();}});
+document.getElementById('export-pdf-btn').addEventListener('click', exportBilanPDF);
+
+/* ══ KPI ══ */
+function computeTonnageComp(){const cur=weekVol();const keys=Object.keys(S.history).sort();const lastKey=keys[keys.length-1];const prev={};if(lastKey){(S.history[lastKey].days||[]).forEach(d=>{(d.exercises||[]).filter(e=>!e.isWarmup).forEach(ex=>{const v=calcVol(ex);if(v&&ex.muscle)prev[ex.muscle]=(prev[ex.muscle]||0)+v;});});}return{cur,prev};}
+
+function computeBodyComp(){const t=parseFloat(S.profilTaille)||0;if(!t||t<100||t>250)return null;const lP=(S.mesures.poids||[]).slice(-1)[0];const lT2=(S.mesures.taille||[]).slice(-1)[0];const lCou=(S.mesures.cou||[]).slice(-1)[0];if(!lP)return null;const poids=parseFloat(lP.val)||0;const imc=poids&&t?Math.round(poids/(t/100)**2*10)/10:null;let bf=null;if(lT2&&t){const abdomen=parseFloat(lT2.val)||0;const cou=lCou?parseFloat(lCou.val)||38:38;if(abdomen>cou&&t)bf=Math.round((495/(1.0324-0.19077*Math.log10(abdomen-cou)+0.15456*Math.log10(t))-450)*10)/10;if(bf)bf=Math.max(3,Math.min(bf,45));}const leanMass=bf&&poids?Math.round(poids*(1-bf/100)*10)/10:null;return{poids,imc,bf,leanMass,taille:t};}
+function computeStreak(){
+  const today=new Date();
+  let cur=0,rec=0,temp=0,inCur=true;
+  for(let i=0;i<365;i++){
+    const d=new Date(today);d.setDate(d.getDate()-i);const ds=localDateStr(d);
+    const mD=S.days.find(day=>day.date===ds);
+    const hD=Object.values(S.history).flatMap(wk=>(wk.days||[])).find(day=>day.date===ds);
+    const aDay=mD||hD;
+    const trained=aDay&&(aDay.exercises||[]).some(e=>e.done&&!e.isWarmup);
+    if(trained){
+      temp++;
+      if(inCur)cur=temp; // still in current streak
+    } else {
+      inCur=false; // first gap breaks current streak
+      if(temp>rec)rec=temp;
+      temp=0;
+    }
+  }
+  if(temp>rec)rec=temp;
+  // Count active days this calendar month
+  const now=new Date();
+  let monthActive=0;
+  for(let d=1;d<=now.getDate();d++){
+    const dd=new Date(now.getFullYear(),now.getMonth(),d);
+    const ds=localDateStr(dd);
+    const mD=S.days.find(day=>day.date===ds);
+    const hD=Object.values(S.history).flatMap(wk=>(wk.days||[])).find(day=>day.date===ds);
+    const aDay=mD||hD;
+    if(aDay&&(aDay.exercises||[]).some(e=>e.done&&!e.isWarmup)) monthActive++;
+  }
+  return{current:cur,record:rec,monthActive};
+}
+function computeAdherence(){const programmed=S.days.filter(d=>getDMS(d).some(k=>k&&k!=='rep')).length;const completed=S.days.filter(d=>{const exs=d.exercises.filter(e=>e.name.trim()&&!e.isWarmup);return exs.length>0&&exs.every(e=>e.done);}).length;let p4=0,c4=0;Object.values(S.history).slice(-4).forEach(wk=>{(wk.days||[]).forEach(d=>{const muscles=(d.muscles||[]).filter(Boolean);if(muscles.some(k=>k!=='rep'))p4++;if((d.exercises||[]).filter(e=>e.name&&!e.isWarmup).every(e=>e.done)&&(d.exercises||[]).some(e=>e.name&&!e.isWarmup))c4++;});});return{programmed,completed,prog4:p4||programmed,comp4:c4||completed};}
+function computeWeekRecovery(){const scores=[];const today=new Date();for(let i=6;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-i);const key=`${S.sessDay}-${localDateStr(d)}`;const r=S.sessRecovery[key];if(r)scores.push(r);}return scores.length?{avg:Math.round(scores.reduce((a,b)=>a+b,0)/scores.length*10)/10,count:scores.length}:null;}
+function computeIntensityZones(){
+  const zones=[];
+  S.days.forEach(function(d){
+    d.exercises.filter(function(e){return !e.isWarmup;}).forEach(function(ex){
+      if(!ex.weight||!ex.repsAchieved)return;
+      const h=exHist(ex.name);
+      const best1rm=Math.max.apply(null,h.map(function(r){return calc1RM(r.weight,r.repsAchieved||r.reps);}).concat([calc1RM(ex.weight,ex.repsAchieved)]));
+      if(!best1rm)return;
+      const pct=Math.round((parseFloat(ex.weight)||0)/best1rm*100);
+      const m=MM[ex.muscle];
+      const zone=pct<65?'Trop léger':pct<75?'End-force':pct<85?'Hypertrophie OK':pct<95?'Force':'1RM zone';
+      zones.push({name:ex.name,pct:pct,muscle:ex.muscle,color:m?m.calColor:'var(--teal)',zone:zone});
+    });
+  });
+  return zones.filter(function(z){return z.pct>0;});
+}
+function computeRepSuccessRate(dayIdx){const d=S.days[dayIdx];let tt=0,at=0,ct=0;d.exercises.filter(e=>!e.isWarmup).forEach(ex=>{if(!ex.repsAchieved||!ex.sets)return;const sets=parseInt(ex.sets)||0;const m=(ex.reps||'').match(/(\d+)/g);if(!m)return;const target=parseInt(m[0])*sets;const achieved=ex.repsAchieved.split('/').reduce((a,b)=>a+(parseInt(b)||0),0);if(target>0){tt+=target;at+=achieved;ct++;}});return ct>0?{rate:Math.round(at/tt*100),count:ct}:null;}
 
 function renderKPI(){
   const wrap=document.getElementById('kpi-wrap');wrap.innerHTML='';
@@ -365,4 +340,3 @@ row.appendChild(zName);row.appendChild(zBar);row.appendChild(zPct);row.appendChi
   setTimeout(()=>Charts.radarChart(radarCanvas,fs2.breakdown.map(b=>({label:b.label,value:b.pts})),{height:220}),50);
 
 }
-

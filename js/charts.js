@@ -1,7 +1,6 @@
-/* ═══════════════════════════════════════
-   charts.js — Moteur de graphiques canvas
-   Dépend de: rien (autonome)
-═══════════════════════════════════════ */
+/* ============================================================
+   charts.js — Charts engine + mkChartWrap
+============================================================ */
 
 const Charts = {
   // Resolve a CSS variable to an actual color
@@ -357,8 +356,9 @@ const Charts = {
     if(opts.xLabel){ctx.fillStyle=Charts.cssVar('--muted');ctx.font=`9px ${Charts.cssVar('--font')}`;ctx.textAlign='center';ctx.fillText(opts.xLabel,W/2,H-2);}
     if(opts.yLabel){ctx.save();ctx.fillStyle=Charts.cssVar('--muted');ctx.font=`9px ${Charts.cssVar('--font')}`;ctx.translate(10,H/2);ctx.rotate(-Math.PI/2);ctx.textAlign='center';ctx.fillText(opts.yLabel,0,0);ctx.restore();}
   }
-}
+};
 
+// ── mkChartWrap: convenience factory ──
 function mkChartWrap(id, title, sub, periodBtns){
   const wrap = document.createElement('div');
   wrap.className = 'chart-wrap';
@@ -382,3 +382,8 @@ function mkChartWrap(id, title, sub, periodBtns){
   wrap.appendChild(canvas);
   return {wrap, canvas, hdr};
 }
+
+
+// ╔══════════════════════════════════════════════════════╗
+// ║  DASHBOARD                                           ║
+// ╚══════════════════════════════════════════════════════╝

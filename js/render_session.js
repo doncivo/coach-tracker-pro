@@ -1,8 +1,9 @@
-/* ═══════════════════════════════════════
-   render_session.js — Page Séance
-   Dépend de: state.js, utils.js, features.js
-═══════════════════════════════════════ */
+/* ============================================================
+   render_session.js — Page Séance + Focus mode
+============================================================ */
 
+/* ══ SESSION MODE ══ */
+/* _sessActiveEx — déclaré dans constants.js */
 function renderSession(){
   startSessTimer();
   // Day selector
@@ -21,9 +22,16 @@ function renderSession(){
   if(_sessActiveEx>=exercises.length)_sessActiveEx=0;
   renderSessNav(d,exercises);renderSessExercise(d,exercises,_sessActiveEx);
 }
-
-/* updateSessProgress défini dans module précédent */
-
+function updateSessProgress(d,exercises){
+  const done=exercises.filter(e=>e.done).length;
+  const pb=document.getElementById('sess-prog-bar');const pe=document.getElementById('sess-prog-ex');
+  if(pb)pb.style.width=(exercises.length?Math.round(done/exercises.length*100):0)+'%';
+  if(pe)pe.textContent=done+'/'+exercises.length;
+  const vol=Object.values(dayVol(d)).reduce((a,b)=>a+b,0);
+  const vl=document.getElementById('sess-vol-live');if(vl)vl.innerHTML='📦 <strong>'+(vol>0?Math.round(vol/1000*10)/10+'t':'—')+'</strong>';
+  let best1rm=0;d.exercises.forEach(ex=>{const rm=calc1RM(ex.weight,ex.repsAchieved);if(rm>best1rm)best1rm=rm;});
+  const r1=document.getElementById('sess-1rm-live');if(r1)r1.innerHTML='🏋️ <strong>'+(best1rm?best1rm+'kg':'—')+'</strong>';
+}
 function renderSessNav(d,exercises){
   const nav=document.getElementById('sess-nav');nav.innerHTML='';
   // Also render mobile strip nav
@@ -69,7 +77,6 @@ function renderSessNav(d,exercises){
     nav.appendChild(item);
   });
 }
-
 function renderSessExercise(d,exercises,vi){
   const mainEl=document.getElementById('sess-main');mainEl.innerHTML='';
   if(!exercises[vi])return;
@@ -226,6 +233,261 @@ function renderSessExercise(d,exercises,vi){
   navBtns.appendChild(prevBtn);navBtns.appendChild(sp);navBtns.appendChild(ctr);navBtns.appendChild(nextBtn);mainEl.appendChild(navBtns);
 }
 
+/* ══ FOCUS MODE ══ */
+document.getElementById('focus-btn').addEventListener('click',()=>openFocusMode());
+document.getElementById('sess-focus-btn').addEventListener('click',()=>openFocusMode());
+function openFocusMode(){
+  const overlay=document.getElementById('focus-overlay');overlay.style.display='flex';overlay.innerHTML='';
+  const d=S.days[S.sessDay];const exercises=d.exercises.filter(e=>e.name.trim());const ex=exercises[_sessActiveEx]||exercises[0];if(!ex){overlay.style.display='none';return;}
+  const realIdx=d.exercises.indexOf(ex);const nSets=parseInt(ex.sets)||3;
+  if(!ex.setData||ex.setData.length<nSets)ex.setData=Array.from({length:nSets},()=>({weight:ex.weight||'',reps:'',done:false,rpe:'',rir:''}));
+  const top=document.createElement('div');top.className='focus-top';
+  const name=document.createElement('div');name.className='focus-ex-name';name.textContent=ex.name;
+  const exit=document.createElement('button');exit.className='focus-exit';exit.textContent='✕ Quitter';exit.addEventListener('click',()=>{overlay.style.display='none';renderSession();});
+  const meta=document.createElement('div');meta.style.cssText='font-size:11px;opacity:.8';meta.textContent=`${ex.sets}×${ex.reps} · Préc: ${lastW(ex.name)||'—'}`;
+  top.appendChild(name);const topInfo=document.createElement('div');topInfo.style.cssText='display:flex;flex-direction:column;gap:2px;flex:1;margin-left:10px';topInfo.appendChild(meta);top.appendChild(topInfo);top.appendChild(exit);
+  overlay.appendChild(top);
+  const body=document.createElement('div');body.className='focus-body';
+  // Chrono
+  const chronoDiv=document.createElement('div');chronoDiv.className='focus-chrono';
+  const chronoTime=document.createElement('div');chronoTime.id='focus-chrono-time';chronoTime.className='focus-chrono-time';chronoTime.textContent='0:00';
+  const chronoPrev=document.createElement('div');chronoPrev.className='focus-prev';chronoPrev.textContent=`Dernier: ${lastW(ex.name)||'—'}`;
+  chronoDiv.appendChild(chronoTime);chronoDiv.appendChild(chronoPrev);body.appendChild(chronoDiv);
+  // Sets
+  ex.setData.slice(0,nSets).forEach((setD,si)=>{
+    const row=document.createElement('div');row.className='focus-set-row'+(setD.done?' f-done':si===ex.setData.findIndex(s=>!s.done)?' f-active':'');
+    const sn=document.createElement('div');sn.style.cssText='font-size:12px;font-weight:700;color:var(--muted);width:24px';sn.textContent=setD.done?'✓':(si+1);
+    const wi=document.createElement('input');wi.type='text';wi.className='focus-inp';wi.value=setD.weight||ex.weight||'';wi.placeholder='kg';wi.addEventListener('input',e=>{setD.weight=e.target.value;save();});
+    const u1=document.createElement('span');u1.className='focus-unit';u1.textContent='kg ×';
+    const ri=document.createElement('input');ri.type='number';ri.className='focus-inp';ri.value=setD.reps||'';ri.placeholder='reps';ri.style.width='70px';ri.addEventListener('input',e=>{setD.reps=e.target.value;save();});
+    const u2=document.createElement('span');u2.className='focus-unit';u2.textContent='reps';
+    const vb=document.createElement('button');vb.className='focus-val-btn'+(setD.done?' f-validated':'');vb.textContent=setD.done?'✓ Fait':'✓';
+    [wi,ri].forEach(inp=>inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();vb.click();}}));
+    vb.addEventListener('click',()=>{setD.done=!setD.done;vb.className='focus-val-btn'+(setD.done?' f-validated':'');vb.textContent=setD.done?'✓ Fait':'✓';row.className='focus-set-row'+(setD.done?' f-done':'');sn.textContent=setD.done?'✓':(si+1);if(setD.done){d.exercises[realIdx].repsAchieved=ex.setData.filter(s=>s.done).map(s=>s.reps).join('/');resetChrono();startChrono();}if(ex.setData.slice(0,nSets).every(s=>s.done)){d.exercises[realIdx].done=true;showToast('✅ Exercice terminé !','save');}save();updateStats();renderDayTabs();});
+    row.appendChild(sn);row.appendChild(wi);row.appendChild(u1);row.appendChild(ri);row.appendChild(u2);row.appendChild(vb);body.appendChild(row);
+  });
+  overlay.appendChild(body);updateChronoDsp();
+}
+
+/* ══ PROGRESSION ══ */
+
+/* ══════════════════════════════════════════════════════
+   CHART ENGINE — Canvas 2D ultra-léger, zéro dépendance
+   ══════════════════════════════════════════════════════ */
+const ChartEngine = {
+  /* Résout une CSS var en couleur réelle */
+  _resolveColor(cv) {
+    if (!cv || !cv.startsWith('var(')) return cv || '#5ba8a0';
+    const name = cv.slice(4, -1);
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#5ba8a0';
+  },
+
+  /* Crée ou recycle un canvas dans un conteneur */
+  _canvas(container, h) {
+    let cv = container.querySelector('canvas');
+    if (!cv) { cv = document.createElement('canvas'); cv.style.cssText = 'width:100%;display:block'; container.appendChild(cv); }
+    const W = container.clientWidth || 320;
+    cv.width = W; cv.height = h;
+    return { cv, ctx: cv.getContext('2d'), W, H: h };
+  },
+
+  /* LINE CHART — data: [{label, value, color?}] */
+  line(container, datasets, opts = {}) {
+    const H = opts.height || 120;
+    const { cv, ctx, W, H: CH } = this._canvas(container, H);
+    const pad = { t: 10, r: 14, b: 28, l: opts.yLabel ? 38 : 8 };
+    const inner = { w: W - pad.l - pad.r, h: CH - pad.t - pad.b };
+
+    // Background
+    ctx.clearRect(0, 0, W, CH);
+
+    const allVals = datasets.flatMap(ds => ds.data.map(p => p.value));
+    if (!allVals.length) { this._noData(ctx, W, CH); return; }
+    const minV = opts.min !== undefined ? opts.min : Math.min(...allVals);
+    const maxV = opts.max !== undefined ? opts.max : Math.max(...allVals);
+    const range = maxV - minV || 1;
+
+    const toX = i => pad.l + (i / (Math.max(...datasets.map(d => d.data.length)) - 1 || 1)) * inner.w;
+    const toY = v => pad.t + (1 - (v - minV) / range) * inner.h;
+
+    // Grid lines
+    ctx.strokeStyle = this._resolveColor('var(--border)');
+    ctx.lineWidth = 0.5;
+    [0, 0.25, 0.5, 0.75, 1].forEach(f => {
+      const y = pad.t + f * inner.h;
+      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
+      if (opts.yLabel) {
+        const val = Math.round(maxV - f * range);
+        ctx.fillStyle = this._resolveColor('var(--muted)');
+        ctx.font = '9px DM Mono,monospace'; ctx.textAlign = 'right';
+        ctx.fillText(val, pad.l - 4, y + 3);
+      }
+    });
+
+    // Datasets
+    datasets.forEach(ds => {
+      if (!ds.data.length) return;
+      const col = this._resolveColor(ds.color || 'var(--teal)');
+      ctx.strokeStyle = col; ctx.lineWidth = ds.width || 2.5;
+      ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      if (ds.dashed) ctx.setLineDash([5, 4]);
+      else ctx.setLineDash([]);
+
+      // Fill under
+      if (ds.fill) {
+        const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + inner.h);
+        grad.addColorStop(0, col + '33'); grad.addColorStop(1, col + '05');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ds.data.forEach((p, i) => { const x = toX(i), y = toY(p.value); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+        ctx.lineTo(toX(ds.data.length - 1), pad.t + inner.h);
+        ctx.lineTo(toX(0), pad.t + inner.h);
+        ctx.closePath(); ctx.fill();
+      }
+
+      // Line
+      ctx.beginPath();
+      ds.data.forEach((p, i) => { const x = toX(i), y = toY(p.value); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Dots + labels
+      ds.data.forEach((p, i) => {
+        const x = toX(i), y = toY(p.value);
+        ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = col; ctx.fill();
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
+      });
+    });
+
+    // X labels
+    const labels = datasets[0]?.data.map(p => p.label) || [];
+    ctx.fillStyle = this._resolveColor('var(--muted)');
+    ctx.font = '9px DM Sans,sans-serif'; ctx.textAlign = 'center';
+    const step = Math.ceil(labels.length / 7);
+    labels.forEach((lbl, i) => {
+      if (i % step !== 0 && i !== labels.length - 1) return;
+      ctx.fillText(lbl, toX(i), CH - 4);
+    });
+  },
+
+  /* BAR CHART — datasets: [{label, value, color?}] */
+  bar(container, data, opts = {}) {
+    const H = opts.height || 110;
+    const { cv, ctx, W, H: CH } = this._canvas(container, H);
+    const pad = { t: 10, r: 8, b: 24, l: opts.yLabel ? 36 : 6 };
+    const inner = { w: W - pad.l - pad.r, h: CH - pad.t - pad.b };
+
+    ctx.clearRect(0, 0, W, CH);
+    if (!data.length) { this._noData(ctx, W, CH); return; }
+
+    const maxV = Math.max(...data.map(d => d.value), 1);
+    const gap = 3, bw = (inner.w - gap * (data.length - 1)) / data.length;
+
+    // Grid
+    ctx.strokeStyle = this._resolveColor('var(--border)');
+    ctx.lineWidth = 0.5;
+    [0.5, 1].forEach(f => {
+      const y = pad.t + (1 - f) * inner.h;
+      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
+    });
+
+    data.forEach((d, i) => {
+      const x = pad.l + i * (bw + gap);
+      const barH = (d.value / maxV) * inner.h;
+      const y = pad.t + inner.h - barH;
+      const col = this._resolveColor(d.color || 'var(--teal)');
+
+      const grad = ctx.createLinearGradient(0, y, 0, y + barH);
+      grad.addColorStop(0, col); grad.addColorStop(1, col + '88');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.roundRect ? ctx.roundRect(x, y, bw, barH, [3, 3, 0, 0]) : ctx.rect(x, y, bw, barH);
+      ctx.fill();
+
+      ctx.fillStyle = this._resolveColor('var(--muted)');
+      ctx.font = '9px DM Sans,sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(d.label, x + bw / 2, CH - 4);
+
+      if (d.value > 0) {
+        ctx.fillStyle = this._resolveColor('var(--text)');
+        ctx.font = 'bold 9px DM Mono,monospace';
+        const valStr = d.value >= 1000 ? (d.value/1000).toFixed(1)+'k' : String(d.value);
+        ctx.fillText(valStr, x + bw / 2, y - 2);
+      }
+    });
+  },
+
+  /* RADAR CHART — axes: [{label, value (0-1)}] */
+  radar(container, axes, opts = {}) {
+    const size = opts.size || Math.min(container.clientWidth || 200, 200);
+    let cv = container.querySelector('canvas');
+    if (!cv) { cv = document.createElement('canvas'); container.appendChild(cv); }
+    cv.width = size; cv.height = size;
+    cv.style.display = 'block'; cv.style.margin = '0 auto';
+    const ctx = cv.getContext('2d');
+    const cx = size / 2, cy = size / 2, R = size * 0.38;
+    const N = axes.length;
+    const angle = i => (Math.PI * 2 / N) * i - Math.PI / 2;
+
+    ctx.clearRect(0, 0, size, size);
+    if (!axes.length) return;
+
+    // Grid rings
+    [0.25, 0.5, 0.75, 1].forEach(f => {
+      ctx.beginPath();
+      axes.forEach((_, i) => {
+        const a = angle(i), x = cx + Math.cos(a) * R * f, y = cy + Math.sin(a) * R * f;
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      });
+      ctx.closePath();
+      ctx.strokeStyle = this._resolveColor('var(--border)');
+      ctx.lineWidth = f === 1 ? 1.2 : 0.5; ctx.stroke();
+    });
+
+    // Spokes
+    axes.forEach((_, i) => {
+      const a = angle(i);
+      ctx.beginPath(); ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R);
+      ctx.strokeStyle = this._resolveColor('var(--border)'); ctx.lineWidth = 0.5; ctx.stroke();
+    });
+
+    // Data polygon
+    const col = this._resolveColor(opts.color || 'var(--teal)');
+    ctx.beginPath();
+    axes.forEach((ax, i) => {
+      const a = angle(i), v = Math.min(1, Math.max(0, ax.value));
+      const x = cx + Math.cos(a) * R * v, y = cy + Math.sin(a) * R * v;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.closePath();
+    ctx.fillStyle = col + '33'; ctx.fill();
+    ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.stroke();
+
+    // Dots
+    axes.forEach((ax, i) => {
+      const a = angle(i), v = Math.min(1, Math.max(0, ax.value));
+      ctx.beginPath(); ctx.arc(cx + Math.cos(a) * R * v, cy + Math.sin(a) * R * v, 4, 0, Math.PI * 2);
+      ctx.fillStyle = col; ctx.fill();
+    });
+
+    // Labels
+    axes.forEach((ax, i) => {
+      const a = angle(i), x = cx + Math.cos(a) * (R + 14), y = cy + Math.sin(a) * (R + 14);
+      ctx.fillStyle = this._resolveColor('var(--text)');
+      ctx.font = 'bold 9px DM Sans,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(ax.label, x, y);
+    });
+  },
+
+  _noData(ctx, W, H) {
+    ctx.fillStyle = '#aaa'; ctx.font = '11px DM Sans,sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('Aucune donnée', W / 2, H / 2);
+  },
+};
+
+
 function render1RMChart(container, exerciseName, color) {
   if (!container) return;
   const hist = exHist(exerciseName);
@@ -237,55 +499,94 @@ function render1RMChart(container, exerciseName, color) {
   ChartEngine.line(container, [{data, color: color||'var(--teal)', fill: true}], {height: 80, yLabel: true});
 }
 
+function renderProgression(){
+  const mf=document.getElementById('prog-muscle-filter');const cv=mf.value;mf.innerHTML='<option value="">Tous les groupes</option>';
+  MUSCLES.filter(m=>m.key!=='rep').forEach(m=>{const o=document.createElement('option');o.value=m.key;o.textContent=m.label;if(m.key===cv)o.selected=true;mf.appendChild(o);});
+  const wLimit=document.getElementById('prog-weeks-filter').value;
+  const cards=document.getElementById('prog-cards');
+  // Render summary charts in progression tab
+  const progChartsSection = document.getElementById('prog-charts-section');
+  if(progChartsSection){
+    progChartsSection.innerHTML='';
+    // Weekly volume trend
+    const volWrap = document.createElement('div');
+    progChartsSection.appendChild(volWrap);
+    const volData = computeWeeklyVolume(12);
+    const {wrap:vw,canvas:vc}=mkChartWrap('prog-vol','📊 Volume hebdomadaire (12 semaines)','kg·reps');
+    volWrap.appendChild(vw);
+    setTimeout(()=>Charts.barChart(vc,volData,{height:140,yFmt:v=>v>=1000?Math.round(v/1000)+'k':Math.round(v)}),50);
 
+    // Poids evolution
+    const weightEntries=(S.mesures.poids||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));
+    if(weightEntries.length>1){
+      const wWrap=document.createElement('div');
+      progChartsSection.appendChild(wWrap);
+      const {wrap:ww,canvas:wc}=mkChartWrap('prog-weight','⚖️ Poids corporel',`Objectif: ${S.objective?.targetWeight||'—'}kg`);
+      wWrap.appendChild(ww);
+      const targetW=parseFloat(S.objective&&S.objective.targetWeight)||null;
+      setTimeout(()=>Charts.lineChart(wc,[{label:'Poids',values:weightEntries.map(e=>({x:e.date,y:parseFloat(e.val)||0})),color:'--teal'}],{height:130,goal:targetW||undefined,yFmt:v=>v.toFixed(1)+'kg'}),50);
+    }
+  }
 
-function showSessionComplete(di,d){
-  const existing=document.getElementById('sess-complete-'+di);if(existing)return;
-  const vol=Object.values(dayVol(d)).reduce((a,b)=>a+b,0);
-  const prs=d.exercises.filter(checkPR).map(e=>e.name);
-  const dur=S.sessStartTime?Math.round((Date.now()-S.sessStartTime)/60000):0;
-  const popup=document.createElement('div');popup.id='sess-complete-'+di;popup.className='sess-complete-popup';
-  // Build popup safely — no user data in innerHTML
-  popup.innerHTML='';
-  function _mkStat(val,lbl){const d=document.createElement('div');d.style.textAlign='center';const v=document.createElement('div');v.style.cssText='font-size:22px;font-weight:700;font-family:var(--mono)';v.textContent=val;const l=document.createElement('div');l.style.cssText='font-size:9px;opacity:.8';l.textContent=lbl;d.appendChild(v);d.appendChild(l);return d;}
-  const hd=document.createElement('div');hd.style.cssText='font-size:20px;margin-bottom:6px';hd.textContent='🎉 Séance terminée !';popup.appendChild(hd);
-  const sub=document.createElement('div');sub.style.cssText='font-size:11px;opacity:.85;margin-bottom:10px';sub.textContent=DAYS[di]+' — Sem. '+S.weekType+' · '+S.currentBlock;popup.appendChild(sub);
-  const stats=document.createElement('div');stats.style.cssText='display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:10px';
-  stats.appendChild(_mkStat(Math.round(vol/1000*10)/10+'t','Volume'));
-  if(dur)stats.appendChild(_mkStat(dur+"'",'Durée'));
-  if(prs.length)stats.appendChild(_mkStat('🏆'+prs.length,'PR'));
-  popup.appendChild(stats);
-  if(prs.length){const pl=document.createElement('div');pl.style.cssText='font-size:10px;opacity:.9;margin-bottom:10px';prs.forEach(n=>{const s=document.createElement('span');s.textContent='🏆 '+n+' ';pl.appendChild(s);});popup.appendChild(pl);}
-  const closeBtn=document.createElement('button');closeBtn.style.cssText='background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 16px;border-radius:10px;cursor:pointer;font-family:var(--font);font-weight:600;font-size:11px';closeBtn.textContent='Fermer';closeBtn.addEventListener('click',()=>popup.remove());
-  const shareBtn=document.createElement('button');shareBtn.style.cssText='background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.4);color:#fff;padding:5px 16px;border-radius:10px;cursor:pointer;font-family:var(--font);font-weight:600;font-size:11px;margin-left:8px';shareBtn.textContent='📤 Partager';shareBtn.addEventListener('click',()=>shareSess(di,exercises,vol,dur));
-  const btnRow2=document.createElement('div');btnRow2.style.cssText='display:flex;gap:6px;justify-content:center;flex-wrap:wrap';btnRow2.appendChild(closeBtn);btnRow2.appendChild(shareBtn);popup.appendChild(btnRow2);
-  const detail=document.getElementById('day-detail');if(detail)detail.prepend(popup);
-  // Save session summary to history
-  const sessDate = localDateStr();
-  if(!S.history) S.history = {};
-  if(!S.history[sessDate]) S.history[sessDate] = [];
-  // Store session summary as a special entry
-  const sessVol2 = Object.values(dayVol(d)).reduce((a,b)=>a+b,0);
-  const sessDur2 = S.sessStartTime?Math.round((Date.now()-S.sessStartTime)/60000):0;
-  const sessSets2 = (d.exercises||[]).reduce((a,ex)=>a+(ex.repsAchieved&&ex.repsAchieved!==''?1:0),0);
-  // Enrich history with session data
-  const histEntry = {
-    name: DAYS[di]||'Séance',
-    date: sessDate,
-    volume: sessVol2,
-    duration: sessDur2,
-    sets: sessSets2,
-    exercises: (d.exercises||[]).map(e=>({
-      name:e.name, muscle:e.muscle, weight:e.weight,
-      sets:e.sets, reps:e.reps, repsAchieved:e.repsAchieved||'',
-      done:e.done, isWarmup:e.isWarmup||false
-    }))
-  };
-  // Avoid duplicates — replace if same date+name
-  const existIdx = S.history[sessDate].findIndex(h=>h.name===histEntry.name);
-  if(existIdx>=0) S.history[sessDate][existIdx] = histEntry;
-  else S.history[sessDate].push(histEntry);
-  S.sessStartTime = null;
-  save();
-  checkAndAwardAchievements();
+cards.innerHTML='';
+  const allNames=new Set();
+  Object.values(S.history).forEach(wk=>(wk.days||[]).forEach(d=>(d.exercises||[]).forEach(ex=>{if(ex.name&&ex.weight&&!ex.isWarmup)allNames.add(ex.name);})));
+  S.days.forEach(d=>d.exercises.filter(e=>!e.isWarmup).forEach(ex=>{if(ex.name&&ex.weight)allNames.add(ex.name);}));
+  if(!allNames.size){cards.innerHTML='<div class="prog-no-data">💡 Aucune donnée. Renseignez des poids ou cliquez "Données démo".</div>';return;}
+  const filter=mf.value;
+  const filteredNames=[...allNames].filter(name=>{if(!filter)return true;return S.days.some(d=>d.exercises.some(e=>e.name===name&&e.muscle===filter));});
+  filteredNames.forEach(name=>{
+    let hist=exHist(name);
+    S.days.forEach(d=>d.exercises.filter(e=>!e.isWarmup).forEach(ex=>{if(ex.name===name&&ex.weight)hist.push({weekKey:'current',weekCount:S.weekCount,weight:ex.weight,repsAchieved:ex.repsAchieved,sets:ex.sets,reps:ex.reps,done:ex.done});}));
+    if(wLimit!=='all')hist=hist.slice(-parseInt(wLimit));if(!hist.length)return;
+    const ex0=S.days.flatMap(d=>d.exercises).find(e=>e.name===name)||{};const m=MM[ex0.muscle||''];
+    const isPlat=isPlateau(name);
+    const card=document.createElement('div');card.className='prog-card';
+    const hdr=document.createElement('div');hdr.className='prog-card-hdr';
+    const nm=document.createElement('div');nm.className='prog-card-name';nm.textContent=name;nm.title=name;
+    let best1rm=0;hist.forEach(r=>{const rm=calc1RM(r.weight,r.repsAchieved||r.reps);if(rm>best1rm)best1rm=rm;});
+    const pill=document.createElement('span');if(m){pill.style.cssText=`background:${m.calBg};color:${m.calColor};font-size:8px;font-weight:700;padding:2px 6px;border-radius:8px`;pill.textContent=m.label;}
+    const rm1=document.createElement('span');rm1.style.cssText='font-size:9px;color:var(--purple);font-weight:700;flex-shrink:0';if(best1rm)rm1.textContent='1RM≈'+best1rm+'kg';
+    if(isPlat){const pb=document.createElement('span');pb.className='badge-plateau';pb.textContent='⚠ Plateau';hdr.appendChild(pb);}
+    hdr.appendChild(nm);hdr.appendChild(pill);hdr.appendChild(rm1);card.appendChild(hdr);
+    const body=document.createElement('div');body.className='prog-card-body';
+    // Overload badge
+    const curEx=S.days.flatMap(d=>d.exercises).find(e=>e.name===name&&!e.isWarmup);
+    if(curEx&&shouldOverload(curEx)){const cw=parseFloat(curEx.weight)||0;const sug=Math.round((cw*1.025)/2.5)*2.5;const badge=document.createElement('div');badge.className='badge-overload';badge.style.marginBottom='6px';badge.textContent='⬆ Surcharge: '+sug+'kg (+2.5%)';body.appendChild(badge);}
+    if(curEx&&checkPR(curEx)){const pb=document.createElement('div');pb.className='badge-pr';pb.style.marginBottom='6px';pb.textContent='🏆 PR actuel';body.appendChild(pb);}
+    if(isPlat){const tips=document.createElement('div');tips.style.cssText='font-size:9px;color:var(--muted);margin-bottom:6px;font-style:italic';tips.textContent='💡 Suggestions: changer la fourchette de reps, modifier le tempo, varier l\'angle.';body.appendChild(tips);}
+    // Strength standard
+    const lastPoids=(S.mesures.poids||[]).slice(-1)[0];
+    if(lastPoids&&curEx&&curEx.weight){const std=strengthStandard(curEx,parseFloat(lastPoids.val));if(std){const sb=document.createElement('div');sb.className='std-comparison';sb.textContent=`Niveau: ${std.level} (${Math.round((parseFloat(curEx.weight)||0)/parseFloat(lastPoids.val)*100)}% du poids corporel)`;body.appendChild(sb);}}
+    // Prediction (linear regression)
+    if(hist.length>=3){
+      const weights=hist.map((r,i)=>({x:i,y:parseFloat(r.weight)||0})).filter(p=>p.y>0);
+      if(weights.length>=3){
+        const n=weights.length;const sumX=weights.reduce((a,p)=>a+p.x,0);const sumY=weights.reduce((a,p)=>a+p.y,0);const sumXY=weights.reduce((a,p)=>a+p.x*p.y,0);const sumX2=weights.reduce((a,p)=>a+p.x*p.x,0);
+        const slope=(n*sumXY-sumX*sumY)/(n*sumX2-sumX*sumX);const intercept=(sumY-slope*sumX)/n;
+        const pred4=Math.round((slope*(n+3)+intercept)*10)/10;const pred8=Math.round((slope*(n+7)+intercept)*10)/10;
+        if(slope>0&&pred4>0){const pred=document.createElement('div');pred.style.cssText='font-size:9px;color:var(--purple);margin-bottom:6px;font-style:italic';pred.textContent=`📈 Projection: +4 sem. → ${pred4}kg · +8 sem. → ${pred8}kg`;body.appendChild(pred);}
+      }
+    }
+    // History table
+    // 1RM chart
+    if(hist.length>1){const chartDiv=document.createElement('div');chartDiv.style.cssText='height:80px;margin-bottom:8px';body.appendChild(chartDiv);setTimeout(()=>render1RMChart(chartDiv,name,m?m.calColor:'var(--teal)'),50);}
+    const t=document.createElement('table');t.className='prog-table';t.innerHTML='<thead><tr><th>Sem.</th><th>Poids</th><th>Sér.</th><th>Reps</th><th>1RM</th><th>Δ</th><th>RPE moy.</th></tr></thead>';
+    const tb=document.createElement('tbody');
+    hist.forEach((row,ri)=>{const tr2=document.createElement('tr');const prev=ri>0?hist[ri-1]:null;const wC=parseFloat(row.weight)||0;const wP=prev?parseFloat(prev.weight)||0:0;const delta=prev?(wC-wP):0;const rm=calc1RM(row.weight,row.repsAchieved||row.reps);const wkLbl=row.weekKey==='current'?'<span style="color:var(--teal-d);font-weight:700">Actuel</span>':'S'+row.weekCount;const deltaHtml=ri===0?'<span class="prog-delta-eq">—</span>':delta>0?`<span class="prog-delta-up">+${delta}kg</span>`:delta<0?`<span class="prog-delta-down">${delta}kg</span>`:'<span class="prog-delta-eq">—</span>';tr2.innerHTML=`<td class="prog-table td">${wkLbl}</td><td>${row.weight}</td><td>${row.sets||'—'}</td><td>${row.repsAchieved||row.reps||'—'}</td><td style="color:var(--purple)">${rm||'—'}</td><td>${deltaHtml}</td><td style="color:var(--muted)">—</td>`;tb.appendChild(tr2);});
+    t.appendChild(tb);body.appendChild(t);
+    // Canvas chart
+    if(hist.length>1){const canvas=document.createElement('canvas');canvas.className='prog-canvas';canvas.height=55;body.appendChild(canvas);setTimeout(()=>{const W=canvas.offsetWidth||270;canvas.width=W;const ctx=canvas.getContext('2d');const weights=hist.map(r=>parseFloat(r.weight)||0);const minW=Math.min(...weights),maxW=Math.max(...weights);const pad=8,cH=48;ctx.clearRect(0,0,W,55);ctx.strokeStyle=m?m.calColor:'var(--teal)';ctx.lineWidth=2;ctx.lineJoin='round';ctx.beginPath();const step=(W-pad*2)/(hist.length-1||1);weights.forEach((w,i)=>{const x=pad+i*step;const y=maxW===minW?cH/2:pad+(1-(w-minW)/(maxW-minW))*(cH-pad*2);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.stroke();// Prediction dotted line
+    weights.forEach((w,i)=>{const x=pad+i*step;const y=maxW===minW?cH/2:pad+(1-(w-minW)/(maxW-minW))*(cH-pad*2);ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fillStyle=m?m.calColor:'var(--teal)';ctx.fill();ctx.fillStyle='#999';ctx.font='8px DM Mono,monospace';ctx.textAlign='center';ctx.fillText(w,x,53);});},100);}
+    card.appendChild(body);cards.appendChild(card);
+  });
+  if(!cards.children.length)cards.innerHTML='<div class="prog-no-data">Aucun exercice correspondant.</div>';
 }
+document.getElementById('prog-muscle-filter').addEventListener('change',renderProgression);
+document.getElementById('prog-weeks-filter').addEventListener('change',renderProgression);
+document.getElementById('gen-sample-data').addEventListener('click',async()=>{
+  const _demoOk=await Modal.confirm('Générer des données de démonstration sur 8 semaines ?');if(!_demoOk)return;
+  const exes=[{name:'Développé incliné haltères (prise neutre)',muscle:'pec',baseW:28,inc:1.25},{name:'Tirage vertical poulie prise neutre',muscle:'dos',baseW:55,inc:2.5},{name:'Presse à cuisses',muscle:'jam',baseW:80,inc:5},{name:'Curl incliné haltères',muscle:'bic',baseW:14,inc:1},{name:'Pushdown corde',muscle:'tri',baseW:20,inc:1.25},{name:'Hip thrust barre',muscle:'jam',baseW:60,inc:2.5}];
+  for(let w=1;w<=8;w++){const key=localDateStr(new Date(Date.now()-(9-w)*7*86400000));S.history[key]={weekType:w%2===0?'B':'A',weekCount:w,block:w<=4?'Accumulation':'Intensification',days:Array.from({length:7},(_,di)=>{const prog=PA[di];return{date:key,muscles:[...((prog&&prog.muscles)||[])],exercises:((prog&&prog.exercises)||[]).map(ex=>{const base=exes.find(e=>e.name===ex.name);const wt=base?base.baseW+(w-1)*base.inc:0;return Object.assign({},ex,{weight:wt?String(wt):'',repsAchieved:String(8+Math.floor(Math.random()*3)),rpe:String(7+Math.random().toFixed(1)),done:true,isWarmup:ex.isWarmup||false});})};})}}
+  save();renderProgression();showToast('Données démo générées ✓','save');
+});

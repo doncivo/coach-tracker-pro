@@ -1,59 +1,6 @@
-/* ═══════════════════════════════════════
-   render_planning.js — Page Planning
-   Dépend de: state.js, utils.js, charts.js
-═══════════════════════════════════════ */
-
-function renderABCompare(container) {
-  if (!container) return;
-  container.innerHTML = '';
-  const aWeeks = Object.values(S.history).filter(w => w.weekType === 'A');
-  const bWeeks = Object.values(S.history).filter(w => w.weekType === 'B');
-  if (!aWeeks.length && !bWeeks.length) {
-    container.innerHTML = '<div class="chart-no-data">Archivez des semaines A et B pour comparer.</div>';
-    return;
-  }
-  const avgVol = weeks => {
-    if (!weeks.length) return {};
-    const totals = {};
-    weeks.forEach(wk => (wk.days||[]).forEach(d => (d.exercises||[]).filter(e=>!e.isWarmup).forEach(ex => {
-      const v = calcVol(ex); if (v&&ex.muscle) totals[ex.muscle] = (totals[ex.muscle]||0) + v;
-    })));
-    Object.keys(totals).forEach(k => totals[k] = Math.round(totals[k]/weeks.length));
-    return totals;
-  };
-  const aVol = avgVol(aWeeks), bVol = avgVol(bWeeks);
-  const keys = [...new Set([...Object.keys(aVol),...Object.keys(bVol)])];
-  if (!keys.length) { container.innerHTML = '<div class="chart-no-data">Aucune donnée de volume.</div>'; return; }
-
-  const maxV = Math.max(...keys.map(k => Math.max(aVol[k]||0, bVol[k]||0)), 1);
-  keys.forEach(k => {
-    const m = MM[k]; if (!m) return;
-    const aV = aVol[k]||0, bV = bVol[k]||0;
-    const row = document.createElement('div'); row.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:11px';
-    const lbl = document.createElement('div'); lbl.style.cssText = 'width:52px;color:var(--muted);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'; lbl.textContent = m.label.split(' ')[0];
-    const bars = document.createElement('div'); bars.style.cssText = 'flex:1;display:flex;flex-direction:column;gap:3px';
-    [[aV,'var(--teal)','A'],[bV,'var(--purple)','B']].forEach(([v,col,lbl2]) => {
-      const bw = document.createElement('div'); bw.style.cssText = 'display:flex;align-items:center;gap:5px';
-      const tag = document.createElement('span'); tag.style.cssText = 'font-size:8px;font-weight:700;width:10px;color:'+col; tag.textContent = lbl2;
-      const barWrap = document.createElement('div'); barWrap.style.cssText = 'flex:1;height:7px;background:var(--border);border-radius:4px;overflow:hidden';
-      const barFill = document.createElement('div'); barFill.style.cssText = `width:${Math.round(v/maxV*100)}%;height:100%;background:${col};border-radius:4px`;
-      barWrap.appendChild(barFill);
-      const valEl = document.createElement('span'); valEl.style.cssText = 'font-size:9px;font-family:var(--mono);color:var(--muted);width:36px;text-align:right';
-      valEl.textContent = Math.round(v/1000*10)/10+'t';
-      bw.appendChild(tag); bw.appendChild(barWrap); bw.appendChild(valEl); bars.appendChild(bw);
-    });
-    row.appendChild(lbl); row.appendChild(bars); container.appendChild(row);
-  });
-  const legend = document.createElement('div'); legend.style.cssText = 'display:flex;gap:14px;margin-top:8px;font-size:10px;color:var(--muted)';
-  [['var(--teal)','Semaine A (moy. '+aWeeks.length+'sem.)'],['var(--purple)','Semaine B (moy. '+bWeeks.length+'sem.)']].forEach(([c,l]) => {
-    const li = document.createElement('span'); li.style.cssText = 'display:flex;align-items:center;gap:4px';
-    const dot = document.createElement('span'); dot.style.cssText = 'width:10px;height:10px;border-radius:50%;background:'+c;
-    li.appendChild(dot); li.appendChild(document.createTextNode(l)); legend.appendChild(li);
-  });
-  container.appendChild(legend);
-}
-
-/* applySlotColor défini dans module précédent */
+/* ============================================================
+   render_planning.js — Page Planning (Tabs + Detail + Stats + Goals)
+============================================================ */
 
 function renderDayTabs(){
   const nav=document.getElementById('day-tabs');nav.innerHTML='';
@@ -78,6 +25,8 @@ function renderDayTabs(){
   }
 }
 
+/* ══ DAY DETAIL ══ */
+/* _exView — déclaré dans constants.js */
 function renderDayDetail(i){
   const detail=document.getElementById('day-detail');const d=S.days[i];
   detail.innerHTML='';detail.style.animation='none';void detail.offsetHeight;detail.style.animation='';
@@ -233,14 +182,7 @@ function buildExTable(di,tbody,d,onUpdate){
   });
 }
 
-function renderGoals(){
-  const list=document.getElementById('goals-list');list.innerHTML='';
-  S.goals.forEach((g,i)=>{const row=document.createElement('div');row.className='goal-row';const cb=document.createElement('input');cb.type='checkbox';cb.className='goal-cb';cb.checked=g.done;cb.addEventListener('change',e=>{S.goals[i].done=e.target.checked;save();});const inp=document.createElement('input');inp.type='text';inp.className='goal-inp';inp.placeholder='Objectif...';inp.value=g.text||'';inp.addEventListener('input',e=>{S.goals[i].text=e.target.value;save();});const del=document.createElement('button');del.className='goal-del';del.textContent='×';del.addEventListener('click',()=>{S.goals.splice(i,1);save();renderGoals();});row.appendChild(cb);row.appendChild(inp);row.appendChild(del);list.appendChild(row);});
-}
-
-
-
-async function buildExRow(di,ei,d,onUpdate,isDetail){
+function buildExRow(di,ei,d,onUpdate,isDetail){
   const ex=d.exercises[ei];
   const tr=document.createElement('tr');
   if(ex.done)tr.classList.add('done-row');
@@ -422,3 +364,158 @@ async function buildExRow(di,ei,d,onUpdate,isDetail){
   tr.addEventListener('dragover',e=>e.preventDefault());
   return tr;
 }
+
+function showSessionComplete(di,d){
+  const existing=document.getElementById('sess-complete-'+di);if(existing)return;
+  const vol=Object.values(dayVol(d)).reduce((a,b)=>a+b,0);
+  const prs=d.exercises.filter(checkPR).map(e=>e.name);
+  const dur=S.sessStartTime?Math.round((Date.now()-S.sessStartTime)/60000):0;
+  const popup=document.createElement('div');popup.id='sess-complete-'+di;popup.className='sess-complete-popup';
+  // Build popup safely — no user data in innerHTML
+  popup.innerHTML='';
+  function _mkStat(val,lbl){const d=document.createElement('div');d.style.textAlign='center';const v=document.createElement('div');v.style.cssText='font-size:22px;font-weight:700;font-family:var(--mono)';v.textContent=val;const l=document.createElement('div');l.style.cssText='font-size:9px;opacity:.8';l.textContent=lbl;d.appendChild(v);d.appendChild(l);return d;}
+  const hd=document.createElement('div');hd.style.cssText='font-size:20px;margin-bottom:6px';hd.textContent='🎉 Séance terminée !';popup.appendChild(hd);
+  const sub=document.createElement('div');sub.style.cssText='font-size:11px;opacity:.85;margin-bottom:10px';sub.textContent=DAYS[di]+' — Sem. '+S.weekType+' · '+S.currentBlock;popup.appendChild(sub);
+  const stats=document.createElement('div');stats.style.cssText='display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:10px';
+  stats.appendChild(_mkStat(Math.round(vol/1000*10)/10+'t','Volume'));
+  if(dur)stats.appendChild(_mkStat(dur+"'",'Durée'));
+  if(prs.length)stats.appendChild(_mkStat('🏆'+prs.length,'PR'));
+  popup.appendChild(stats);
+  if(prs.length){const pl=document.createElement('div');pl.style.cssText='font-size:10px;opacity:.9;margin-bottom:10px';prs.forEach(n=>{const s=document.createElement('span');s.textContent='🏆 '+n+' ';pl.appendChild(s);});popup.appendChild(pl);}
+  const closeBtn=document.createElement('button');closeBtn.style.cssText='background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 16px;border-radius:10px;cursor:pointer;font-family:var(--font);font-weight:600;font-size:11px';closeBtn.textContent='Fermer';closeBtn.addEventListener('click',()=>popup.remove());
+  const shareBtn=document.createElement('button');shareBtn.style.cssText='background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.4);color:#fff;padding:5px 16px;border-radius:10px;cursor:pointer;font-family:var(--font);font-weight:600;font-size:11px;margin-left:8px';shareBtn.textContent='📤 Partager';shareBtn.addEventListener('click',()=>shareSess(di,exercises,vol,dur));
+  const btnRow2=document.createElement('div');btnRow2.style.cssText='display:flex;gap:6px;justify-content:center;flex-wrap:wrap';btnRow2.appendChild(closeBtn);btnRow2.appendChild(shareBtn);popup.appendChild(btnRow2);
+  const detail=document.getElementById('day-detail');if(detail)detail.prepend(popup);
+  // Save session summary to history
+  const sessDate = localDateStr();
+  if(!S.history) S.history = {};
+  if(!S.history[sessDate]) S.history[sessDate] = [];
+  // Store session summary as a special entry
+  const sessVol2 = Object.values(dayVol(d)).reduce((a,b)=>a+b,0);
+  const sessDur2 = S.sessStartTime?Math.round((Date.now()-S.sessStartTime)/60000):0;
+  const sessSets2 = (d.exercises||[]).reduce((a,ex)=>a+(ex.repsAchieved&&ex.repsAchieved!==''?1:0),0);
+  // Enrich history with session data
+  const histEntry = {
+    name: DAYS[di]||'Séance',
+    date: sessDate,
+    volume: sessVol2,
+    duration: sessDur2,
+    sets: sessSets2,
+    exercises: (d.exercises||[]).map(e=>({
+      name:e.name, muscle:e.muscle, weight:e.weight,
+      sets:e.sets, reps:e.reps, repsAchieved:e.repsAchieved||'',
+      done:e.done, isWarmup:e.isWarmup||false
+    }))
+  };
+  // Avoid duplicates — replace if same date+name
+  const existIdx = S.history[sessDate].findIndex(h=>h.name===histEntry.name);
+  if(existIdx>=0) S.history[sessDate][existIdx] = histEntry;
+  else S.history[sessDate].push(histEntry);
+  S.sessStartTime = null;
+  save();
+  checkAndAwardAchievements();
+}
+
+/* ══ STATS ══ */
+function updateStats(){
+  let done=0,total=0,active=0;
+  S.days.forEach(d=>{const exs=d.exercises.filter(e=>e.name.trim()&&!e.isWarmup);total+=exs.length;done+=exs.filter(e=>e.done).length;if(getDMS(d).some(k=>k&&k!=='rep'))active++;});
+  const setEl=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  setEl('stat-done',done);setEl('stat-total',total);setEl('stat-days',active);setEl('stat-pct',total>0?Math.round(done/total*100)+'%':'0%');
+  const vol=weekVol();const maxV=Math.max(...Object.values(vol),1);
+  const vd=document.getElementById('vol-bars');
+  if(vd){vd.innerHTML='';Object.entries(vol).sort((a,b)=>b[1]-a[1]).forEach(([k,vv])=>{const m=MM[k];if(!m)return;const row=document.createElement('div');row.className='vol-row';const lb=document.createElement('div');lb.className='vol-label';lb.textContent=m.label;lb.title=m.label;const bar=document.createElement('div');bar.className='bar-wrap';const fill=document.createElement('div');fill.className='bar-fill';fill.style.cssText=`width:${Math.round(vv/maxV*100)}%;background:${m.calColor}`;bar.appendChild(fill);const num=document.createElement('div');num.className='vol-num';num.textContent=Math.round(vv/1000*10)/10+'t';row.appendChild(lb);row.appendChild(bar);row.appendChild(num);vd.appendChild(row);});}
+  // Push/Pull
+  const pp=pushPull();const ppd=document.getElementById('push-pull-ratio');
+  if(ppd){ppd.innerHTML='';const tot=pp.push+pp.pull||1;const ppPct=Math.round(pp.push/tot*100),plPct=100-ppPct;const balanced=Math.abs(ppPct-50)<15;const row=document.createElement('div');row.className='vol-row';const lb=document.createElement('div');lb.className='vol-label';lb.textContent='Push/Pull';const dual=document.createElement('div');dual.style.cssText='flex:1;display:flex;height:6px;border-radius:3px;overflow:hidden';const p1=document.createElement('div');p1.style.cssText=`width:${ppPct}%;background:#ffe0ea`;const p2=document.createElement('div');p2.style.cssText=`width:${plPct}%;background:#e0d8ff`;dual.appendChild(p1);dual.appendChild(p2);const val=document.createElement('div');val.style.cssText='font-size:8px;font-family:var(--mono);color:var(--muted);width:36px;text-align:right';val.textContent=ppPct+'/'+plPct;row.appendChild(lb);row.appendChild(dual);row.appendChild(val);ppd.appendChild(row);const ok=document.createElement('div');ok.style.cssText=`font-size:9px;margin-top:3px;font-weight:600;color:${balanced?'var(--green)':'var(--red)'}`;ok.textContent=balanced?'✅ Équilibré':'⚠️ Déséquilibré';ppd.appendChild(ok);}
+  // PR panel
+  const prp=document.getElementById('pr-panel');
+  if(prp){
+    const prs=S.days.flatMap(d=>d.exercises).filter(checkPR);
+    prp.innerHTML='';
+    if(!prs.length){prp.innerHTML='<span style="color:var(--muted)">—</span>';}
+    else{prs.forEach(e=>{const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:5px;padding:2px 0;border-bottom:1px solid var(--border);font-size:10px';const ico=document.createElement('span');ico.textContent='🏆';const nm=document.createElement('span');nm.style.cssText='flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';nm.textContent=e.name;row.appendChild(ico);row.appendChild(nm);prp.appendChild(row);});}
+  }
+  // Alerts panel
+  renderAlertsPanel();
+
+  // Update header fitness score badge
+  try{
+    const fsEl = document.getElementById('hdr-fitness-score');
+    if(fsEl){
+      const fs = computeFitnessScore();
+      const color = fs.score>=80?'#4CAF50':fs.score>=60?'var(--teal)':fs.score>=40?'var(--orange)':'var(--red)';
+      fsEl.textContent = '⚡ '+fs.score;
+      fsEl.style.background = color;
+    }
+  }catch(e){}
+
+}
+
+function renderAlertsPanel(){
+  const ap=document.getElementById('alerts-panel');if(!ap)return;
+  const alerts=[];
+  // Plateau detection
+  S.days.flatMap(d=>d.exercises).filter(e=>e.name.trim()).forEach(ex=>{if(isPlateau(ex.name))alerts.push({type:'warn',msg:'⚠️ Plateau: '+ex.name.slice(0,25)});});
+  // Consecutive same muscle
+  for(let i=0;i<6;i++){const m1=getDM(S.days[i]).filter(k=>k!=='rep');const m2=getDM(S.days[i+1]).filter(k=>k!=='rep');const ov=m1.filter(m=>m2.includes(m));if(ov.length)alerts.push({type:'bad',msg:'🔴 '+DAYS_SH[i]+'/'+DAYS_SH[i+1]+': même groupe'});}
+  // RPE warnings
+  S.days.forEach(d=>d.exercises.forEach(ex=>{const rpe=parseFloat(ex.rpe)||0;if(rpe>=9.5)alerts.push({type:'warn',msg:'🔴 RPE '+rpe+': '+ex.name.slice(0,20)});}));
+  // Pain alerts
+  const pains14=activePains();
+  pains14.forEach(p=>{
+    alerts.push({type:'bad',msg:'⚠️ Douleur: '+(p.zone||p.part||'Zone inconnue')+(p.intensity?' ('+p.intensity+'/10)':'')});
+  });
+  // Untrained muscles this week
+  const trainedMuscles=new Set(S.days.flatMap(d=>getDM(d)));
+  const allMuscles=MK.filter(k=>k!=='rep'&&k!=='cardio');
+  const untrained=allMuscles.filter(k=>!trainedMuscles.has(k));
+  if(untrained.length>0&&untrained.length<allMuscles.length){
+    alerts.push({type:'info',msg:'💡 Non travaillé: '+untrained.slice(0,3).map(k=>MM[k]?.label.split(' ')[0]||k).join(', ')+(untrained.length>3?'…':'')});
+  }
+  if(!alerts.length){ap.innerHTML='<span style="color:var(--muted)">Aucune alerte ✅</span>';return;}
+  ap.innerHTML='';
+  alerts.slice(0,7).forEach(a=>{
+    const row=document.createElement('div');
+    row.style.cssText=`font-size:9px;padding:2px 0;border-bottom:1px solid var(--border);color:${a.type==='bad'?'var(--red)':a.type==='info'?'var(--teal-d)':'var(--orange)'}`;
+    row.textContent=a.msg;
+    ap.appendChild(row);
+  });
+}
+
+/* ══ GOALS ══ */
+function renderGoals(){
+  const list=document.getElementById('goals-list');list.innerHTML='';
+  S.goals.forEach((g,i)=>{const row=document.createElement('div');row.className='goal-row';const cb=document.createElement('input');cb.type='checkbox';cb.className='goal-cb';cb.checked=g.done;cb.addEventListener('change',e=>{S.goals[i].done=e.target.checked;save();});const inp=document.createElement('input');inp.type='text';inp.className='goal-inp';inp.placeholder='Objectif...';inp.value=g.text||'';inp.addEventListener('input',e=>{S.goals[i].text=e.target.value;save();});const del=document.createElement('button');del.className='goal-del';del.textContent='×';del.addEventListener('click',()=>{S.goals.splice(i,1);save();renderGoals();});row.appendChild(cb);row.appendChild(inp);row.appendChild(del);list.appendChild(row);});
+}
+document.getElementById('add-goal-btn').addEventListener('click',()=>{S.goals.push({text:'',done:false});renderGoals();save();});
+document.getElementById('notes-area').addEventListener('input',e=>{S.notes=e.target.value;save();});
+
+/* ══ CHRONO ══ */
+/* _ci — déclaré dans constants.js */
+function updateChronoDsp(){
+  ['chrono-display','focus-chrono-time'].forEach(id=>{const el=document.getElementById(id);if(!el)return;const m=Math.floor(_cs/60),s=_cs%60;el.textContent=m+':'+(s<10?'0':'')+s;el.className=el.className.replace(/warning|done-clr|pulsing/g,'').trim();if(_ct>0){const rem=_ct-_cs;if(rem<=10&&rem>0)el.className+=' warning';if(rem<=0)el.className+=' done-clr';}});
+}
+function startChrono(){
+  if(_cr)return;_cr=true;
+  _ci=setInterval(()=>{_cs++;updateChronoDsp();
+    if(_ct>0&&_cs>=_ct){clearInterval(_ci);_cr=false;document.getElementById('chrono-start').textContent='▶';
+      ['chrono-display','focus-chrono-time'].forEach(id=>{const el=document.getElementById(id);if(el)el.className+=' pulsing';});
+      // Flash screen
+      document.body.style.boxShadow='inset 0 0 0 4px var(--green)';setTimeout(()=>document.body.style.boxShadow='',600);
+      navigator.vibrate&&navigator.vibrate([200,100,200,100,200]);
+      // Scroll to next exercise
+      const next=document.querySelector('.sess-nav-item:not(.done-nav)');if(next)next.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }
+  },1000);
+  document.getElementById('chrono-start').textContent='⏸';
+}
+function pauseChrono(){clearInterval(_ci);_cr=false;document.getElementById('chrono-start').textContent='▶';}
+function resetChrono(){pauseChrono();_cs=0;_ct=0;updateChronoDsp();document.querySelectorAll('.rp-act').forEach(b=>b.classList.remove('rp-act'));}
+document.getElementById('chrono-start').addEventListener('click',()=>{if(_cr)pauseChrono();else startChrono();});
+document.getElementById('chrono-reset').addEventListener('click',resetChrono);
+document.querySelectorAll('.rest-preset').forEach(btn=>btn.addEventListener('click',()=>{resetChrono();_ct=parseInt(btn.dataset.s);document.querySelectorAll('.rest-preset').forEach(b=>b.classList.remove('rp-act'));btn.classList.add('rp-act');startChrono();}));
+
+/* ══ SESSION DURATION TIMER ══ */
+/* _sessTimer — déclaré dans constants.js */
+function startSessTimer(){if(!S.sessStartTime)S.sessStartTime=Date.now();clearInterval(_sessTimer);_sessTimer=setInterval(()=>{const dur=Math.round((Date.now()-S.sessStartTime)/60000);const el=document.getElementById('sess-duration');if(el)el.textContent=dur+' min';},30000);}

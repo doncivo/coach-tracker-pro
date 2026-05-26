@@ -1,26 +1,11 @@
-/* ═══════════════════════════════════════
+/* ============================================================
    render_corps.js — Page Corps
-   Dépend de: compute.js, charts.js, utils.js
-═══════════════════════════════════════ */
+============================================================ */
 
-/* MEAL_NAMES défini dans module précédent */
+/* ══ CORPS ══ */
 
-function calDayKey(offset) {
-  const d = new Date();
-  d.setDate(d.getDate() + offset);
-  return localDateStr(d);
-}
-
-function calDayLabel(offset) {
-  if (offset === 0) return "Aujourd'hui";
-  if (offset === -1) return 'Hier';
-  if (offset === 1) return 'Demain';
-  const d = new Date();
-  d.setDate(d.getDate() + offset);
-  return d.toLocaleDateString('fr-FR', {weekday:'long', day:'2-digit', month:'long'});
-}
-
-/* initCorpsSubNav défini dans module précédent */
+/* ══ STEPS TRACKER ══ */
+/* _calDayOffset — déclaré dans constants.js */
 
 function renderStepsGrid() {
   const grid = document.getElementById('steps-grid');
@@ -125,6 +110,24 @@ function renderStepsGrid() {
       summary.appendChild(s);
     });
   }
+}
+
+/* ══ CALORIES TRACKER ══ */
+const MEAL_NAMES = ['Petit-déjeuner 🌅', 'Déjeuner 🌞', 'Dîner 🌙', 'Collation 🍎'];
+
+function calDayKey(offset) {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return localDateStr(d);
+}
+
+function calDayLabel(offset) {
+  if (offset === 0) return "Aujourd'hui";
+  if (offset === -1) return 'Hier';
+  if (offset === 1) return 'Demain';
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return d.toLocaleDateString('fr-FR', {weekday:'long', day:'2-digit', month:'long'});
 }
 
 function renderCalTracker() {
@@ -369,6 +372,11 @@ function renderCalTracker() {
   content.appendChild(mealsWrap);
 }
 
+// Nav buttons for calorie day selector
+document.getElementById('cal-day-prev').addEventListener('click', () => { _calDayOffset--; renderCalTracker(); });
+document.getElementById('cal-day-next').addEventListener('click', () => { if (_calDayOffset < 0) { _calDayOffset++; renderCalTracker(); } });
+
+
 function renderStepsChart(container) {
   if (!container) return;
   const today = new Date();
@@ -515,7 +523,6 @@ function renderCorps(){
   }, 80);
 
 }
-
 function renderSleepGrid(){
   const grid=document.getElementById('sleep-grid');if(!grid)return;grid.innerHTML='';
   // Sleep chart
@@ -532,7 +539,6 @@ function renderSleepGrid(){
     card.appendChild(lbl);card.appendChild(dateDisp);card.appendChild(inp);card.appendChild(qualRow);grid.appendChild(card);
   }
 }
-
 function renderNutriGrid(){
   const grid=document.getElementById('nutri-grid');if(!grid)return;grid.innerHTML='';
   for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=localDateStr(d);const val=S.nutrition[ds]||'';
@@ -542,7 +548,6 @@ function renderNutriGrid(){
     row.insertBefore(lbl,row.firstChild);grid.appendChild(row);
   }
 }
-
 function renderStreakHeatmap(){
   const hm=document.getElementById('streak-heatmap');if(!hm)return;hm.innerHTML='';
   const today=new Date();
@@ -586,7 +591,6 @@ function renderStreakHeatmap(){
   wrapper.appendChild(grid);
   hm.appendChild(row);
 }
-
 function renderPainList(){
   const pl=document.getElementById('pain-list');if(!pl)return;pl.innerHTML='';
   if(!S.painLog.length){pl.innerHTML='<div style="font-size:10px;color:var(--muted)">Aucune douleur signalée.</div>';return;}
@@ -602,4 +606,19 @@ function renderPainList(){
     const del=document.createElement('button');del.className='mesure-del';del.textContent='×';del.addEventListener('click',()=>{S.painLog.splice(S.painLog.length-1-i,1);save();renderPainList();});row.appendChild(del);pl.appendChild(row);
   });
 }
-
+document.getElementById('add-pain-btn').addEventListener('click',async()=>{
+  const _painForm=await Modal.form('Ajouter une douleur',[
+    {key:'part',label:'Zone',type:'select',options:BODY_PARTS,value:1},
+    {key:'level',label:'Intensité',type:'select',options:['🟡 Légère','🟠 Modérée','🔴 Forte'],value:1},
+    {key:'note',label:'Note (optionnel)',type:'text',placeholder:'Ex: après développé incliné...'}
+  ]);
+  if(!_painForm)return;
+  const idx=parseInt(_painForm.part)-1;if(idx<0||idx>=BODY_PARTS.length)return;
+  const level=parseInt(_painForm.level)||1;
+  const note=_painForm.note||'';
+  S.painLog.push({part:BODY_PARTS[idx],level:Math.min(3,Math.max(1,level)),date:todayStr(),note});
+  save();renderPainList();showToast('Douleur enregistrée','save');
+});
+document.getElementById('add-photo-btn').addEventListener('click',()=>{
+  const input=document.createElement('input');input.type='file';input.accept='image/*';input.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{S.photos.push({date:todayStr(),data:ev.target.result.slice(0,50)+'...'});save();showToast('Photo enregistrée ✓','save');};r.readAsDataURL(f);};input.click();
+});

@@ -1,23 +1,6 @@
-/* ═══════════════════════════════════════
-   utils.js — Utilitaires transversaux
-   Dépend de: constants.js, state.js
-═══════════════════════════════════════ */
-
-
-function undoAction() {
-  try {
-    const stack = JSON.parse(localStorage.getItem('ctp_undo') || '[]');
-    if (!stack.length) return showToast('Rien à annuler', 'warn');
-    const prev = JSON.parse(stack.pop());
-    localStorage.setItem('ctp_undo', JSON.stringify(stack));
-    S.days = prev.days; S.history = prev.history;
-    save(true);
-    renderDayTabs(); renderDayDetail(S.activeDay);
-    showToast('↩ Action annulée', 'save');
-  } catch(e) {
-    showToast('Annulation impossible', 'error');
-  }
-}
+/* ============================================================
+   utils.js — Toast + Export + Navigation + Helpers
+============================================================ */
 
 /* ══ TOAST ══ */
 function showToast(msg,type='save',dur=2500){
@@ -261,8 +244,7 @@ function _buildAlerts() {
 
 
 /* ══ RECHERCHE GLOBALE ══ */
-let _searchOpen = false;
-
+/* _searchOpen — déclaré dans constants.js */
 function openSearch() {
   if (_searchOpen) return;
   _searchOpen = true;
@@ -377,7 +359,55 @@ function _copyToClipboard(text) {
 }
 
 
-/* renderABCompare défini dans module précédent */
+function renderABCompare(container) {
+  if (!container) return;
+  container.innerHTML = '';
+  const aWeeks = Object.values(S.history).filter(w => w.weekType === 'A');
+  const bWeeks = Object.values(S.history).filter(w => w.weekType === 'B');
+  if (!aWeeks.length && !bWeeks.length) {
+    container.innerHTML = '<div class="chart-no-data">Archivez des semaines A et B pour comparer.</div>';
+    return;
+  }
+  const avgVol = weeks => {
+    if (!weeks.length) return {};
+    const totals = {};
+    weeks.forEach(wk => (wk.days||[]).forEach(d => (d.exercises||[]).filter(e=>!e.isWarmup).forEach(ex => {
+      const v = calcVol(ex); if (v&&ex.muscle) totals[ex.muscle] = (totals[ex.muscle]||0) + v;
+    })));
+    Object.keys(totals).forEach(k => totals[k] = Math.round(totals[k]/weeks.length));
+    return totals;
+  };
+  const aVol = avgVol(aWeeks), bVol = avgVol(bWeeks);
+  const keys = [...new Set([...Object.keys(aVol),...Object.keys(bVol)])];
+  if (!keys.length) { container.innerHTML = '<div class="chart-no-data">Aucune donnée de volume.</div>'; return; }
+
+  const maxV = Math.max(...keys.map(k => Math.max(aVol[k]||0, bVol[k]||0)), 1);
+  keys.forEach(k => {
+    const m = MM[k]; if (!m) return;
+    const aV = aVol[k]||0, bV = bVol[k]||0;
+    const row = document.createElement('div'); row.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:11px';
+    const lbl = document.createElement('div'); lbl.style.cssText = 'width:52px;color:var(--muted);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'; lbl.textContent = m.label.split(' ')[0];
+    const bars = document.createElement('div'); bars.style.cssText = 'flex:1;display:flex;flex-direction:column;gap:3px';
+    [[aV,'var(--teal)','A'],[bV,'var(--purple)','B']].forEach(([v,col,lbl2]) => {
+      const bw = document.createElement('div'); bw.style.cssText = 'display:flex;align-items:center;gap:5px';
+      const tag = document.createElement('span'); tag.style.cssText = 'font-size:8px;font-weight:700;width:10px;color:'+col; tag.textContent = lbl2;
+      const barWrap = document.createElement('div'); barWrap.style.cssText = 'flex:1;height:7px;background:var(--border);border-radius:4px;overflow:hidden';
+      const barFill = document.createElement('div'); barFill.style.cssText = `width:${Math.round(v/maxV*100)}%;height:100%;background:${col};border-radius:4px`;
+      barWrap.appendChild(barFill);
+      const valEl = document.createElement('span'); valEl.style.cssText = 'font-size:9px;font-family:var(--mono);color:var(--muted);width:36px;text-align:right';
+      valEl.textContent = Math.round(v/1000*10)/10+'t';
+      bw.appendChild(tag); bw.appendChild(barWrap); bw.appendChild(valEl); bars.appendChild(bw);
+    });
+    row.appendChild(lbl); row.appendChild(bars); container.appendChild(row);
+  });
+  const legend = document.createElement('div'); legend.style.cssText = 'display:flex;gap:14px;margin-top:8px;font-size:10px;color:var(--muted)';
+  [['var(--teal)','Semaine A (moy. '+aWeeks.length+'sem.)'],['var(--purple)','Semaine B (moy. '+bWeeks.length+'sem.)']].forEach(([c,l]) => {
+    const li = document.createElement('span'); li.style.cssText = 'display:flex;align-items:center;gap:4px';
+    const dot = document.createElement('span'); dot.style.cssText = 'width:10px;height:10px;border-radius:50%;background:'+c;
+    li.appendChild(dot); li.appendChild(document.createTextNode(l)); legend.appendChild(li);
+  });
+  container.appendChild(legend);
+}
 
 
 /* ══ NOTIFICATIONS ══ */
@@ -401,7 +431,184 @@ function scheduleRestNotif(seconds) {
 }
 
 
-/* renderSettings défini dans module précédent */
+function renderSettings() {
+  const wrap = document.getElementById('settings-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  // ── PROFIL ──
+  const profSec = _settingsSection('👤 Profil');
+  _settingsRow(profSec, 'Taille', 'Utilisée pour le calcul IMC & masse grasse', () => {
+    const inp = document.createElement('input'); inp.type='number'; inp.className='settings-inp';
+    inp.value=S.profilTaille||''; inp.placeholder='cm'; inp.min=100; inp.max=250;
+    inp.addEventListener('change', e => { S.profilTaille=parseInt(e.target.value)||0; save(); });
+    return inp;
+  });
+  _settingsRow(profSec, 'Objectif pas/jour', 'Pour le tracker de pas quotidiens', () => {
+    const inp = document.createElement('input'); inp.type='number'; inp.className='settings-inp';
+    inp.value=S.stepsGoal||10000; inp.min=1000; inp.max=50000; inp.step=500;
+    inp.addEventListener('change', e => { S.stepsGoal=parseInt(e.target.value)||10000; save(); });
+    return inp;
+  });
+  _settingsRow(profSec, 'Objectif calories/jour', 'Pour le tracker de calories', () => {
+    const inp = document.createElement('input'); inp.type='number'; inp.className='settings-inp';
+    inp.value=S.caloriesGoal||2500; inp.min=500; inp.max=6000; inp.step=50;
+    inp.addEventListener('change', e => { S.caloriesGoal=parseInt(e.target.value)||2500; save(); });
+    return inp;
+  });
+  wrap.appendChild(profSec);
+
+  // ── PROGRAMME ──
+  const progSec = _settingsSection('📋 Programme');
+  _settingsRow(progSec, 'Semaine actuelle', 'A ou B', () => {
+    const sp = document.createElement('span'); sp.style.cssText='font-size:13px;font-weight:700;color:var(--teal-d)';
+    sp.textContent = 'Semaine ' + S.weekType + ' — N°' + S.weekCount;
+    return sp;
+  });
+  _settingsRow(progSec, 'Bloc actuel', S.currentBlock, () => {
+    const btn = document.createElement('button'); btn.className='btn btn-ghost btn-sm';
+    btn.textContent='Changer'; btn.addEventListener('click', () => document.getElementById('block-btn')?.click());
+    return btn;
+  });
+  _settingsRow(progSec, 'Archiver la semaine', 'Sauvegarder et passer à la suivante', () => {
+    const btn = document.createElement('button'); btn.className='btn btn-teal btn-sm';
+    btn.textContent='Archiver'; btn.addEventListener('click', () => { archiveWeek(); renderSettings(); });
+    return btn;
+  });
+  wrap.appendChild(progSec);
+
+  // ── APPARENCE ──
+  // ── Section Entraînement ──
+  const trainSec = _settingsSection('⚡ Entraînement');
+  _settingsRow(trainSec, 'Repos entre séries', 'Durée par défaut du minuteur de repos', () => {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap';
+    [{sec:45,lbl:'45s'},{sec:60,lbl:'1 min'},{sec:90,lbl:'1:30'},{sec:120,lbl:'2 min'},{sec:180,lbl:'3 min'}].forEach(({sec,lbl}) => {
+      const btn = document.createElement('button');
+      btn.className = 'rest-timer-preset' + (S._restDuration===sec?' active':'');
+      btn.textContent = lbl;
+      btn.style.cssText = 'padding:6px 12px;min-height:34px;font-size:12px';
+      btn.addEventListener('click', () => {
+        S._restDuration = sec;
+        save();
+        wrap.querySelectorAll('.rest-timer-preset').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        showToast('⏱ Repos par défaut : ' + lbl, 'ok', 2000);
+      });
+      wrap.appendChild(btn);
+    });
+    return wrap;
+  });
+  _settingsRow(trainSec, 'Son du minuteur', 'Bip sonore à la fin du repos', () => {
+    const tog = document.createElement('label');
+    tog.style.cssText = 'display:flex;align-items:center;gap:8px;cursor:pointer';
+    const inp = document.createElement('input'); inp.type='checkbox';
+    inp.checked = S._restBeep !== false;
+    inp.addEventListener('change', () => { S._restBeep = inp.checked; save(); });
+    const lbl = document.createElement('span'); lbl.style.fontSize='12px'; lbl.textContent = inp.checked ? '🔔 Activé' : '🔕 Désactivé';
+    inp.addEventListener('change', () => { lbl.textContent = inp.checked ? '🔔 Activé' : '🔕 Désactivé'; });
+    tog.appendChild(inp); tog.appendChild(lbl);
+    return tog;
+  });
+
+  const appSec = _settingsSection('🎨 Apparence');
+  _settingsRow(appSec, 'Mode sombre', 'Thème sombre pour économiser la batterie', () => {
+    const label = document.createElement('label'); label.className='toggle-wrap';
+    const inp = document.createElement('input'); inp.type='checkbox'; inp.className='toggle-inp'; inp.checked=S.darkMode||false;
+    inp.addEventListener('change', e => { S.darkMode=e.target.checked; document.documentElement.setAttribute('data-theme', e.target.checked?'dark':'light'); save(); });
+    const slider = document.createElement('span'); slider.className='toggle-slider';
+    label.appendChild(inp); label.appendChild(slider); return label;
+  });
+  wrap.appendChild(appSec);
+
+  // ── NOTIFICATIONS ──
+  const notifSec = _settingsSection('🔔 Notifications');
+  const notifPerm = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported';
+  const notifStatus = notifPerm === 'granted' ? '✅ Activées' : notifPerm === 'denied' ? '❌ Refusées (modifier dans Réglages → Safari)' : '⬜ Non configurées';
+  _settingsRow(notifSec, 'Autorisation', notifStatus, () => {
+    if (notifPerm === 'granted') return null;
+    const btn = document.createElement('button'); btn.className='btn btn-teal btn-sm';
+    btn.textContent = notifPerm === 'denied' ? 'Ouvrir Réglages' : 'Activer';
+    btn.addEventListener('click', requestNotifPermission);
+    return btn;
+  });
+  _settingsRow(notifSec, 'Rappel entraînement', "Notification quotidienne à l'heure de ta séance", () => {
+    const wrap2 = document.createElement('div');
+    wrap2.style.cssText = 'display:flex;gap:8px;align-items:center;flex-wrap:wrap';
+    const timeInp = document.createElement('input');
+    timeInp.type = 'time'; timeInp.className = 'onboard-inp';
+    timeInp.style.cssText = 'width:110px;padding:6px 10px;font-size:14px';
+    const h = S._reminderHour; const m = S._reminderMinute;
+    timeInp.value = (h!=null) ? (String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')) : '08:00';
+    const setBtn = document.createElement('button'); setBtn.className='btn btn-teal btn-sm';
+    setBtn.textContent = (h!=null) ? '✅ Modifer' : '🔔 Activer';
+    setBtn.addEventListener('click', async () => {
+      const [hh,mm] = timeInp.value.split(':').map(Number);
+      if(isNaN(hh)||isNaN(mm)) return;
+      const ok = notifPerm === 'granted' || await requestNotifPermission();
+      if(ok) { scheduleTrainingReminder(hh, mm); setBtn.textContent='✅ Modifer'; }
+    });
+    const cancelBtn = document.createElement('button'); cancelBtn.className='btn btn-ghost btn-sm';
+    cancelBtn.textContent='🔕 Annuler';
+    cancelBtn.style.display = (h!=null) ? 'block' : 'none';
+    cancelBtn.addEventListener('click', () => { cancelTrainingReminder(); cancelBtn.style.display='none'; setBtn.textContent='🔔 Activer'; });
+    wrap2.appendChild(timeInp); wrap2.appendChild(setBtn); wrap2.appendChild(cancelBtn);
+    return wrap2;
+  });
+  wrap.appendChild(notifSec);
+
+  // ── DONNÉES ──
+  const dataSec = _settingsSection('💾 Données');
+  _settingsRow(dataSec, 'Exporter mes données', 'Fichier JSON de sauvegarde complet', () => {
+    const btn = document.createElement('button'); btn.className='btn btn-ghost btn-sm';
+    btn.textContent='⬇ Exporter'; btn.addEventListener('click', () => document.getElementById('export-btn')?.click());
+    return btn;
+  });
+  _settingsRow(dataSec, 'Importer des données', 'Restaurer depuis un fichier JSON', () => {
+    const btn = document.createElement('button'); btn.className='btn btn-ghost btn-sm';
+    btn.textContent='⬆ Importer'; btn.addEventListener('click', () => document.getElementById('import-btn')?.click());
+    return btn;
+  });
+  _settingsRow(dataSec, 'Données de démonstration', 'Générer 8 semaines d\u2019entra\u00eenement', () => {
+    const btn = document.createElement('button'); btn.className='btn btn-ghost btn-sm';
+    btn.textContent='🎲 Démo'; btn.addEventListener('click', () => document.getElementById('gen-sample-data')?.click());
+    return btn;
+  });
+  _settingsRow(dataSec, 'Reconfiguration', 'Relancer l\'assistant de démarrage', () => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-ghost btn-sm';
+    btn.textContent = '🔄 Reconfigurer';
+    btn.addEventListener('click', () => resetOnboarding());
+    return btn;
+  });
+  _settingsRow(dataSec, 'Espace utilisé', 'localStorage', () => {
+    const sp = document.createElement('span'); sp.style.cssText='font-family:var(--mono);font-size:12px;color:var(--muted)';
+    try {
+      const used = new Blob([JSON.stringify(S)]).size;
+      sp.textContent = (used/1024).toFixed(1) + ' KB / ~5 MB';
+    } catch(e) { sp.textContent = '—'; }
+    return sp;
+  });
+  _settingsRow(dataSec, 'Version du schéma', '', () => {
+    const sp = document.createElement('span'); sp.style.cssText='font-family:var(--mono);font-size:12px;color:var(--muted)';
+    sp.textContent = 'v' + (S._schemaVersion||3); return sp;
+  });
+  wrap.appendChild(dataSec);
+
+  // ── COMPARAISON A/B ──
+  const abSec = _settingsSection('📊 Comparaison Semaine A vs B');
+  const abContainer = document.createElement('div'); abContainer.style.padding = '12px';
+  abSec.appendChild(abContainer);
+  wrap.appendChild(abSec);
+  setTimeout(() => renderABCompare(abContainer), 50);
+
+  // ── TESTS ──
+  _settingsRow(dataSec, 'Tests unitaires (?test=1)', 'Vérifier l\'intégrité de l\'application', () => {
+    const btn = document.createElement('button'); btn.className='btn btn-ghost btn-sm';
+    btn.textContent='🧪 Lancer'; btn.addEventListener('click', () => window.open(location.href.split('?')[0]+'?test=1','_blank'));
+    return btn;
+  });
+}
 
 function _settingsSection(title) {
   const sec = document.createElement('div'); sec.className = 'settings-section';
@@ -508,7 +715,7 @@ document.addEventListener('click', () => {
 
 // ── Swipe gesture between tabs ────────────────────────────────
 const TAB_ORDER = ['dashboard','weekly','session','progression','corps','bilan','kpi','achievements','library','monthly','settings'];
-let _swipeStartX = 0, _swipeStartY = 0, _swipeActive = false;
+/* _swipeStartX — déclaré dans constants.js */
 document.addEventListener('touchstart', e => {
   _swipeStartX = e.touches[0].clientX;
   _swipeStartY = e.touches[0].clientY;
@@ -569,34 +776,161 @@ function buildMusclePicker(di){
 function lastNDays(n){ return Array.from({length:n},(_,i)=>{ const d=new Date(); d.setDate(d.getDate()-(n-1-i)); return localDateStr(d); }); }
 
 // Weekly volume (kg) from history
-/* computeWeeklyVolume défini dans module précédent */
+function computeWeeklyVolume(weeks=8){
+  const today=new Date();
+  return Array.from({length:weeks},(_,wi)=>{
+    const weekStart=new Date(today); weekStart.setDate(today.getDate()-7*(weeks-1-wi)-today.getDay());
+    let vol=0;
+    for(let d=0;d<7;d++){
+      const date=new Date(weekStart); date.setDate(weekStart.getDate()+d);
+      const key=localDateStr(date);
+      const hDay=S.history[key];
+      if(!hDay) continue;
+      const hDayArr=Array.isArray(hDay)?hDay:(hDay.days||[]);
+      hDayArr.forEach(ex=>{ if(ex.sets) ex.sets.forEach(set=>{ vol+=(parseFloat(set.weight)||0)*(parseInt(set.reps)||0); }); });
+    }
+    return {label:`S${wi+1}`,value:vol};
+  });
+}
 
 // Daily steps for last N days
-/* computeDailySteps défini dans module précédent */
+function computeDailySteps(n=14){
+  return lastNDays(n).map(d=>({ x:d, y:parseInt(S.steps&&S.steps[d]||0)||0 }));
+}
 
 // Daily calories for last N days
-/* computeDailyCalories défini dans module précédent */
+function computeDailyCalories(n=14){
+  return lastNDays(n).map(d=>{
+    const c=S.calories&&S.calories[d];
+    let total=0;
+    if(c&&c.meals) c.meals.forEach(m=>(m.items||[]).forEach(it=>total+=parseFloat(it.kcal)||0));
+    return {x:d, y:total};
+  });
+}
 
 // Daily sleep for last N days
-/* computeDailySleep défini dans module précédent */
+function computeDailySleep(n=14){
+  return lastNDays(n).map(d=>({ x:d, y:parseFloat(S.sleep&&S.sleep[d]&&(S.sleep[d].hours||S.sleep[d].h)||0)||0 }));
+}
 
 // Body weight from mesures history
-/* computeWeightHistory défini dans module précédent */
+function computeWeightHistory(){
+  const wh=S.history&&Object.entries(S.history)
+    .filter(([,v])=>v&&v[0]&&v[0].poids!=null)
+    .sort(([a],[b])=>a.localeCompare(b));
+  if(!wh||!wh.length){
+    // Fallback: use mesures entries if weight stored there
+    return [];
+  }
+  return wh.map(([d,v])=>({x:d,y:parseFloat(v[0].poids)||0}));
+}
 
 // ATL/CTL over time (fatigue / fitness)
-/* computeATLCTL défini dans module précédent */
+function computeATLCTL(days=42){
+  const dates=lastNDays(days);
+  let atl=50,ctl=50;
+  const atlDecay=1-1/7, ctlDecay=1-1/42;
+  return dates.map(d=>{
+    const hDay=S.history[d];
+    let load=0;
+    if(hDay){const hDayArr=Array.isArray(hDay)?hDay:(hDay.days||[]);hDayArr.forEach(ex=>{ if(ex.sets) ex.sets.forEach(s=>{ load+=(parseFloat(s.weight)||0)*(parseInt(s.reps)||0)/1000; }); });}
+    atl = atl*atlDecay + load*(1-atlDecay)*10;
+    ctl = ctl*ctlDecay + load*(1-ctlDecay)*10;
+    return {x:d, atl:Math.round(atl), ctl:Math.round(ctl), tsb:Math.round(ctl-atl)};
+  });
+}
 
 // Correlation: sleep hours vs session volume
-/* computeSleepPerfCorrelation défini dans module précédent */
+function computeSleepPerfCorrelation(){
+  const pts=[];
+  Object.keys(S.history||{}).forEach(d=>{
+    const sleepH=parseFloat(S.sleep&&S.sleep[d]&&(S.sleep[d].hours||S.sleep[d].h)||0)||0;
+    const hDay=S.history[d];
+    let vol=0;
+    if(hDay){const hDayArr=Array.isArray(hDay)?hDay:(hDay.days||[]);hDayArr.forEach(ex=>{ if(ex.sets) ex.sets.forEach(s=>{ vol+=(parseFloat(s.weight)||0)*(parseInt(s.reps)||0); }); });}
+    if(sleepH>0&&vol>0) pts.push({x:sleepH,y:vol,color:'--teal'});
+  });
+  return pts;
+}
 
 // Global fitness score (0-100)
-/* computeFitnessScore défini dans module précédent */
+function computeFitnessScore(){
+  const today=localDateStr(new Date());
+  const days7=lastNDays(7);
+
+  // Adherence (% séances complétées sur 7j)
+  const plannedDays=S.days.filter(d=>d.exercises&&d.exercises.length>0).length;
+  const trainedDays=days7.filter(d=>S.history&&S.history[d]&&S.history[d].length>0).length;
+  const adherence=plannedDays>0?Math.min(100,trainedDays/plannedDays*100):50;
+
+  // Steps (% vs goal)
+  const stepsGoal=S.stepsGoal||10000;
+  const avgSteps=days7.reduce((a,d)=>a+(parseInt(S.steps&&S.steps[d]||0)||0),0)/7;
+  const stepsScore=Math.min(100,avgSteps/stepsGoal*100);
+
+  // Sleep (7-8h = 100%)
+  const avgSleep=days7.reduce((a,d)=>a+(parseFloat(S.sleep&&S.sleep[d]&&(S.sleep[d].hours||S.sleep[d].h)||0)||0),0)/7;
+  const sleepScore=avgSleep===0?50:Math.min(100,avgSleep/7.5*100);
+
+  // Nutrition (calories vs goal ±20%)
+  const calGoal=S.caloriesGoal||2500;
+  const avgCals=computeDailyCalories(7).map(p=>p.y);
+  const avgCal=avgCals.reduce((a,v)=>a+v,0)/7;
+  const calDiff=Math.abs(avgCal-calGoal)/calGoal;
+  const nutScore=avgCal===0?50:Math.max(0,100-calDiff*200);
+
+  // Recovery (based on pain log + sessRecovery)
+  const painPenalty=(S.painLog||[]).filter(p=>{ const d=new Date(p.date); const dif=(Date.now()-d)/(86400000); return dif<7; }).length*10;
+  const recoverySessions=days7.map(d=>S.sessRecovery&&S.sessRecovery[d]||0).filter(v=>v>0);
+  const avgRec=recoverySessions.length?recoverySessions.reduce((a,v)=>a+v,0)/recoverySessions.length:70;
+  // Blend with sleep quality for a richer recovery score
+  const avgSleepForRec=days7.map(d=>parseFloat(S.sleep&&S.sleep[d]&&(S.sleep[d].hours||S.sleep[d].h)||0)||0).filter(v=>v>0);
+  const sleepBonus=avgSleepForRec.length?(avgSleepForRec.reduce((a,v)=>a+v,0)/avgSleepForRec.length>=7?10:avgSleepForRec.reduce((a,v)=>a+v,0)/avgSleepForRec.length>=6?0:-10):0;
+  const recovScore=Math.max(0,Math.min(100,avgRec+sleepBonus-painPenalty));
+
+  const score=Math.round((adherence*.3+stepsScore*.2+sleepScore*.2+nutScore*.15+recovScore*.15));
+  return {
+    score:Math.min(100,score),
+    breakdown:[
+      {icon:'💪',label:'Assiduité',pts:Math.round(adherence),max:100,color:'--teal'},
+      {icon:'👣',label:'Pas',pts:Math.round(stepsScore),max:100,color:'--green'},
+      {icon:'😴',label:'Sommeil',pts:Math.round(sleepScore),max:100,color:'--purple'},
+      {icon:'🥗',label:'Nutrition',pts:Math.round(nutScore),max:100,color:'--orange'},
+      {icon:'🔋',label:'Récup.',pts:Math.round(recovScore),max:100,color:'--red'},
+    ]
+  };
+}
 
 // TDEE calculation (Mifflin-St Jeor)
-/* computeTDEE défini dans module précédent */
+function computeTDEE(){
+  const poids=parseFloat(S.mesures&&S.mesures.poids)||70;
+  const taille=parseFloat(S.profilTaille)||175;
+  const age=35; // default (could add to profile)
+  // Assume male for now (could add gender to profile)
+  const bmr=10*poids+6.25*taille-5*age+5;
+  // Activity multiplier based on weekly sessions
+  const weeks7=lastNDays(7);
+  const sessions=weeks7.filter(d=>S.history&&S.history[d]&&S.history[d].length>0).length;
+  const mult=sessions>=5?1.725:sessions>=3?1.55:sessions>=1?1.375:1.2;
+  return {tdee:Math.round(bmr*mult),bmr:Math.round(bmr),mult,sessions};
+}
 
 // Push/Pull/Legs repartition from history (all time)
-/* computePPL défini dans module précédent */
+function computePPL(){
+  const push=['développé','press','poussé','overhead','dips','triceps','écarté'];
+  const pull=['traction','curl','row','rowing','biceps','soulevé','deadlift','tirage'];
+  let P=0,Pu=0,L=0,Other=0;
+  Object.values(S.history||{}).forEach(day=>{
+    (day||[]).forEach(ex=>{
+      const n=(ex.name||'').toLowerCase();
+      if(push.some(k=>n.includes(k))) P++;
+      else if(pull.some(k=>n.includes(k))) Pu++;
+      else if(n.includes('squat')||n.includes('cuisse')||n.includes('fente')||n.includes('leg')) L++;
+      else Other++;
+    });
+  });
+  return [{label:'Push',value:P,color:'--teal'},{label:'Pull',value:Pu,color:'--green'},{label:'Legs',value:L,color:'--orange'},{label:'Autre',value:Other,color:'--muted'}];
+}
 
 // Douleurs actives (last 14j)
 function activePains(){
@@ -606,70 +940,3 @@ function activePains(){
 // ╔══════════════════════════════════════════════════════╗
 // ║  CHART ENGINE — reusable canvas charts               ║
 // ╚══════════════════════════════════════════════════════╝
-
-
-
-function updateStats(){
-  let done=0,total=0,active=0;
-  S.days.forEach(d=>{const exs=d.exercises.filter(e=>e.name.trim()&&!e.isWarmup);total+=exs.length;done+=exs.filter(e=>e.done).length;if(getDMS(d).some(k=>k&&k!=='rep'))active++;});
-  const setEl=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  setEl('stat-done',done);setEl('stat-total',total);setEl('stat-days',active);setEl('stat-pct',total>0?Math.round(done/total*100)+'%':'0%');
-  const vol=weekVol();const maxV=Math.max(...Object.values(vol),1);
-  const vd=document.getElementById('vol-bars');
-  if(vd){vd.innerHTML='';Object.entries(vol).sort((a,b)=>b[1]-a[1]).forEach(([k,vv])=>{const m=MM[k];if(!m)return;const row=document.createElement('div');row.className='vol-row';const lb=document.createElement('div');lb.className='vol-label';lb.textContent=m.label;lb.title=m.label;const bar=document.createElement('div');bar.className='bar-wrap';const fill=document.createElement('div');fill.className='bar-fill';fill.style.cssText=`width:${Math.round(vv/maxV*100)}%;background:${m.calColor}`;bar.appendChild(fill);const num=document.createElement('div');num.className='vol-num';num.textContent=Math.round(vv/1000*10)/10+'t';row.appendChild(lb);row.appendChild(bar);row.appendChild(num);vd.appendChild(row);});}
-  // Push/Pull
-  const pp=pushPull();const ppd=document.getElementById('push-pull-ratio');
-  if(ppd){ppd.innerHTML='';const tot=pp.push+pp.pull||1;const ppPct=Math.round(pp.push/tot*100),plPct=100-ppPct;const balanced=Math.abs(ppPct-50)<15;const row=document.createElement('div');row.className='vol-row';const lb=document.createElement('div');lb.className='vol-label';lb.textContent='Push/Pull';const dual=document.createElement('div');dual.style.cssText='flex:1;display:flex;height:6px;border-radius:3px;overflow:hidden';const p1=document.createElement('div');p1.style.cssText=`width:${ppPct}%;background:#ffe0ea`;const p2=document.createElement('div');p2.style.cssText=`width:${plPct}%;background:#e0d8ff`;dual.appendChild(p1);dual.appendChild(p2);const val=document.createElement('div');val.style.cssText='font-size:8px;font-family:var(--mono);color:var(--muted);width:36px;text-align:right';val.textContent=ppPct+'/'+plPct;row.appendChild(lb);row.appendChild(dual);row.appendChild(val);ppd.appendChild(row);const ok=document.createElement('div');ok.style.cssText=`font-size:9px;margin-top:3px;font-weight:600;color:${balanced?'var(--green)':'var(--red)'}`;ok.textContent=balanced?'✅ Équilibré':'⚠️ Déséquilibré';ppd.appendChild(ok);}
-  // PR panel
-  const prp=document.getElementById('pr-panel');
-  if(prp){
-    const prs=S.days.flatMap(d=>d.exercises).filter(checkPR);
-    prp.innerHTML='';
-    if(!prs.length){prp.innerHTML='<span style="color:var(--muted)">—</span>';}
-    else{prs.forEach(e=>{const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:5px;padding:2px 0;border-bottom:1px solid var(--border);font-size:10px';const ico=document.createElement('span');ico.textContent='🏆';const nm=document.createElement('span');nm.style.cssText='flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';nm.textContent=e.name;row.appendChild(ico);row.appendChild(nm);prp.appendChild(row);});}
-  }
-  // Alerts panel
-  renderAlertsPanel();
-
-  // Update header fitness score badge
-  try{
-    const fsEl = document.getElementById('hdr-fitness-score');
-    if(fsEl){
-      const fs = computeFitnessScore();
-      const color = fs.score>=80?'#4CAF50':fs.score>=60?'var(--teal)':fs.score>=40?'var(--orange)':'var(--red)';
-      fsEl.textContent = '⚡ '+fs.score;
-      fsEl.style.background = color;
-    }
-  }catch(e){}
-
-}
-
-function updateChronoDsp(){
-  ['chrono-display','focus-chrono-time'].forEach(id=>{const el=document.getElementById(id);if(!el)return;const m=Math.floor(_cs/60),s=_cs%60;el.textContent=m+':'+(s<10?'0':'')+s;el.className=el.className.replace(/warning|done-clr|pulsing/g,'').trim();if(_ct>0){const rem=_ct-_cs;if(rem<=10&&rem>0)el.className+=' warning';if(rem<=0)el.className+=' done-clr';}});
-}
-
-function resetChrono(){pauseChrono();_cs=0;_ct=0;updateChronoDsp();document.querySelectorAll('.rp-act').forEach(b=>b.classList.remove('rp-act'));}
-
-function startChrono(){
-  if(_cr)return;_cr=true;
-  _ci=setInterval(()=>{_cs++;updateChronoDsp();
-    if(_ct>0&&_cs>=_ct){clearInterval(_ci);_cr=false;document.getElementById('chrono-start').textContent='▶';
-      ['chrono-display','focus-chrono-time'].forEach(id=>{const el=document.getElementById(id);if(el)el.className+=' pulsing';});
-      // Flash screen
-      document.body.style.boxShadow='inset 0 0 0 4px var(--green)';setTimeout(()=>document.body.style.boxShadow='',600);
-      navigator.vibrate&&navigator.vibrate([200,100,200,100,200]);
-      // Scroll to next exercise
-      const next=document.querySelector('.sess-nav-item:not(.done-nav)');if(next)next.scrollIntoView({behavior:'smooth',block:'nearest'});
-    }
-  },1000);
-  document.getElementById('chrono-start').textContent='⏸';
-}
-
-function cancelTrainingReminder() {
-  if (window._reminderTimeout) clearTimeout(window._reminderTimeout);
-  S._reminderHour = null; S._reminderMinute = null;
-  save();
-  showToast('🔕 Rappel annulé', 'warn', 2000);
-}
-
-function pauseChrono(){clearInterval(_ci);_cr=false;document.getElementById('chrono-start').textContent='▶';}

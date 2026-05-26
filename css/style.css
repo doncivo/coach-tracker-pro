@@ -229,20 +229,9 @@ nav.tabs   { flex-shrink: 0 !important; }
 }
 
 /* ── Session ── */
-.session-wrap {
-  flex: 1 !important;
-  min-height: 0 !important;
-  overflow: hidden !important;
-  display: flex !important;
-  flex-direction: column !important;
-}
+
 .session-body,
-.sess-main {
-  flex: 1 !important;
-  min-height: 0 !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-}
+
 
 /* ── Corps (sous-navigation) ── */
 .corps-wrap {
@@ -793,15 +782,15 @@ nav.tabs   { flex-shrink: 0 !important; }
    ════════════════════════════════════════════ */
 
 /* ── Calendrier mensuel ── */
-.cal-cell { min-height:60px; padding:4px; border-radius:6px; cursor:pointer; transition:background .1s; }
+
 .cal-cell:hover { background:var(--bg); }
-.cal-dh { font-size:9px; font-weight:700; color:var(--muted); text-align:center; padding:4px 0; text-transform:uppercase; }
-.cal-dn { font-size:11px; font-weight:600; color:var(--muted); }
-.cal-mpill { display:inline-block; width:6px; height:6px; border-radius:50%; margin:1px; }
-.cal-muscles { display:flex; flex-wrap:wrap; gap:1px; margin-top:2px; }
-.cal-partial { background:color-mix(in srgb,var(--teal) 15%,transparent); }
-.cal-full { background:color-mix(in srgb,var(--teal) 30%,transparent); }
-.cal-conflict { outline:2px solid var(--red); }
+
+
+
+
+
+
+
 
 /* ── Calories tracker ── */
 .cal-meals { display:flex; flex-direction:column; gap:10px; }
@@ -888,13 +877,13 @@ nav.tabs   { flex-shrink: 0 !important; }
 .lib-search { width:100%; margin-bottom:8px; }
 
 /* ── Session guidée ── */
-.sess-wrap, .session-wrap { display:flex; flex-direction:column; flex:1; min-height:0; overflow:hidden; }
-.sess-topbar { display:flex; align-items:center; gap:8px; padding:8px 12px; background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0; flex-wrap:wrap; }
-.sess-nav-strip { display:flex; gap:4px; overflow-x:auto; flex-shrink:0; padding:6px 8px; border-bottom:1px solid var(--border); scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+.sess-wrap, 
+
+
 .sess-nav-strip::-webkit-scrollbar { display:none; }
 .sess-nav-btn { padding:6px 12px; border-radius:10px; border:1.5px solid var(--border); background:var(--bg); font-family:var(--font); font-size:11px; font-weight:700; color:var(--muted); cursor:pointer; white-space:nowrap; transition:all .15s; min-height:36px; }
 .sess-nav-btn.active { background:var(--teal); border-color:var(--teal); color:#fff; }
-.sess-main { flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:12px; }
+
 .sess-ex-card { background:var(--card); border-radius:14px; border:1px solid var(--border); padding:14px; box-shadow:var(--sh); }
 .sess-ex-hdr { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
 .sess-ex-num-big { width:32px; height:32px; border-radius:50%; background:var(--teal)20; color:var(--teal-d); font-weight:800; font-size:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
@@ -1141,3 +1130,63 @@ nav.tabs   { flex-shrink: 0 !important; }
 .goal-cb{width:16px;height:16px;cursor:pointer;accent-color:var(--teal);flex-shrink:0}
 .goal-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;flex-shrink:0}
 
+/* ── Calendrier ── */
+.cal-wrap{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.cal-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;flex-shrink:0;border-bottom:1px solid var(--border)}
+.cal-nav{background:none;border:1.5px solid var(--border);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;color:var(--text)}
+.cal-nav:hover{border-color:var(--teal);color:var(--teal-d)}
+.cal-month{font-size:14px;font-weight:800;color:var(--text)}
+.cal-grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:1px;
+  flex:1;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:0 4px 8px;
+  background:var(--border);
+}
+.cal-grid>*{background:var(--surface)}
+.cal-dh{font-size:9px;font-weight:700;color:var(--muted);text-align:center;padding:6px 0;text-transform:uppercase;background:var(--bg)!important}
+.cal-cell{min-height:58px;padding:4px;cursor:pointer;transition:background .1s}
+.cal-cell:hover{background:color-mix(in srgb,var(--teal) 5%,var(--surface))}
+.cal-dn{font-size:11px;font-weight:600;color:var(--muted)}
+.cal-mpill{display:inline-block;width:6px;height:6px;border-radius:50%;margin:1px}
+.cal-muscles{display:flex;flex-wrap:wrap;gap:1px;margin-top:2px}
+.cal-partial{background:color-mix(in srgb,var(--teal) 10%,var(--surface))!important}
+.cal-full{background:color-mix(in srgb,var(--teal) 22%,var(--surface))!important}
+.cal-conflict{outline:2px solid var(--red)}
+.today{border:2px solid var(--teal)!important}
+
+/* ── Séance: scroll fix ── */
+.session-wrap{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden}
+.sess-topbar{flex-shrink:0;display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--surface);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.sess-nav-strip{display:none;flex-shrink:0;overflow-x:auto;padding:5px 8px;gap:3px;border-bottom:1px solid var(--border);scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.sess-nav-strip::-webkit-scrollbar{display:none}
+.sess-progress-area{flex-shrink:0;display:flex;align-items:center;gap:8px;padding:5px 12px;background:var(--bg);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.sess-prog-bar-wrap{flex:1;min-width:60px;height:4px;background:var(--border);border-radius:4px;overflow:hidden}
+.sess-prog-bar{height:100%;background:linear-gradient(90deg,var(--teal),var(--green));border-radius:4px;transition:width .4s}
+.sess-info-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sess-info-chip{font-size:11px;color:var(--muted);white-space:nowrap}
+.sess-info-chip strong{color:var(--text);font-family:var(--mono)}
+.sess-body-wrap{display:flex;flex:1;min-height:0;overflow:hidden}
+.sess-nav{width:185px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;background:var(--surface);display:flex;flex-direction:column;padding:5px;gap:2px}
+.sess-main{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px}
+@media(max-width:768px){
+  .sess-nav{display:none!important}
+  
+  .sess-body-wrap{flex-direction:column!important}
+}
+
+/* ── Séance topbar: chrono et reste ── */
+.sess-progress-bar-area{flex-shrink:0;display:flex;align-items:center;gap:8px;padding:5px 12px;background:var(--bg);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.chrono-widget{display:flex;flex-direction:column;gap:2px;margin-left:auto;flex-shrink:0}
+.chrono-label{font-size:8px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.chrono-display{font-family:var(--mono);font-size:18px;font-weight:800;color:var(--text);line-height:1}
+.chrono-btns{display:flex;gap:3px}
+.chrono-btn{width:28px;height:26px;border-radius:6px;border:1.5px solid var(--border);background:var(--bg);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;color:var(--text);transition:all .15s}
+.chrono-btn:hover{background:var(--teal);border-color:var(--teal);color:#fff}
+.rest-presets{display:flex;gap:3px}
+.rest-preset{padding:2px 5px;border-radius:5px;border:1px solid var(--border);background:var(--bg);font-family:var(--mono);font-size:9px;font-weight:700;color:var(--muted);cursor:pointer;min-height:22px;transition:all .15s}
+.rest-preset:hover,.rest-preset.active{border-color:var(--teal);color:var(--teal-d)}
+.rest-preset.active{background:color-mix(in srgb,var(--teal) 10%,transparent)}

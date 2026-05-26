@@ -1201,3 +1201,125 @@ nav.tabs   { flex-shrink: 0; }
 .rest-preset{padding:2px 5px;border-radius:5px;border:1px solid var(--border);background:var(--bg);font-family:var(--mono);font-size:9px;font-weight:700;color:var(--muted);cursor:pointer;min-height:22px;transition:all .15s}
 .rest-preset:hover,.rest-preset.active{border-color:var(--teal);color:var(--teal-d)}
 .rest-preset.active{background:color-mix(in srgb,var(--teal) 10%,transparent)}
+
+
+/* ================================================================
+   MOBILE ERGONOMIE — iPhone optimisations
+   Ajouté par fix-mobile-design.sh
+   ================================================================ */
+
+@media(max-width:768px) {
+
+  /* ── Header : réduire la taille des boutons ── */
+  .hdr { padding-top: max(10px, env(safe-area-inset-top, 10px)); padding-bottom: 6px; gap: 4px; }
+  .hdr h1 { font-size: 12px; letter-spacing: .04em; }
+  .hdr-btn { padding: 5px 6px; font-size: 10px; min-height: 32px; border-radius: 8px; }
+  .hdr-badge { padding: 2px 6px; font-size: 9px; }
+  /* Cacher le badge S1 sur mobile pour gagner de la place */
+  .badge-block { display: none; }
+
+  /* ── Bottom nav : uniformiser ── */
+  .bnav-btn { gap: 1px; }
+  .bnav-label { font-size: 10px; letter-spacing: 0; }
+
+  /* ── Corps sous-navigation ── */
+  .corps-subbtn { font-size: 12px; padding: 10px 10px; min-width: 80px; }
+
+  /* ── Planning : noms d'exercices ── */
+  .ex-name-inp {
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+  }
+
+  /* Planning table : cacher colonnes secondaires sur mobile */
+  /* Colonnes cachées : RPE, RIR (trop petites pour mobile) */
+  .ex-table th.th-rpe,
+  .ex-table td.td-rpe,
+  .ex-table th.th-rir,
+  .ex-table td.td-rir,
+  .ex-table th.th-time,
+  .ex-table td.td-time { display: none; }
+
+  /* Planning table : réduire padding cellules */
+  .ex-table th { padding: 5px 3px; font-size: 8px; }
+  .ex-table td { padding: 4px 3px; }
+  .inp-w { width: 48px; font-size: 13px; }
+  .inp-sm { width: 36px; font-size: 13px; }
+
+  /* ── Séance : tableau séries ── */
+  /* Cacher VOL. et 1RM sur mobile (secondaires) */
+  .sess-sets-table th:nth-child(7),
+  .sess-sets-table td:nth-child(7),
+  .sess-sets-table th:nth-child(8),
+  .sess-sets-table td:nth-child(8) { display: none; }
+
+  /* Réduire taille inputs séance */
+  .set-inp { width: 48px; font-size: 15px; padding: 6px 3px; }
+  .inp-r, .inp-rpe, .inp-rir { width: 36px; font-size: 12px; padding: 4px 2px; }
+
+  /* Bouton valider séance plus grand et plus visible */
+  .set-val-btn {
+    padding: 6px 12px;
+    font-size: 11px;
+    min-height: 34px;
+    border-radius: 10px;
+  }
+  .set-val-btn.validated { font-size: 11px; }
+
+  /* ── Séance topbar : plus compact ── */
+  .sess-topbar { padding: 6px 8px; gap: 6px; }
+  .sess-topbar > div > div:first-child { font-size: 7px; }
+
+  /* ── Session : barre de progression ── */
+  .sess-progress-bar-area { padding: 4px 10px; gap: 6px; }
+  .sess-info-chip { font-size: 10px; }
+
+  /* ── Dashboard : hero card ── */
+  .dash-hero { padding: 14px 16px; border-radius: 16px; }
+  .dash-greeting { font-size: 18px; }
+  .dash-score-svg { width: 72px; height: 72px; }
+
+  /* Dashboard stats : 2 colonnes sur mobile */
+  .dash-stats-grid { grid-template-columns: repeat(2,1fr); gap: 8px; }
+  .dash-stat-val { font-size: 18px; }
+  .dash-stat-lbl { font-size: 9px; }
+
+  /* ── Inputs : taille minimum iOS (évite zoom) ── */
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  select,
+  textarea { font-size: 16px; }
+
+  /* ── Cards : padding réduit sur mobile ── */
+  .card-hdr { padding: 8px 12px; }
+  .day-detail { padding: 8px 10px 20px; gap: 8px; }
+
+  /* ── Scrollbars cachées sur mobile ── */
+  .day-tabs::-webkit-scrollbar,
+  .corps-subnav::-webkit-scrollbar,
+  .sess-nav-strip::-webkit-scrollbar { display: none; }
+
+  /* ── Drawer Plus : plus grand sur grand écran ── */
+  .bnav-more-menu { padding: 10px 10px calc(10px + env(safe-area-inset-bottom,0px)); gap: 8px; }
+  .bnav-more-btn {
+    min-width: 90px;
+    padding: 12px 8px;
+    font-size: 11px;
+    border-radius: 14px;
+    gap: 4px;
+  }
+  .bnav-more-btn span:first-child { font-size: 20px; }
+
+}
+
+/* ── iPhone 14/15/16 Pro Max spécifique (430px+) ── */
+@media(min-width:390px) and (max-width:768px) {
+  .ex-name-inp { max-width: 170px; }
+  .inp-w { width: 52px; }
+  .hdr h1 { font-size: 13px; }
+  .bnav-label { font-size: 11px; }
+}

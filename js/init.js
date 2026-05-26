@@ -4,7 +4,7 @@
 ============================================================ */
 
 /* ── 0. Initialiser la gestion d'erreurs ── */
-Errors.init({ dev: true }); // passer dev:false en production
+Errors.init({ dev: false });
 
 /* ── 1. Charger les données ── */
 Store.load();
@@ -39,7 +39,7 @@ Router.init();
    On le redirige vers Router.navigate() sans rien casser */
 function switchTab(tabName) {
   Router.navigate(tabName);
-  S._currentTab = tabName; // compat legacy
+  Store.dispatch({ type: 'APP_SET_TAB', payload: tabName }, { skipUndo: true });
 }
 
 /* ── 7. Init des composants ── */

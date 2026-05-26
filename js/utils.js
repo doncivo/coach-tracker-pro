@@ -559,3 +559,40 @@ function activePains(){
 // ╔══════════════════════════════════════════════════════╗
 // ║  CHART ENGINE — reusable canvas charts               ║
 // ╚══════════════════════════════════════════════════════╝
+
+
+/* ── Fonctions restaurées ── */
+function computeAdherence(){const programmed=S.days.filter(d=>getDMS(d).some(k=>k&&k!=='rep')).length;const completed=S.days.filter(d=>{const exs=d.exercises.filter(e=>e.name.trim()&&!e.isWarmup);return exs.length>0&&exs.every(e=>e.done);}).length;let p4=0,c4=0;Object.values(S.history).slice(-4).forEach(wk=>{(wk.days||[]).forEach(d=>{const muscles=(d.muscles||[]).filter(Boolean);if(muscles.some(k=>k!=='rep'))p4++;if((d.exercises||[]).filter(e=>e.name&&!e.isWarmup).every(e=>e.done)&&(d.exercises||[]).some(e=>e.name&&!e.isWarmup))c4++;});});return{programmed,completed,prog4:p4||programmed,comp4:c4||completed};}
+
+function computeStreak(){
+  const today=new Date();
+  let cur=0,rec=0,temp=0,inCur=true;
+  for(let i=0;i<365;i++){
+    const d=new Date(today);d.setDate(d.getDate()-i);const ds=localDateStr(d);
+    const mD=S.days.find(day=>day.date===ds);
+    const hD=Object.values(S.history).flatMap(wk=>(wk.days||[])).find(day=>day.date===ds);
+    const aDay=mD||hD;
+    const trained=aDay&&(aDay.exercises||[]).some(e=>e.done&&!e.isWarmup);
+    if(trained){
+      temp++;
+      if(inCur)cur=temp; // still in current streak
+    } else {
+      inCur=false; // first gap breaks current streak
+      if(temp>rec)rec=temp;
+      temp=0;
+    }
+  }
+  if(temp>rec)rec=temp;
+  // Count active days this calendar month
+  const now=new Date();
+  let monthActive=0;
+  for(let d=1;d<=now.getDate();d++){
+    const dd=new Date(now.getFullYear(),now.getMonth(),d);
+    const ds=localDateStr(dd);
+    const mD=S.days.find(day=>day.date===ds);
+    const hD=Object.values(S.history).flatMap(wk=>(wk.days||[])).find(day=>day.date===ds);
+    const aDay=mD||hD;
+    if(aDay&&(aDay.exercises||[]).some(e=>e.done&&!e.isWarmup)) monthActive++;
+  }
+  return{current:cur,record:rec,monthActive};
+}

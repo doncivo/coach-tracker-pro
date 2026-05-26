@@ -153,10 +153,13 @@ function renderCalTracker() {
   const dk = calDayKey(_calDayOffset);
   if (!S.calories) S.calories = {};
   if (!S.calories[dk]) {
-        Store.dispatch({type:'ACTIVITY_SET_NUTRITION',payload:{[dk]:{meals:[{items:[]},{items:[]},{items:[]},{items:[]}]}}},{skipUndo:true});
-      }
+    // Initialiser la structure de repas directement
+    const calState = Store.getState().activity.calories;
+    calState[dk] = { meals: [{items:[]},{items:[]},{items:[]},{items:[]}] };
+  }
   // Ensure 4 meals
-  while (S.calories[dk].meals.length < 4) S.calories[dk].meals.push({items:[]});
+  const calDk = Store.getState().activity.calories[dk];
+  if (calDk) { while (calDk.meals.length < 4) calDk.meals.push({items:[]}); }
 
   const dayData = S.calories[dk];
   const goal = S.caloriesGoal || 2500;

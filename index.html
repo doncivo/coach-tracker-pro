@@ -557,7 +557,8 @@
   <script src="js/views/settings.js"></script>
   <script src="js/init.js"></script>
   <script>
-    var vConsole = new VConsole({ theme: 'dark' });
+    // vConsole uniquement en mode debug (?debug=1)
+    var vConsole = location.search.includes('debug=1') ? new VConsole({ theme: 'dark' }) : null;
     // Errors.init() appelé après chargement des scripts
     window.onerror = function(msg, src, line, col, err) {
       console.error('[ERR] ' + msg + ' — ' + (src||'').split('/').pop() + ':' + line);

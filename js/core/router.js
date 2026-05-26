@@ -213,7 +213,12 @@ const Router = (() => {
     // Bouton "Plus" (ouvrir/fermer drawer)
     const moreBtnToggle = document.getElementById('bnav-more-btn');
     if (moreBtnToggle) {
+      let _lastToggleTime = 0;
       function _toggleMore(e) {
+        // Éviter le double déclenchement touchstart + click
+        const now = Date.now();
+        if (now - _lastToggleTime < 300) return;
+        _lastToggleTime = now;
         e.preventDefault();
         e.stopPropagation();
         const menu = document.getElementById('bnav-more-menu');
@@ -225,7 +230,7 @@ const Router = (() => {
         if (bd) bd.style.display = isOpen ? 'block' : 'none';
       }
       moreBtnToggle.addEventListener('click',      _toggleMore);
-      moreBtnToggle.addEventListener('touchstart', _toggleMore, { passive: false });
+      moreBtnToggle.addEventListener('touchend',   _toggleMore);
     }
 
     // Backdrop — fermer le drawer

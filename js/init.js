@@ -9,11 +9,8 @@ Errors.init({ dev: true }); // passer dev:false en production
 /* ── 1. Charger les données ── */
 Store.load();
 
-/* ── 2. Compatibilité: synchroniser l'ancien S avec le Store ──
-   Pendant la migration, le code existant utilise encore S.xxx
-   On pointe S vers le state aplati du Store               */
-const _storeState = Store.bridge();
-Object.keys(_storeState).forEach(k => { S[k] = _storeState[k]; });
+/* ── 2. S est maintenant un proxy réactif (state-bridge.js)
+   Les lectures/écritures sont automatiquement routées vers Store ── */
 
 /* ── 3. Appliquer les préférences UI ── */
 _exView = S.exViewMode || 'compact';

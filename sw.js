@@ -1,4 +1,4 @@
-const CACHE = 'ctp-v19';
+const CACHE = 'ctp-v20';
 const ASSETS = [
   './', './index.html',
   './design/tokens.css', './css/style.css',
@@ -6,7 +6,8 @@ const ASSETS = [
   './js/store/training.js', './js/store/activity.js',
   './js/store/body.js', './js/store/goals.js', './js/store/app.js',
   './js/services/persist.js', './js/services/compute.js',
-  './js/core/router.js', './js/utils.js', './js/charts.js',
+  './js/core/state-bridge.js', './js/core/router.js',
+  './js/utils.js', './js/charts.js',
   './js/render_dashboard.js', './js/render_planning.js',
   './js/render_session.js', './js/render_corps.js',
   './js/render_bilan.js', './js/render_other.js',

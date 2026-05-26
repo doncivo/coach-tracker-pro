@@ -134,39 +134,6 @@ document.getElementById('export-pdf-btn').addEventListener('click', exportBilanP
 function computeTonnageComp(){const cur=weekVol();const keys=Object.keys(S.history).sort();const lastKey=keys[keys.length-1];const prev={};if(lastKey){(S.history[lastKey].days||[]).forEach(d=>{(d.exercises||[]).filter(e=>!e.isWarmup).forEach(ex=>{const v=calcVol(ex);if(v&&ex.muscle)prev[ex.muscle]=(prev[ex.muscle]||0)+v;});});}return{cur,prev};}
 
 function computeBodyComp(){const t=parseFloat(S.profilTaille)||0;if(!t||t<100||t>250)return null;const lP=(S.mesures.poids||[]).slice(-1)[0];const lT2=(S.mesures.taille||[]).slice(-1)[0];const lCou=(S.mesures.cou||[]).slice(-1)[0];if(!lP)return null;const poids=parseFloat(lP.val)||0;const imc=poids&&t?Math.round(poids/(t/100)**2*10)/10:null;let bf=null;if(lT2&&t){const abdomen=parseFloat(lT2.val)||0;const cou=lCou?parseFloat(lCou.val)||38:38;if(abdomen>cou&&t)bf=Math.round((495/(1.0324-0.19077*Math.log10(abdomen-cou)+0.15456*Math.log10(t))-450)*10)/10;if(bf)bf=Math.max(3,Math.min(bf,45));}const leanMass=bf&&poids?Math.round(poids*(1-bf/100)*10)/10:null;return{poids,imc,bf,leanMass,taille:t};}
-function computeStreak(){
-  const today=new Date();
-  let cur=0,rec=0,temp=0,inCur=true;
-  for(let i=0;i<365;i++){
-    const d=new Date(today);d.setDate(d.getDate()-i);const ds=localDateStr(d);
-    const mD=S.days.find(day=>day.date===ds);
-    const hD=Object.values(S.history).flatMap(wk=>(wk.days||[])).find(day=>day.date===ds);
-    const aDay=mD||hD;
-    const trained=aDay&&(aDay.exercises||[]).some(e=>e.done&&!e.isWarmup);
-    if(trained){
-      temp++;
-      if(inCur)cur=temp; // still in current streak
-    } else {
-      inCur=false; // first gap breaks current streak
-      if(temp>rec)rec=temp;
-      temp=0;
-    }
-  }
-  if(temp>rec)rec=temp;
-  // Count active days this calendar month
-  const now=new Date();
-  let monthActive=0;
-  for(let d=1;d<=now.getDate();d++){
-    const dd=new Date(now.getFullYear(),now.getMonth(),d);
-    const ds=localDateStr(dd);
-    const mD=S.days.find(day=>day.date===ds);
-    const hD=Object.values(S.history).flatMap(wk=>(wk.days||[])).find(day=>day.date===ds);
-    const aDay=mD||hD;
-    if(aDay&&(aDay.exercises||[]).some(e=>e.done&&!e.isWarmup)) monthActive++;
-  }
-  return{current:cur,record:rec,monthActive};
-}
-function computeAdherence(){const programmed=S.days.filter(d=>getDMS(d).some(k=>k&&k!=='rep')).length;const completed=S.days.filter(d=>{const exs=d.exercises.filter(e=>e.name.trim()&&!e.isWarmup);return exs.length>0&&exs.every(e=>e.done);}).length;let p4=0,c4=0;Object.values(S.history).slice(-4).forEach(wk=>{(wk.days||[]).forEach(d=>{const muscles=(d.muscles||[]).filter(Boolean);if(muscles.some(k=>k!=='rep'))p4++;if((d.exercises||[]).filter(e=>e.name&&!e.isWarmup).every(e=>e.done)&&(d.exercises||[]).some(e=>e.name&&!e.isWarmup))c4++;});});return{programmed,completed,prog4:p4||programmed,comp4:c4||completed};}
 function computeWeekRecovery(){const scores=[];const today=new Date();for(let i=6;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-i);const key=`${S.sessDay}-${localDateStr(d)}`;const r=S.sessRecovery[key];if(r)scores.push(r);}return scores.length?{avg:Math.round(scores.reduce((a,b)=>a+b,0)/scores.length*10)/10,count:scores.length}:null;}
 function computeIntensityZones(){
   const zones=[];

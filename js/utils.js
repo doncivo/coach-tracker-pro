@@ -702,3 +702,20 @@ function updateStats(){
   }catch(e){}
 
 }
+
+function validateImport(data) {
+  const errors = [];
+  if (typeof data !== 'object' || data === null) {
+    return { ok: false, errors: ['Le fichier JSON est invalide ou corrompu.'] };
+  }
+  if (!Array.isArray(data.days) || data.days.length !== 7) {
+    errors.push('days: doit être un tableau de 7 éléments.');
+  }
+  if (typeof data.weekType !== 'string' || !['A','B'].includes(data.weekType)) {
+    errors.push('weekType: doit être "A" ou "B".');
+  }
+  if (data.mesures && typeof data.mesures !== 'object') {
+    errors.push('mesures: format invalide.');
+  }
+  return { ok: errors.length === 0, errors };
+}

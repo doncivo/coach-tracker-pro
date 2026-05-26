@@ -154,8 +154,7 @@ function renderSessExercise(d,exercises,vi){
     const tdN=document.createElement('td');tdN.appendChild(snum);tr.appendChild(tdN);
     const wi=document.createElement('input');wi.type='text';wi.className='set-inp inp-w';wi.value=setD.weight||ex.weight||'';wi.placeholder='kg';
     wi.addEventListener('input',e=>{setD.weight=e.target.value;d.exercises[realIdx].weight=e.target.value;refreshRowCalc();save();updateStats();});
-    tr.appendChild(Object.assign(document.createElement('td'),{}).appendChild(wi)||document.createElement('td'));
-    tr.lastChild.appendChild(wi);tr.lastChild.remove();const tdW=document.createElement('td');tdW.appendChild(wi);tr.appendChild(tdW);
+    const tdW=document.createElement('td');tdW.appendChild(wi);tr.appendChild(tdW);
     // Copy previous weight button
     const cpBtn=document.createElement('button');cpBtn.className='set-copy-btn';cpBtn.textContent='=';cpBtn.title='Copier le poids de la série précédente';
     cpBtn.addEventListener('click',()=>{if(si>0){wi.value=ex.setData[si-1].weight||ex.weight||'';setD.weight=wi.value;refreshRowCalc();save();}});

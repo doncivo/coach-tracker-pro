@@ -211,7 +211,8 @@ const Router = (() => {
     // Bouton "Plus" (ouvrir/fermer drawer)
     const moreBtnToggle = document.getElementById('bnav-more-btn');
     if (moreBtnToggle) {
-      moreBtnToggle.addEventListener('click', () => {
+      moreBtnToggle.addEventListener('click', function(e) {
+        e.stopPropagation(); // empêche la fermeture immédiate par le handler document
         const menu = document.getElementById('bnav-more-menu');
         if (!menu) return;
         const isOpen = menu.classList.toggle('open');
@@ -219,11 +220,16 @@ const Router = (() => {
       });
     }
 
-    // Fermer le drawer en cliquant dehors
-    document.addEventListener('click', e => {
+    // Fermer le drawer en cliquant dehors (compatible iOS Safari)
+    document.addEventListener('click', function(e) {
       const menu = document.getElementById('bnav-more-menu');
       const btn  = document.getElementById('bnav-more-btn');
-      if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
+      if (!menu || !menu.classList.contains('open')) return;
+      // Vérifier via composedPath pour iOS Safari
+      const path = e.composedPath ? e.composedPath() : [e.target];
+      const clickedInMenu = path.some(el => el === menu);
+      const clickedOnBtn  = path.some(el => el === btn);
+      if (!clickedInMenu && !clickedOnBtn) {
         menu.classList.remove('open');
         if (btn) btn.setAttribute('aria-expanded', 'false');
       }

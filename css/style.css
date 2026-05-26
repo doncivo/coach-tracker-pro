@@ -74,7 +74,7 @@ input,textarea,select{user-select:auto;-webkit-user-select:auto}
 .bnav-label{font-size:9px;font-weight:600;letter-spacing:.02em}
 /* Bottom nav badge for secondary tabs */
 .bnav-more{position:relative}
-.bnav-more-menu{display:none;position:fixed;bottom:54px;right:0;left:0;background:var(--surface);border-top:1px solid var(--border);box-shadow:0 -4px 20px rgba(0,0,0,.15);padding:8px;flex-wrap:wrap;gap:6px}
+.bnav-more-menu{display:none;position:fixed;bottom:54px;right:0;left:0;z-index:600;background:var(--surface);border-top:1px solid var(--border);box-shadow:0 -4px 20px rgba(0,0,0,.15);padding:8px;flex-wrap:wrap;gap:6px;-webkit-overflow-scrolling:touch}
 .bnav-more-menu.open{display:flex}
 .bnav-more-btn{flex:1;min-width:80px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 6px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg);font-family:var(--font);font-size:10px;font-weight:600;color:var(--muted);cursor:pointer}
 .bnav-more-btn.active{background:var(--teal-l);color:var(--teal-d);border-color:var(--teal)}

@@ -22,13 +22,13 @@ const _dmBtn = document.getElementById('darkmode-btn');
 if (_dmBtn) _dmBtn.textContent = S.darkMode ? '☀️' : '🌙';
 
 /* ── 4. Enregistrer toutes les routes ── */
-Router.register('dashboard',   () => renderDashboard());
-Router.register('weekly',      () => { renderDayTabs(); renderDayDetail(S.activeDay || 0); });
-Router.register('session',     () => renderSession());
-Router.register('progression', () => renderProgression());
-Router.register('corps',       () => { renderCalTracker(); renderCorps(); });
-Router.register('bilan',       () => renderBilan());
-Router.register('kpi',         () => renderKPI());
+Router.register('dashboard',   () => DashboardView.render());
+Router.register('weekly',      () => PlanningView.render());
+Router.register('session',     () => SessionView.render());
+Router.register('progression', () => ProgressionView.render());
+Router.register('corps',       () => CorpsView.render());
+Router.register('bilan',       () => BilanView.render());
+Router.register('kpi',         () => KPIView.render());
 Router.register('achievements',() => AchievementsView.render());
 Router.register('library',     () => LibraryView.render());
 Router.register('monthly',     () => CalendarView.render());
@@ -47,6 +47,7 @@ function switchTab(tabName) {
 
 /* ── 7. Init des composants ── */
 updateWeekBadges();
+PlanningView._syncS();
 renderDayTabs();
 renderDayDetail(S.activeDay || 0);
 renderGoals();

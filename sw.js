@@ -1,9 +1,8 @@
-const CACHE = 'ctp-v18';
+const CACHE = 'ctp-v19';
 const ASSETS = [
   './', './index.html',
   './design/tokens.css', './css/style.css',
-  './js/core/errors.js', './js/constants.js',
-  './js/core/store.js',
+  './js/core/errors.js', './js/constants.js', './js/core/store.js',
   './js/store/training.js', './js/store/activity.js',
   './js/store/body.js', './js/store/goals.js', './js/store/app.js',
   './js/services/persist.js', './js/services/compute.js',
@@ -11,9 +10,12 @@ const ASSETS = [
   './js/render_dashboard.js', './js/render_planning.js',
   './js/render_session.js', './js/render_corps.js',
   './js/render_bilan.js', './js/render_other.js',
-  './js/views/library.js', './js/views/calendar.js',
-  './js/views/achievements.js', './js/views/settings.js',
-  './js/init.js'
+  './js/views/dashboard.js', './js/views/bilan.js',
+  './js/views/kpi.js', './js/views/progression.js',
+  './js/views/corps.js', './js/views/planning.js',
+  './js/views/session.js', './js/views/library.js',
+  './js/views/calendar.js', './js/views/achievements.js',
+  './js/views/settings.js', './js/init.js'
 ];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));

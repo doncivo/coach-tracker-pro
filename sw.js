@@ -1,6 +1,7 @@
-const CACHE = 'ctp-v11';
+const CACHE = 'ctp-v12';
 const ASSETS = [
   './', './index.html', './css/style.css',
+  './js/core/errors.js',
   './js/constants.js',
   './js/core/store.js',
   './js/core/router.js',

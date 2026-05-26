@@ -520,6 +520,7 @@
 </div>
 
   <!-- Modules JS dans l'ordre de dépendance -->
+  <script src="js/core/errors.js"></script>
   <script src="js/constants.js"></script>
   <script src="js/core/store.js"></script>
   <script src="js/core/router.js"></script>
@@ -534,6 +535,7 @@
   <script src="js/init.js"></script>
   <script>
     var vConsole = new VConsole({ theme: 'dark' });
+    // Errors.init() appelé après chargement des scripts
     window.onerror = function(msg, src, line, col, err) {
       console.error('[ERR] ' + msg + ' — ' + (src||'').split('/').pop() + ':' + line);
     };

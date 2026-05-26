@@ -3,6 +3,9 @@
    Ordre: Store.load → Router.register → Router.init → navigate
 ============================================================ */
 
+/* ── 0. Initialiser la gestion d'erreurs ── */
+Errors.init({ dev: true }); // passer dev:false en production
+
 /* ── 1. Charger les données ── */
 Store.load();
 

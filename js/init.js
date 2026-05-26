@@ -1,20 +1,82 @@
 /* ============================================================
-   init.js — Initialisation
+   init.js — Point d'entrée Coach Tracker Pro
+   Ordre: Store.load → Router.register → Router.init → navigate
 ============================================================ */
 
-/* ══ INIT ══ */
-load();
-_exView = S.exViewMode||'compact';
-document.documentElement.setAttribute('data-theme',S.darkMode?'dark':'light');
-document.getElementById('darkmode-btn').textContent=S.darkMode?'☀️':'🌙';
-updateWeekBadges();renderDayTabs();renderDayDetail(S.activeDay);renderGoals();
-document.getElementById('notes-area').value=S.notes||'';
-updateStats();updateChronoDsp();checkWeeklyAutoSave();checkAndAwardAchievements();checkOnboarding();
+/* ── 1. Charger les données ── */
+Store.load();
+
+/* ── 2. Compatibilité: synchroniser l'ancien S avec le Store ──
+   Pendant la migration, le code existant utilise encore S.xxx
+   On pointe S vers le state aplati du Store               */
+const _storeState = Store.bridge();
+Object.keys(_storeState).forEach(k => { S[k] = _storeState[k]; });
+
+/* ── 3. Appliquer les préférences UI ── */
+_exView = S.exViewMode || 'compact';
+document.documentElement.setAttribute('data-theme', S.darkMode ? 'dark' : 'light');
+const _dmBtn = document.getElementById('darkmode-btn');
+if (_dmBtn) _dmBtn.textContent = S.darkMode ? '☀️' : '🌙';
+
+/* ── 4. Enregistrer toutes les routes ── */
+Router.register('dashboard',   () => renderDashboard());
+Router.register('weekly',      () => { renderDayTabs(); renderDayDetail(S.activeDay || 0); });
+Router.register('session',     () => renderSession());
+Router.register('progression', () => renderProgression());
+Router.register('corps',       () => { renderCalTracker(); renderCorps(); });
+Router.register('bilan',       () => renderBilan());
+Router.register('kpi',         () => renderKPI());
+Router.register('achievements',() => renderAchievements());
+Router.register('library',     () => renderLibrary());
+Router.register('monthly',     () => renderCalendar());
+Router.register('settings',    () => renderSettings());
+
+/* ── 5. Initialiser le router (event listeners nav) ── */
+Router.init();
+
+/* ── 6. Alias de compatibilité ──
+   switchTab() utilisé partout dans le code existant
+   On le redirige vers Router.navigate() sans rien casser */
+function switchTab(tabName) {
+  Router.navigate(tabName);
+  S._currentTab = tabName; // compat legacy
+}
+
+/* ── 7. Init des composants ── */
+updateWeekBadges();
+renderDayTabs();
+renderDayDetail(S.activeDay || 0);
+renderGoals();
+
+const _notesArea = document.getElementById('notes-area');
+if (_notesArea) _notesArea.value = S.notes || '';
+
+updateStats();
+updateChronoDsp();
+checkWeeklyAutoSave();
+checkAndAwardAchievements();
+checkOnboarding();
 _initRestTimerButtons();
 restoreReminder();
-// Start on dashboard (or restore last tab)
-const startTab = S._currentTab || 'dashboard';
-setTimeout(()=>switchTab(startTab),0);
-// PWA manifest
-const manifest={name:'Coach Tracker Pro',short_name:'CTP',start_url:'.',display:'standalone',background_color:'#f2f4f7',theme_color:'#5ba8a0',icons:[{src:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🏋️</text></svg>',type:'image/svg+xml',sizes:'any'}]};
-const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});const ml=document.getElementById('pwa-manifest');if(ml)ml.href=URL.createObjectURL(blob);
+
+/* ── 8. Naviguer vers l'onglet de démarrage ── */
+const _startTab = S._currentTab || 'weekly';
+setTimeout(() => Router.navigate(_startTab), 0);
+
+/* ── 9. PWA manifest dynamique ── */
+const _manifest = {
+  name: 'Coach Tracker Pro',
+  short_name: 'CTP',
+  start_url: '.',
+  display: 'standalone',
+  background_color: '#f2f4f7',
+  theme_color: '#5ba8a0',
+  icons: [{
+    src: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🏋️</text></svg>',
+    type: 'image/svg+xml',
+    sizes: 'any'
+  }]
+};
+const _blob = new Blob([JSON.stringify(_manifest)], { type: 'application/json' });
+const _ml = document.getElementById('pwa-manifest');
+if (_ml) _ml.href = URL.createObjectURL(_blob);

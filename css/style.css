@@ -957,3 +957,187 @@ nav.tabs   { flex-shrink: 0 !important; }
 .day-detail > .ex-table-wrap { flex-shrink: 0; }
 /* Fix scroll Dashboard */
 .dashboard-wrap > * { flex-shrink: 0; }
+
+/* ═══════════════════════════════════════════════════════
+   CSS MANQUANT — classes non définies dans le CSS original
+   Toutes les pages: Séance, Planning, Corps, Bilan, Dashboard
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Séance: topbar ── */
+.sess-day-btn{padding:5px 9px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;min-height:32px;transition:all .15s}
+.sess-day-btn.active{background:var(--teal);border-color:var(--teal);color:#fff}
+.recovery-btn{width:34px;height:34px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.recovery-btn.sel{border-color:var(--teal);background:color-mix(in srgb,var(--teal) 15%,transparent)}
+.nutri-btn{padding:4px 9px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;min-height:30px;transition:all .15s}
+.nutri-btn.sel-deficit{background:color-mix(in srgb,var(--red) 12%,transparent);border-color:var(--red);color:var(--red)}
+.nutri-btn.sel-maint{background:color-mix(in srgb,var(--teal) 12%,transparent);border-color:var(--teal);color:var(--teal-d)}
+.nutri-btn.sel-surplus{background:color-mix(in srgb,var(--green) 12%,transparent);border-color:var(--green);color:var(--green)}
+
+/* ── Séance: navigation latérale et strip ── */
+.sess-nav-item{padding:7px 9px;border-radius:10px;cursor:pointer;border:1.5px solid transparent;transition:all .15s;display:flex;align-items:center;gap:7px}
+.sess-nav-item:hover,.sess-nav-item.active-nav{background:color-mix(in srgb,var(--teal) 10%,transparent);border-color:color-mix(in srgb,var(--teal) 25%,transparent)}
+.sess-nav-item.done-nav{opacity:.55}
+.sess-nav-num{width:22px;height:22px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:var(--text)}
+.sess-nav-num.done{background:var(--teal);color:#fff}
+.sess-nav-name{font-size:11px;font-weight:600;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sess-nav-meta{font-size:9px;color:var(--muted)}
+.sess-nav-sets{display:flex;gap:2px;margin-top:2px}
+.sess-nav-set-dot{width:6px;height:6px;border-radius:50%;background:var(--border)}
+.sess-nav-set-dot.done{background:var(--teal)}
+.sess-nav-btns{display:flex;gap:6px;padding:8px;border-top:1px solid var(--border)}
+.sess-nav-info{font-size:10px;color:var(--muted);padding:4px 9px}
+.sess-strip-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 7px;border-radius:8px;cursor:pointer;border:1.5px solid transparent;flex-shrink:0;min-width:44px}
+.sess-strip-item.active-nav{background:color-mix(in srgb,var(--teal) 10%,transparent);border-color:var(--teal)}
+.sess-strip-num{font-size:10px;font-weight:800;color:var(--text)}
+.sess-strip-dots{display:flex;gap:2px}
+.sess-strip-dot{width:5px;height:5px;border-radius:50%;background:var(--border)}
+.sess-strip-dot.done{background:var(--teal)}
+
+/* ── Séance: exercice card ── */
+.sess-ex-main-name{font-size:14px;font-weight:800;color:var(--text)}
+.sess-ex-sub{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px}
+.sess-ex-sub-item{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:2px}
+.sess-sets-table{width:100%;border-collapse:collapse;font-size:12px}
+.sess-sets-table th{background:var(--bg);padding:4px 4px;text-align:center;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border)}
+.sess-sets-table td{padding:4px;text-align:center;border-bottom:1px solid var(--border);vertical-align:middle}
+.sess-sets-table tr:last-child td{border-bottom:none}
+.sess-sets-table tr.srow-done td{opacity:.5;background:var(--bg)}
+.sess-sets-table tr.srow-active td{background:color-mix(in srgb,var(--teal) 4%,transparent)}
+.snum{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--muted);min-width:16px;text-align:center}
+.snum.snum-done{color:var(--teal-d)}
+.snum.snum-active{color:var(--text)}
+.snum.snum-warmup{color:var(--orange)}
+.set-inp{width:52px;text-align:center;font-family:var(--mono);font-size:14px;padding:5px 4px;border-radius:7px;border:1.5px solid var(--border);background:var(--surface);color:var(--text)}
+.set-inp:focus{outline:none;border-color:var(--teal)}
+.inp-r,.inp-rpe,.inp-rir{width:44px;text-align:center;font-family:var(--mono);font-size:12px;padding:4px 3px;border-radius:6px}
+.set-1rm-val,.set-vol-val,.set-prev-val{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.set-copy-btn{background:none;border:none;cursor:pointer;font-size:13px;color:var(--muted);padding:0 3px}
+.set-val-btn{padding:4px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;min-height:28px;transition:all .15s;color:var(--muted)}
+.set-val-btn.validated{background:var(--teal);border-color:var(--teal);color:#fff}
+.sess-add-set-btn{width:100%;padding:7px;border-radius:10px;border:1.5px dashed var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:11px;font-weight:600;font-family:var(--font);transition:all .15s;margin-top:4px}
+.sess-add-set-btn:hover{border-color:var(--teal);color:var(--teal-d)}
+.sess-note-inp,.sess-note-area{width:100%;margin-top:6px;min-height:52px;resize:vertical;font-family:var(--font);font-size:13px;padding:7px 10px;border-radius:9px;border:1.5px solid var(--border);background:var(--bg);color:var(--text)}
+.sess-note-inp:focus,.sess-note-area:focus{outline:none;border-color:var(--teal)}
+.sess-rpe-alert{background:color-mix(in srgb,var(--orange) 10%,transparent);border:1px solid color-mix(in srgb,var(--orange) 30%,transparent);border-radius:8px;padding:5px 10px;font-size:11px;color:var(--orange);margin-top:5px}
+.srow-warmup td{opacity:.75;background:var(--bg)}
+.done-num{font-family:var(--mono);font-weight:800;color:var(--green)}
+.dot-done{background:var(--green)!important}
+
+/* ── Focus mode ── */
+.focus-top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.focus-ex-name{font-size:18px;font-weight:800;color:var(--text);flex:1}
+.focus-exit{background:none;border:1.5px solid var(--border);border-radius:8px;padding:5px 11px;cursor:pointer;font-family:var(--font);font-size:12px;color:var(--muted)}
+.focus-set-row{display:flex;align-items:center;gap:10px;padding:9px;background:var(--surface);border-radius:var(--r);border:1.5px solid var(--border);margin-bottom:7px}
+.focus-chrono{text-align:center;margin:16px 0}
+.focus-chrono-time{font-family:var(--mono);font-size:44px;font-weight:800;color:var(--teal-d)}
+.focus-prev{font-size:12px;color:var(--muted);margin-top:3px}
+.focus-val-btn{width:100%;padding:13px;border-radius:13px;border:none;background:var(--teal);color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:var(--font);margin-top:10px}
+.focus-inp{font-size:22px;font-family:var(--mono);text-align:center;padding:9px;border-radius:10px;border:2px solid var(--border);background:var(--bg);color:var(--text);width:100%;box-sizing:border-box}
+.focus-unit{font-size:13px;color:var(--muted);text-align:center;margin-top:3px}
+
+/* ── Planning: exercice table ── */
+.ex-name-inp{font-size:13px;font-weight:600}
+.ex-num-inp,.inp-r{width:36px;text-align:center;font-family:var(--mono)}
+.ex-note-inp{font-size:11px;color:var(--muted)}
+.ex-muscle-sel,.ex-rpe-sel,.ex-rir-sel{font-size:11px;border-radius:6px;padding:2px 4px}
+.ex-cb{width:16px;height:16px;cursor:pointer;accent-color:var(--teal)}
+.ex-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px}
+.ex-1rm,.ex-vol,.ex-prev{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.drag-handle{cursor:grab;color:var(--muted);font-size:14px;padding:0 4px;touch-action:none}
+.superset-badge{font-size:9px;background:color-mix(in srgb,var(--purple,#805ad5) 15%,transparent);color:var(--purple,#805ad5);border-radius:5px;padding:1px 5px;font-weight:700}
+.warmup-badge{font-size:9px;background:color-mix(in srgb,var(--orange) 15%,transparent);color:var(--orange);border-radius:5px;padding:1px 5px;font-weight:700}
+.srow-done td{opacity:.5;background:var(--bg)!important}
+.srow-active td{background:color-mix(in srgb,var(--teal) 4%,transparent)!important}
+.ex-compact-row{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.ex-detail-row{padding:6px 0;border-bottom:1px solid var(--border)}
+.ex-hdr-row{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.ex-section.dragging{opacity:.5}
+.ex-section.drag-over{border-top:2px solid var(--teal)}
+.ex-table-hdr{background:var(--bg)!important}
+.day-date-inp{width:130px;font-size:12px}
+.dhc-dayname{font-size:14px;font-weight:800}
+.dhc-left{flex:1;min-width:0}
+.dhc-right{display:flex;gap:6px;flex-wrap:wrap}
+
+/* ── Dashboard ── */
+.lbl{font-size:10px;color:var(--muted)}
+.num{font-family:var(--mono);font-weight:700}
+.date{font-size:11px;color:var(--muted)}
+.pts{font-weight:700}
+.score-badge{font-family:var(--mono);font-size:22px;font-weight:800;color:var(--teal-d)}
+.score-chip{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:11px;display:flex;gap:5px;align-items:center}
+.score-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.countdown-chip{font-size:11px;background:color-mix(in srgb,var(--teal) 12%,transparent);color:var(--teal-d);border-radius:8px;padding:4px 10px;font-weight:700;display:inline-flex;align-items:center;gap:4px}
+.onboard-info-box{background:var(--bg);border-radius:10px;padding:10px 14px;border:1px solid var(--border);margin:6px 0}
+.std-comparison{background:var(--bg);border-radius:10px;padding:10px;border:1px solid var(--border)}
+.rp-act{color:var(--teal-d);font-weight:700}
+
+/* ── Corps ── */
+.nutri-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)}
+.nutri-day{font-size:11px;color:var(--muted);min-width:28px;font-weight:600}
+.corps-canvas,.prog-canvas,.chart-canvas{display:block;width:100%}
+.pain-entry{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)}
+.sleep-day-card{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:44px}
+.sleep-day-lbl{font-size:9px;color:var(--muted);font-weight:600}
+.sleep-qual-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:var(--bg);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.sleep-qual-btn.sel{border-color:var(--teal);background:color-mix(in srgb,var(--teal) 12%,transparent)}
+.sleep-qual-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.steps-day-col{display:flex;flex-direction:column;align-items:center;gap:3px;flex:0 0 auto;min-width:36px}
+.steps-day-num{font-size:9px;color:var(--muted);font-weight:600}
+.steps-empty{text-align:center;color:var(--muted);font-size:12px;padding:16px}
+.mesure-add-btn{margin-top:8px}
+.mesure-inp{width:80px;text-align:center;font-family:var(--mono)}
+.mesure-val{font-family:var(--mono);font-size:16px;font-weight:800;color:var(--text)}
+.mesure-unit{font-size:11px;color:var(--muted)}
+.cal-total-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--border);margin-top:4px}
+.cal-total-val{font-family:var(--mono);font-size:15px;font-weight:800;color:var(--teal-d)}
+
+/* ── Bilan / KPI ── */
+.bilan-big{font-family:var(--mono);font-size:26px;font-weight:800;color:var(--teal-d)}
+.bilan-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.chart-canvas{display:block;width:100%;max-height:200px}
+.kpi-bar-wrap{height:6px;background:var(--border);border-radius:6px;overflow:hidden;margin-top:4px}
+.kpi-bar{height:100%;background:var(--teal);border-radius:6px;transition:width .6s}
+.kpi-gauge-wrap{display:flex;justify-content:center;margin:10px 0}
+.kpi-gauge{position:relative;width:120px;height:60px}
+.kpi-gauge-bg{fill:none;stroke:var(--border);stroke-width:10}
+.kpi-gauge-fill{fill:none;stroke:var(--teal);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .8s}
+.kpi-gauge-text{font-family:var(--mono);font-size:18px;font-weight:800;fill:var(--text)}
+.kpi-section{margin-bottom:14px}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.vol-row{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.vol-label{font-size:10px;color:var(--muted);width:68px;flex-shrink:0}
+.vol-bar-wrap{flex:1;height:5px;background:var(--border);border-radius:5px;overflow:hidden}
+.vol-bar{height:100%;background:var(--teal);border-radius:5px;transition:width .4s}
+.vol-num{font-family:var(--mono);font-size:10px;width:38px;text-align:right;flex-shrink:0;color:var(--text)}
+.prog-card{background:var(--card);border-radius:13px;border:1px solid var(--border);padding:13px;box-shadow:var(--sh);margin-bottom:10px}
+.prog-card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.prog-card-name{font-size:13px;font-weight:700;color:var(--text)}
+.prog-card-body{display:flex;flex-direction:column;gap:6px}
+.prog-table{width:100%;border-collapse:collapse;font-size:11px}
+.prog-table th{background:var(--bg);padding:4px;text-align:center;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--border)}
+.prog-table td{padding:4px;text-align:center;border-bottom:1px solid var(--border)}
+.prog-delta-up{color:var(--green);font-weight:700}
+.prog-delta-down{color:var(--red);font-weight:700}
+.prog-delta-eq{color:var(--muted)}
+.prog-no-data{text-align:center;color:var(--muted);padding:16px;font-size:12px}
+
+/* ── Autres pages ── */
+.empty{text-align:center;color:var(--muted);padding:20px;font-size:12px}
+.cal-status{font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px}
+.cal-rest{background:var(--border);color:var(--muted)}
+.lib-card-hdr{padding:10px 12px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.lib-card-body{padding:10px 12px}
+.lib-muscles{font-size:10px;color:var(--muted);margin-top:3px;display:flex;flex-wrap:wrap;gap:3px}
+.lib-tag{font-size:9px;background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:2px 6px;font-weight:600}
+.lib-tip{font-size:11px;color:var(--muted);font-style:italic;margin-top:6px}
+.obj-stat-row{display:flex;align-items:center;gap:8px;padding:4px 0}
+.obj-stat-lbl{font-size:11px;color:var(--muted);flex:1}
+.obj-stat-val{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text)}
+.obj-progress-bar-wrap{height:5px;background:var(--border);border-radius:5px;overflow:hidden;margin-top:5px}
+.obj-progress-bar{height:100%;background:var(--teal);border-radius:5px;transition:width .5s}
+.goal-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)}
+.goal-inp{flex:1;font-size:13px}
+.goal-cb{width:16px;height:16px;cursor:pointer;accent-color:var(--teal);flex-shrink:0}
+.goal-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;flex-shrink:0}
+

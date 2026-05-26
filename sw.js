@@ -1,4 +1,4 @@
-const CACHE = 'ctp-v5';
+const CACHE = 'ctp-v6';
 const ASSETS = [
   './',
   './index.html',

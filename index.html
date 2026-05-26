@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
@@ -17,71 +17,71 @@
   <!-- v36-1779795824 -->
 </head>
 <body>
-<div class="save-badge" id="save-badge">âœ“ SauvegardÃ©</div>
+<div class="save-badge" id="save-badge">✓ Sauvegardé</div>
 <header class="hdr">
-  <span style="font-size:18px;flex-shrink:0">ðŸ‹ï¸</span>
-  <div style="min-width:0;flex:1"><h1>Coach Tracker Pro</h1><div class="hdr-sub">Hypertrophie Â· A/B</div></div>
+  <span style="font-size:18px;flex-shrink:0">🏋️</span>
+  <div style="min-width:0;flex:1"><h1>Coach Tracker Pro</h1><div class="hdr-sub">Hypertrophie · A/B</div></div>
   <div class="hdr-right">
     <span class="hdr-badge" id="week-type-badge">A</span>
-    <button class="hdr-btn" id="toggle-week-btn" title="Changer semaine A/B" aria-label="Changer semaine A/B">â‡„</button>
-    <button class="hdr-btn hdr-desktop-only btn-archive" id="archive-week-btn" title="Archiver la semaine" aria-label="Archiver"><span>ðŸ“</span></button>
+    <button class="hdr-btn" id="toggle-week-btn" title="Changer semaine A/B" aria-label="Changer semaine A/B">⇄</button>
+    <button class="hdr-btn hdr-desktop-only btn-archive" id="archive-week-btn" title="Archiver la semaine" aria-label="Archiver"><span>📁</span></button>
     <span class="hdr-badge badge-block" id="week-counter-badge">S1</span>
-    <button class="hdr-btn" id="block-btn" title="Changer de bloc" aria-label="Bloc">ðŸ“¦</button>
-    <button class="hdr-btn hdr-desktop-only btn-export" id="export-btn" title="Exporter les donnÃ©es" aria-label="Exporter"><span>â¬‡</span></button>
-    <button class="hdr-btn hdr-desktop-only btn-import" id="import-btn" title="Importer des donnÃ©es" aria-label="Importer"><span>â¬†</span></button>
-    <button class="hdr-btn hdr-desktop-only" id="focus-btn" title="Mode focus" aria-label="Mode focus">ðŸŽ¯</button>
+    <button class="hdr-btn" id="block-btn" title="Changer de bloc" aria-label="Bloc">📦</button>
+    <button class="hdr-btn hdr-desktop-only btn-export" id="export-btn" title="Exporter les données" aria-label="Exporter"><span>⬇</span></button>
+    <button class="hdr-btn hdr-desktop-only btn-import" id="import-btn" title="Importer des données" aria-label="Importer"><span>⬆</span></button>
+    <button class="hdr-btn hdr-desktop-only" id="focus-btn" title="Mode focus" aria-label="Mode focus">🎯</button>
     <span id="hdr-fitness-score" style="display:none;cursor:pointer;font-family:var(--mono);font-size:12px;font-weight:700;padding:3px 8px;border-radius:12px;background:var(--teal);color:#fff" onclick="switchTab('dashboard')"></span>
-    <button class="hdr-btn" id="darkmode-btn" aria-label="Mode sombre">ðŸŒ™</button>
+    <button class="hdr-btn" id="darkmode-btn" aria-label="Mode sombre">🌙</button>
     <input type="file" id="import-file" accept=".json" style="display:none">
   </div>
 </header>
 
-<!-- BOTTOM NAV â€” mobile only -->
+<!-- BOTTOM NAV — mobile only -->
 <nav class="bottom-nav" role="navigation" aria-label="Navigation principale">
   <div class="bottom-nav-inner">
     <button class="bnav-btn" data-tab="dashboard" aria-label="Accueil">
-      <span class="bnav-icon">ðŸ </span><span class="bnav-label">Accueil</span>
+      <span class="bnav-icon">🏠</span><span class="bnav-label">Accueil</span>
     </button>
     <button class="bnav-btn" data-tab="weekly" aria-label="Planning">
-      <span class="bnav-icon">ðŸ“‹</span>
+      <span class="bnav-icon">📋</span>
       <span class="bnav-label">Planning</span>
     </button>
-    <button class="bnav-btn" data-tab="session" aria-label="SÃ©ance">
-      <span class="bnav-icon">âš¡</span>
-      <span class="bnav-label">SÃ©ance</span>
+    <button class="bnav-btn" data-tab="session" aria-label="Séance">
+      <span class="bnav-icon">⚡</span>
+      <span class="bnav-label">Séance</span>
     </button>
     <button class="bnav-btn" data-tab="progression" aria-label="Progression">
-      <span class="bnav-icon">ðŸ“ˆ</span>
-      <span class="bnav-label">ProgrÃ¨s</span>
+      <span class="bnav-icon">📈</span>
+      <span class="bnav-label">Progrès</span>
     </button>
     <button class="bnav-btn" data-tab="corps" aria-label="Corps">
-      <span class="bnav-icon">ðŸ’ª</span>
+      <span class="bnav-icon">💪</span>
       <span class="bnav-label">Corps</span>
     </button>
     <button class="bnav-btn bnav-more" id="bnav-more-btn" aria-label="Plus" aria-expanded="false">
-      <span class="bnav-icon">â‹¯</span>
+      <span class="bnav-icon">⋯</span>
       <span class="bnav-label">Plus</span>
     </button>
   </div>
   <!-- "Plus" drawer -->
   <div class="bnav-more-menu" id="bnav-more-menu" role="menu">
-    <button class="bnav-more-btn" data-tab="bilan" role="menuitem"><span style="font-size:16px">ðŸ“Š</span><span>Bilan</span></button>
-    <button class="bnav-more-btn" data-tab="kpi" role="menuitem"><span style="font-size:16px">ðŸŽ¯</span><span>KPI</span></button>
-    <button class="bnav-more-btn" data-tab="achievements" role="menuitem"><span style="font-size:16px">ðŸ†</span><span>Objectifs</span></button>
-    <button class="bnav-more-btn" data-tab="library" role="menuitem"><span style="font-size:16px">ðŸ“š</span><span>Biblio</span></button>
-    <button class="bnav-more-btn" data-tab="monthly" role="menuitem"><span style="font-size:16px">ðŸ“…</span><span>Calendrier</span></button>
+    <button class="bnav-more-btn" data-tab="bilan" role="menuitem"><span style="font-size:16px">📊</span><span>Bilan</span></button>
+    <button class="bnav-more-btn" data-tab="kpi" role="menuitem"><span style="font-size:16px">🎯</span><span>KPI</span></button>
+    <button class="bnav-more-btn" data-tab="achievements" role="menuitem"><span style="font-size:16px">🏆</span><span>Objectifs</span></button>
+    <button class="bnav-more-btn" data-tab="library" role="menuitem"><span style="font-size:16px">📚</span><span>Biblio</span></button>
+    <button class="bnav-more-btn" data-tab="monthly" role="menuitem"><span style="font-size:16px">📅</span><span>Calendrier</span></button>
   </div>
 </nav>
 <div class="tabs">
-  <button class="tab-btn active" data-tab="weekly">ðŸ“‹ Planning</button>
-  <button class="tab-btn" data-tab="session">âš¡ SÃ©ance</button>
-  <button class="tab-btn" data-tab="progression">ðŸ“ˆ Progression</button>
-  <button class="tab-btn" data-tab="corps">ðŸ’ª Corps</button>
-  <button class="tab-btn" data-tab="bilan">ðŸ“Š Bilan</button>
-  <button class="tab-btn" data-tab="kpi">ðŸŽ¯ KPI</button>
-  <button class="tab-btn" data-tab="achievements">ðŸ† Objectifs</button>
-  <button class="tab-btn" data-tab="library">ðŸ“š BibliothÃ¨que</button>
-  <button class="tab-btn" data-tab="monthly">ðŸ“… Calendrier</button>
+  <button class="tab-btn active" data-tab="weekly">📋 Planning</button>
+  <button class="tab-btn" data-tab="session">⚡ Séance</button>
+  <button class="tab-btn" data-tab="progression">📈 Progression</button>
+  <button class="tab-btn" data-tab="corps">💪 Corps</button>
+  <button class="tab-btn" data-tab="bilan">📊 Bilan</button>
+  <button class="tab-btn" data-tab="kpi">🎯 KPI</button>
+  <button class="tab-btn" data-tab="achievements">🏆 Objectifs</button>
+  <button class="tab-btn" data-tab="library">📚 Bibliothèque</button>
+  <button class="tab-btn" data-tab="monthly">📅 Calendrier</button>
 </div>
 <div class="content">
 
@@ -94,34 +94,34 @@
     <div class="day-panel"><div class="day-detail" id="day-detail"></div></div>
     <aside class="side-panel">
       <div class="sp-block">
-        <div class="sp-title">ðŸ“Š Semaine</div>
+        <div class="sp-title">📊 Semaine</div>
         <div class="stats-grid" style="margin-bottom:8px">
           <div class="stat-box"><div class="stat-val" id="stat-done">0</div><div class="stat-lbl">Faits</div></div>
           <div class="stat-box"><div class="stat-val" id="stat-total">0</div><div class="stat-lbl">Total</div></div>
           <div class="stat-box"><div class="stat-val" id="stat-days">0</div><div class="stat-lbl">Actifs</div></div>
-          <div class="stat-box"><div class="stat-val" id="stat-pct">0%</div><div class="stat-lbl">ComplÃ©tion</div></div>
+          <div class="stat-box"><div class="stat-val" id="stat-pct">0%</div><div class="stat-lbl">Complétion</div></div>
         </div>
         <div id="vol-bars"></div>
       </div>
       <div class="sp-block">
-        <div class="sp-title">ðŸ”„ Push/Pull</div>
+        <div class="sp-title">🔄 Push/Pull</div>
         <div id="push-pull-ratio"></div>
       </div>
       <div class="sp-block">
-        <div class="sp-title">ðŸ† PR semaine</div>
-        <div id="pr-panel" style="font-size:10px;color:var(--muted)">â€”</div>
+        <div class="sp-title">🏆 PR semaine</div>
+        <div id="pr-panel" style="font-size:10px;color:var(--muted)">—</div>
       </div>
       <div class="sp-block">
-        <div class="sp-title">âš ï¸ Alertes</div>
-        <div id="alerts-panel" style="font-size:10px;color:var(--muted)">â€”</div>
+        <div class="sp-title">⚠️ Alertes</div>
+        <div id="alerts-panel" style="font-size:10px;color:var(--muted)">—</div>
       </div>
       <div class="sp-block">
-        <div class="sp-title">ðŸŽ¯ Objectifs</div>
+        <div class="sp-title">🎯 Objectifs</div>
         <div id="goals-list"></div>
         <button class="add-goal-btn" style="width:100%;border:1px dashed var(--border);background:transparent;color:var(--muted);font-family:var(--font);font-size:9px;padding:4px;border-radius:var(--rs);cursor:pointer;margin-top:4px" id="add-goal-btn">+ Ajouter</button>
       </div>
       <div class="sp-block">
-        <div class="sp-title">ðŸ“ Notes</div>
+        <div class="sp-title">📝 Notes</div>
         <textarea class="notes-ta" id="notes-area" placeholder="Notes..."></textarea>
       </div>
     </aside>
@@ -137,17 +137,17 @@
         <div class="sess-day-sel" id="sess-day-sel"></div>
       </div>
       <div style="display:flex;flex-direction:column;gap:2px">
-        <div style="font-size:8px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">RÃ©cupÃ©ration</div>
+        <div style="font-size:8px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Récupération</div>
         <div id="recovery-btns" style="display:flex;gap:4px">
-          <button class="recovery-btn" data-r="1" title="Mauvaise">ðŸ˜´</button>
-          <button class="recovery-btn" data-r="2" title="Moyenne">ðŸ˜</button>
-          <button class="recovery-btn" data-r="3" title="Bonne">ðŸ”¥</button>
+          <button class="recovery-btn" data-r="1" title="Mauvaise">😴</button>
+          <button class="recovery-btn" data-r="2" title="Moyenne">😐</button>
+          <button class="recovery-btn" data-r="3" title="Bonne">🔥</button>
         </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:2px">
         <div style="font-size:8px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Nutrition</div>
         <div id="nutri-today-btns" style="display:flex;gap:5px">
-          <button class="nutri-btn" data-n="deficit" style="min-height:38px;font-size:12px">DÃ©ficit</button>
+          <button class="nutri-btn" data-n="deficit" style="min-height:38px;font-size:12px">Déficit</button>
           <button class="nutri-btn" data-n="maint" style="min-height:38px;font-size:12px">Maint.</button>
           <button class="nutri-btn" data-n="surplus" style="min-height:38px;font-size:12px">Surplus</button>
         </div>
@@ -156,8 +156,8 @@
         <div><div class="chrono-label">Repos</div><div class="chrono-display" id="chrono-display">0:00</div></div>
         <div>
           <div class="chrono-btns">
-            <button class="chrono-btn" id="chrono-start">â–¶</button>
-            <button class="chrono-btn" id="chrono-reset">â†º</button>
+            <button class="chrono-btn" id="chrono-start">▶</button>
+            <button class="chrono-btn" id="chrono-reset">↺</button>
           </div>
           <div class="rest-presets" style="margin-top:2px">
             <button class="rest-preset" data-s="60">1'</button>
@@ -169,12 +169,12 @@
       </div>
     </div>
     <div class="sess-progress-bar-area">
-      <span class="sess-info-chip">ðŸ’ª <strong id="sess-prog-ex">0/0</strong></span>
+      <span class="sess-info-chip">💪 <strong id="sess-prog-ex">0/0</strong></span>
       <div class="sess-prog-bar-wrap"><div class="sess-prog-bar" id="sess-prog-bar" style="width:0%"></div></div>
-      <span class="sess-info-chip">â± <strong id="sess-duration">0 min</strong></span>
-      <span class="sess-info-chip" id="sess-vol-live">ðŸ“¦ <strong>â€”</strong></span>
-      <span class="sess-info-chip" id="sess-1rm-live">ðŸ‹ï¸ <strong>â€”</strong></span>
-      <button class="btn btn-ghost btn-sm" id="sess-focus-btn" style="margin-left:auto">ðŸŽ¯ Mode Focus</button>
+      <span class="sess-info-chip">⏱ <strong id="sess-duration">0 min</strong></span>
+      <span class="sess-info-chip" id="sess-vol-live">📦 <strong>—</strong></span>
+      <span class="sess-info-chip" id="sess-1rm-live">🏋️ <strong>—</strong></span>
+      <button class="btn btn-ghost btn-sm" id="sess-focus-btn" style="margin-left:auto">🎯 Mode Focus</button>
     </div>
     <!-- Mobile strip nav (horizontal scroll) -->
     <div class="sess-nav-strip" id="sess-nav-strip"></div>
@@ -189,14 +189,14 @@
 <div class="tab-pane" id="tab-progression">
   <div class="prog-wrap" id="prog-wrap">
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <span class="section-title">ðŸ“ˆ Progression</span>
+      <span class="section-title">📈 Progression</span>
       <div class="prog-filter-row">
         <select class="prog-filter-sel" id="prog-muscle-filter"><option value="">Tous les groupes</option></select>
         <select class="prog-filter-sel" id="prog-weeks-filter">
           <option value="4">4 semaines</option><option value="8">8 sem.</option><option value="12">12 sem.</option><option value="all">Tout</option>
         </select>
       </div>
-      <button class="btn btn-green btn-sm" id="gen-sample-data">ðŸ’¡ DonnÃ©es dÃ©mo</button>
+      <button class="btn btn-green btn-sm" id="gen-sample-data">💡 Données démo</button>
     </div>
     <div class="prog-cards" id="prog-cards"></div>
   </div>
@@ -208,17 +208,17 @@
 
     <!-- Sous-navigation Corps -->
     <nav class="corps-subnav" id="corps-subnav">
-      <button class="corps-subbtn active" data-corps="nutrition">ðŸ½ï¸ Nutrition</button>
-      <button class="corps-subbtn" data-corps="mesures">ðŸ“ Mesures</button>
-      <button class="corps-subbtn" data-corps="activite">ðŸƒ ActivitÃ©</button>
-      <button class="corps-subbtn" data-corps="journal">ðŸ“‹ Journal</button>
+      <button class="corps-subbtn active" data-corps="nutrition">🍽️ Nutrition</button>
+      <button class="corps-subbtn" data-corps="mesures">📏 Mesures</button>
+      <button class="corps-subbtn" data-corps="activite">🏃 Activité</button>
+      <button class="corps-subbtn" data-corps="journal">📋 Journal</button>
     </nav>
 
     <!-- NUTRITION : Calories & Repas -->
     <div class="corps-section active" id="corps-sect-nutrition">
       <div class="card" style="margin:10px 12px 0">
         <div class="card-hdr">
-          <div class="card-title">ðŸ½ï¸ Calories & Macros</div>
+          <div class="card-title">🍽️ Calories & Macros</div>
           <div style="display:flex;align-items:center;gap:6px">
             <span style="font-size:11px;color:var(--muted)">Objectif :</span>
             <input type="number" id="cal-goal-inp" class="steps-goal-inp" value="2500" min="500" max="6000" step="50">
@@ -240,13 +240,13 @@
     <!-- MESURES corporelles -->
     <div class="corps-section" id="corps-sect-mesures">
       <div style="padding:10px 12px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <span class="section-title">ðŸ“ Mensurations</span>
+        <span class="section-title">📏 Mensurations</span>
         <div style="display:flex;align-items:center;gap:6px">
           <label style="font-size:11px;font-weight:700;color:var(--muted)">Taille :</label>
           <input type="number" id="profil-taille" class="mesure-inp" placeholder="cm" style="width:70px;padding:6px 10px;font-size:15px" min="100" max="250">
           <span style="font-size:11px;color:var(--muted)">cm</span>
         </div>
-        <button class="btn btn-ghost btn-sm" id="add-photo-btn">ðŸ“¸ Photo</button>
+        <button class="btn btn-ghost btn-sm" id="add-photo-btn">📸 Photo</button>
       </div>
       <div style="padding:8px 12px 12px">
         <div class="corps-grid" id="corps-grid"></div>
@@ -254,12 +254,12 @@
       </div>
     </div>
 
-    <!-- ACTIVITE : Pas + Sommeil + RÃ©gularitÃ© -->
+    <!-- ACTIVITE : Pas + Sommeil + Régularité -->
     <div class="corps-section" id="corps-sect-activite">
       <div style="padding:10px 12px;display:flex;flex-direction:column;gap:10px">
         <div class="card">
           <div class="card-hdr">
-            <div class="card-title">ðŸ‘Ÿ Pas quotidiens (7 j)</div>
+            <div class="card-title">👟 Pas quotidiens (7 j)</div>
             <div style="display:flex;align-items:center;gap:6px">
               <input type="number" id="steps-goal-inp" class="steps-goal-inp" value="10000" min="1000" max="50000" step="500">
               <span style="font-size:11px;color:var(--muted)">pas/j</span>
@@ -272,20 +272,20 @@
           </div>
         </div>
         <div class="card">
-          <div class="card-hdr"><div class="card-title">ðŸ˜´ Sommeil & Ã‰nergie (7 j)</div></div>
+          <div class="card-hdr"><div class="card-title">😴 Sommeil & Énergie (7 j)</div></div>
           <div style="padding:10px">
             <div class="sleep-grid" id="sleep-grid"></div>
             <div id="sleep-chart-container"></div>
           </div>
         </div>
         <div class="card">
-          <div class="card-hdr"><div class="card-title">ðŸ”¥ RÃ©gularitÃ© â€” 90 jours</div></div>
+          <div class="card-hdr"><div class="card-title">🔥 Régularité — 90 jours</div></div>
           <div style="padding:10px">
             <div class="streak-heatmap" id="streak-heatmap"></div>
             <div style="display:flex;gap:10px;margin-top:6px;font-size:9px;color:var(--muted)">
-              <span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--teal);margin-right:3px"></span>SÃ©ance</span>
+              <span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--teal);margin-right:3px"></span>Séance</span>
               <span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#d4e8f8;margin-right:3px"></span>Repos</span>
-              <span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--border);margin-right:3px"></span>Non renseignÃ©</span>
+              <span><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--border);margin-right:3px"></span>Non renseigné</span>
             </div>
           </div>
         </div>
@@ -299,12 +299,12 @@
     <div class="corps-section" id="corps-sect-journal">
       <div style="padding:10px 12px;display:flex;flex-direction:column;gap:10px">
         <div class="card">
-          <div class="card-hdr"><div class="card-title">ðŸ¥— Macros â€” 7 derniers jours</div></div>
+          <div class="card-hdr"><div class="card-title">🥗 Macros — 7 derniers jours</div></div>
           <div style="padding:10px" id="nutri-grid"></div>
         </div>
         <div class="card">
           <div class="card-hdr">
-            <div class="card-title">ðŸ©º Journal douleurs</div>
+            <div class="card-title">🩺 Journal douleurs</div>
             <button class="btn btn-ghost btn-sm" id="add-pain-btn">+ Ajouter</button>
           </div>
           <div style="padding:10px" id="pain-list"></div>
@@ -318,13 +318,13 @@
 <div class="tab-pane" id="tab-bilan">
   <div class="bilan-wrap">
     <div class="bilan-header">
-      <span class="section-title">ðŸ“Š Bilan</span>
+      <span class="section-title">📊 Bilan</span>
       <div class="bilan-nav">
         <button class="bilan-nav-btn" id="bilan-prev">&#8249;</button>
         <div class="bilan-week-lbl" id="bilan-week-lbl">Semaine courante</div>
         <button class="bilan-nav-btn" id="bilan-next">&#8250;</button>
       </div>
-      <button class="btn btn-ghost btn-sm" id="export-pdf-btn">ðŸ“„ Export PDF</button>
+      <button class="btn btn-ghost btn-sm" id="export-pdf-btn">📄 Export PDF</button>
     </div>
     <div id="bilan-content"></div>
   </div>
@@ -339,24 +339,24 @@
 <div class="tab-pane" id="tab-achievements">
   <div class="ach-wrap">
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
-      <span class="section-title">ðŸ† Objectifs & Badges</span>
+      <span class="section-title">🏆 Objectifs & Badges</span>
     </div>
 
-    <!-- Objectif principal â€” formulaire inline toujours visible -->
+    <!-- Objectif principal — formulaire inline toujours visible -->
     <div class="card" id="obj-card">
       <div class="card-hdr">
-        <div class="card-title">ðŸŽ¯ Objectif principal</div>
+        <div class="card-title">🎯 Objectif principal</div>
         <div style="display:flex;gap:6px">
           <button class="btn btn-ghost btn-sm" id="obj-cancel-btn" style="display:none">Annuler</button>
           <button class="btn btn-teal btn-sm" id="obj-save-btn" style="display:none">Enregistrer</button>
-          <button class="btn btn-ghost btn-sm" id="obj-edit-btn">âœï¸ Modifier</button>
+          <button class="btn btn-ghost btn-sm" id="obj-edit-btn">✏️ Modifier</button>
         </div>
       </div>
 
       <!-- Vue affichage -->
       <div id="obj-view" style="padding:16px 18px">
         <div id="obj-view-empty" style="color:var(--muted);font-size:12px;text-align:center;padding:12px 0">
-          Aucun objectif dÃ©fini â€” cliquez sur <strong>Modifier</strong> pour commencer.
+          Aucun objectif défini — cliquez sur <strong>Modifier</strong> pour commencer.
         </div>
         <div id="obj-view-content" style="display:none">
           <div id="obj-view-title" style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:10px"></div>
@@ -368,7 +368,7 @@
         </div>
       </div>
 
-      <!-- Vue Ã©dition â€” masquÃ©e par dÃ©faut -->
+      <!-- Vue édition — masquée par défaut -->
       <div id="obj-edit" style="display:none;padding:16px 18px;border-top:1px solid var(--border);background:var(--bg)">
         <div id="obj-edit-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
           <div style="grid-column:span 2">
@@ -385,7 +385,7 @@
           </div>
           <div>
             <label style="display:block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px">Exercice cible</label>
-            <input type="text" id="obj-inp-exercise" class="inp" style="width:100%" placeholder="Ex : DÃ©veloppÃ© inclinÃ©">
+            <input type="text" id="obj-inp-exercise" class="inp" style="width:100%" placeholder="Ex : Développé incliné">
           </div>
           <div>
             <label style="display:block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px">Charge cible (kg)</label>
@@ -397,28 +397,28 @@
 
     <!-- Progression vers l'objectif -->
     <div class="card" id="obj-progress-card" style="display:none">
-      <div class="card-hdr"><div class="card-title">ðŸ“ˆ Progression vers l'objectif</div></div>
+      <div class="card-hdr"><div class="card-title">📈 Progression vers l'objectif</div></div>
       <div style="padding:14px 18px" id="obj-progress-body"></div>
     </div>
 
     <!-- Badges -->
     <div style="font-size:11px;font-weight:700;color:var(--text);margin:4px 0">
-      Badges â€” <span id="ach-unlocked-count" style="color:var(--teal-d)">0</span> dÃ©bloquÃ©s
+      Badges — <span id="ach-unlocked-count" style="color:var(--teal-d)">0</span> débloqués
     </div>
     <div class="ach-grid" id="ach-grid"></div>
   </div>
 </div>
 
-<!-- BIBLIOTHÃˆQUE -->
+<!-- BIBLIOTHÈQUE -->
 <div class="tab-pane" id="tab-library">
   <div class="lib-wrap">
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <span class="section-title">ðŸ“š BibliothÃ¨que d exercices</span>
+      <span class="section-title">📚 Bibliothèque d exercices</span>
       <input type="text" id="lib-search" class="inp" placeholder="Rechercher un exercice..." style="width:200px">
       <select id="lib-filter-muscle" class="prog-filter-sel"><option value="">Tous les groupes</option></select>
-      <select id="lib-filter-pattern" class="prog-filter-sel"><option value="">Tous les patterns</option><option value="push">PoussÃ©</option><option value="pull">TirÃ©</option><option value="legs">Jambes</option><option value="core">Gainage</option></select>
-      <select id="lib-filter-equipment" class="prog-filter-sel" onchange="renderLibrary()"><option value="">Tout Ã©quipement</option><option value="barre">Barre</option><option value="haltÃ¨res">HaltÃ¨res</option><option value="machine">Machine</option><option value="poids du corps">Poids du corps</option></select>
-      <select id="lib-filter-difficulty" class="prog-filter-sel" onchange="renderLibrary()"><option value="">Tous niveaux</option><option value="dÃ©butant">DÃ©butant</option><option value="intermÃ©diaire">IntermÃ©diaire</option><option value="avancÃ©">AvancÃ©</option></select>
+      <select id="lib-filter-pattern" class="prog-filter-sel"><option value="">Tous les patterns</option><option value="push">Poussé</option><option value="pull">Tiré</option><option value="legs">Jambes</option><option value="core">Gainage</option></select>
+      <select id="lib-filter-equipment" class="prog-filter-sel" onchange="renderLibrary()"><option value="">Tout équipement</option><option value="barre">Barre</option><option value="haltères">Haltères</option><option value="machine">Machine</option><option value="poids du corps">Poids du corps</option></select>
+      <select id="lib-filter-difficulty" class="prog-filter-sel" onchange="renderLibrary()"><option value="">Tous niveaux</option><option value="débutant">Débutant</option><option value="intermédiaire">Intermédiaire</option><option value="avancé">Avancé</option></select>
     </div>
     <div class="lib-grid" id="lib-grid"></div>
   </div>
@@ -447,7 +447,7 @@
 <!-- Focus mode overlay -->
 <div id="focus-overlay" style="display:none" class="focus-overlay"></div>
 
-<!-- â•â• SEARCH OVERLAY â•â• -->
+<!-- ══ SEARCH OVERLAY ══ -->
 <div id="search-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;align-items:flex-start;justify-content:center;padding-top:80px">
   <div style="background:var(--surface);border-radius:16px;width:calc(100% - 32px);max-width:480px;padding:16px;box-shadow:0 24px 60px rgba(0,0,0,.3)">
     <input id="search-input" type="text" placeholder="Rechercher un exercice, une date..." class="inp" style="width:100%;box-sizing:border-box;font-size:16px">
@@ -455,11 +455,11 @@
   </div>
 </div>
 
-<!-- â•â• REST TIMER OVERLAY â•â• -->
+<!-- ══ REST TIMER OVERLAY ══ -->
 <div id="rest-timer-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:5000;align-items:center;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)" role="dialog">
   <div class="rest-timer-card" id="rest-timer-card">
     <button class="rest-timer-add" id="rest-timer-add-btn" title="+15 secondes">+15s</button>
-    <div class="rest-timer-title">â± Repos</div>
+    <div class="rest-timer-title">⏱ Repos</div>
     <div class="rest-timer-ex" id="rest-timer-ex-name"></div>
     <div class="rest-timer-ring">
       <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
@@ -478,13 +478,13 @@
       <button class="rest-timer-preset" data-sec="180">3:00</button>
     </div>
     <div class="rest-timer-actions">
-      <button class="rest-timer-skip" id="rest-timer-skip">âœ• Passer</button>
-      <button class="rest-timer-next" id="rest-timer-next">â–¶ SÃ©rie suivante</button>
+      <button class="rest-timer-skip" id="rest-timer-skip">✕ Passer</button>
+      <button class="rest-timer-next" id="rest-timer-next">▶ Série suivante</button>
     </div>
   </div>
 </div>
 
-<!-- â•â• BARCODE SCANNER â•â• -->
+<!-- ══ BARCODE SCANNER ══ -->
 <div id="barcode-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:6000;flex-direction:column;align-items:center;justify-content:center;gap:16px">
   <div style="position:relative;width:min(340px,90vw);border-radius:16px;overflow:hidden;background:#000">
     <video id="barcode-video" autoplay playsinline muted style="width:100%;display:block;aspect-ratio:4/3;object-fit:cover"></video>
@@ -494,33 +494,33 @@
       </div>
     </div>
   </div>
-  <div id="barcode-status" style="color:#fff;font-size:13px;text-align:center;padding:0 20px;font-weight:600">ðŸ“· Initialisation...</div>
+  <div id="barcode-status" style="color:#fff;font-size:13px;text-align:center;padding:0 20px;font-weight:600">📷 Initialisation...</div>
   <div id="barcode-manual" style="display:none;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;padding:0 16px">
     <input id="barcode-manual-inp" type="text" inputmode="numeric" placeholder="Code-barres (ex: 3017620422003)" style="padding:10px 14px;border-radius:10px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font-size:16px;width:min(260px,80vw)" onkeydown="if(event.key==='Enter')manualBarcodeSearch()">
     <button onclick="manualBarcodeSearch()" style="padding:10px 20px;border-radius:10px;border:none;background:#5BA8A0;color:#fff;font-weight:700;font-size:14px;cursor:pointer">Rechercher</button>
   </div>
-  <button onclick="closeBarcodeScanner()" style="padding:10px 28px;border-radius:12px;border:1.5px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:14px;font-weight:600;cursor:pointer">âœ• Fermer</button>
+  <button onclick="closeBarcodeScanner()" style="padding:10px 28px;border-radius:12px;border:1.5px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:14px;font-weight:600;cursor:pointer">✕ Fermer</button>
 </div>
 
-<!-- â•â• ONBOARDING â•â• -->
+<!-- ══ ONBOARDING ══ -->
 <div id="onboard-overlay" class="onboard-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10000;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)" role="dialog" aria-modal="true">
   <div class="onboard-card" style="background:var(--surface);border-radius:20px;width:100%;max-width:480px;max-height:90dvh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);display:flex;flex-direction:column">
     <div style="background:linear-gradient(135deg,var(--teal),var(--teal-d));color:#fff;padding:24px 24px 20px;border-radius:20px 20px 0 0;text-align:center">
-      <div style="font-size:42px;margin-bottom:8px">ðŸ‹ï¸</div>
+      <div style="font-size:42px;margin-bottom:8px">🏋️</div>
       <div style="font-size:22px;font-weight:800;margin-bottom:4px">Coach Tracker Pro</div>
-      <div style="font-size:13px;opacity:.85">Configurons votre suivi en 4 Ã©tapes rapides</div>
+      <div style="font-size:13px;opacity:.85">Configurons votre suivi en 4 étapes rapides</div>
     </div>
     <div id="onboard-steps-bar" style="display:flex;gap:6px;padding:16px 24px 0"></div>
     <div id="onboard-body" style="padding:20px 24px;flex:1;overflow-y:auto"></div>
     <div style="padding:16px 24px 20px;display:flex;gap:10px;border-top:1px solid var(--border)">
-      <button id="onboard-back" style="display:none;padding:12px 20px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:14px;font-weight:600;color:var(--muted);cursor:pointer">â† Retour</button>
-      <button id="onboard-next" style="flex:1;padding:12px 20px;border-radius:12px;border:none;background:var(--teal);color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer">Commencer â†’</button>
+      <button id="onboard-back" style="display:none;padding:12px 20px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:14px;font-weight:600;color:var(--muted);cursor:pointer">← Retour</button>
+      <button id="onboard-next" style="flex:1;padding:12px 20px;border-radius:12px;border:none;background:var(--teal);color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer">Commencer →</button>
     </div>
     <div id="onboard-skip" style="font-size:11px;color:var(--muted);text-align:center;padding:0 24px 16px;cursor:pointer;text-decoration:underline">Passer la configuration</div>
   </div>
 </div>
 
-  <!-- Modules JS dans l'ordre de dÃ©pendance -->
+  <!-- Modules JS dans l'ordre de dépendance -->
   <script src="js/core/errors.js"></script>
   <script src="js/data/constants.js"></script>
   <script src="js/data/exercises.js"></script>
@@ -556,66 +556,69 @@
   <script src="js/views/achievements.js"></script>
   <script src="js/views/settings.js"></script>
   <script src="js/init.js"></script>
-
   <script>
-    // Gestion globale des erreurs — console uniquement
+    // Debug: ajouter ?debug=1 à l'URL pour les logs
+    // Errors.init() appelé après chargement des scripts
     window.onerror = function(msg, src, line, col, err) {
-      console.error('[CTP ERR] ' + msg + ' — ' + (src||'').split('/').pop() + ':' + line);
-      return false;
+      console.error('[ERR] ' + msg + ' — ' + (src||'').split('/').pop() + ':' + line);
     };
     window.addEventListener('unhandledrejection', function(e) {
-      console.error('[CTP PROMISE] ' + (e.reason && e.reason.stack || e.reason));
+      console.error('[PROMISE] ' + (e.reason && e.reason.stack || e.reason));
     });
   </script>
-
-  <script>
-    // Enregistrement Service Worker v37 — sans boucle de reload
-    (function() {
-      if (!('serviceWorker' in navigator)) return;
-
-      navigator.serviceWorker.register('./sw.js', { scope: './' })
-        .then(function(reg) {
-          console.log('[CTP] SW ctp-v37 enregistré');
-          reg.update();
-
-          // SW déjà en attente (rechargement de page rapide)
-          if (reg.waiting) {
-            reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-          }
-
-          // Nouveau SW trouvé
-          reg.addEventListener('updatefound', function() {
-            var nw = reg.installing;
-            nw.addEventListener('statechange', function() {
-              // Quand installé ET qu'un ancien SW contrôle déjà la page → update
-              if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-                nw.postMessage({ type: 'SKIP_WAITING' });
-              }
-              // NE PAS recharger ici → boucle infinie
-              // Le rechargement est géré par controllerchange ci-dessous
-            });
-          });
-        })
-        .catch(function(err) { console.warn('[CTP] SW error:', err); });
-
-      // Rechargement unique quand le nouveau SW prend le contrôle
-      navigator.serviceWorker.addEventListener('controllerchange', function() {
-        if (!sessionStorage.getItem('sw-reloaded')) {
-          sessionStorage.setItem('sw-reloaded', '1');
-          window.location.reload();
+<script>
+(function() {
+  const SW_VERSION = 'ctp-v35';
+  if ('serviceWorker' in navigator) {
+    // Désinscrire tous les anciens SW et vider les caches
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      const hasOld = regs.some(r => !r.active || !r.active.scriptURL.includes('sw.js'));
+      Promise.all([
+        // Vider tous les anciens caches
+        caches.keys().then(keys =>
+          Promise.all(keys.filter(k => k !== SW_VERSION).map(k => caches.delete(k)))
+        ),
+        // Désinscrire les vieux SW
+        Promise.all(regs.map(r => r.active &&
+          r.active.scriptURL && !r.active.scriptURL.endsWith('sw.js') ?
+          r.unregister() : Promise.resolve()
+        ))
+      ]).then(() => {
+        // Enregistrer le nouveau SW
+        return navigator.serviceWorker.register('./sw.js?v=1779795824', { scope: './' });
+      }).then(reg => {
+        console.log('[CTP] SW v35 registered');
+        reg.update();
+        if (reg.waiting) {
+          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
         }
-      });
-
-      // Shortcut ?tab= depuis le manifest
-      var tabParam = new URLSearchParams(location.search).get('tab');
-      if (tabParam) {
-        window.addEventListener('DOMContentLoaded', function() {
-          setTimeout(function() {
-            typeof switchTab === 'function' && switchTab(tabParam);
-          }, 100);
+        reg.addEventListener('updatefound', () => {
+          const nw = reg.installing;
+          nw.addEventListener('statechange', () => {
+            if (nw.state === 'installed') {
+              nw.postMessage({ type: 'SKIP_WAITING' });
+            }
+            if (nw.state === 'activated') {
+              window.location.reload();
+            }
+          });
         });
+      }).catch(err => console.warn('[CTP] SW:', err));
+    });
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!sessionStorage.getItem('sw-reloaded')) {
+        sessionStorage.setItem('sw-reloaded', '1');
+        window.location.reload();
       }
-    })();
-  </script>
+    });
+  }
+  // Handle ?tab= shortcut from manifest shortcuts
+  const urlParams = new URLSearchParams(location.search);
+  const tabParam = urlParams.get('tab');
+  if (tabParam) window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => typeof switchTab === 'function' && switchTab(tabParam), 100);
+  });
+})();
+</script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-﻿const CACHE = 'ctp-v37';
+const CACHE = 'ctp-v36';
 const ASSETS = [
   './', './index.html',
   './design/tokens.css', './css/style.css',
@@ -22,6 +22,7 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', e => {
+  // Installer immédiatement sans attendre
   self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE).then(c => c.addAll(ASSETS))
@@ -29,6 +30,7 @@ self.addEventListener('install', e => {
 });
 
 self.addEventListener('activate', e => {
+  // Prendre le contrôle immédiatement
   e.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE).map(k => {
@@ -45,6 +47,7 @@ self.addEventListener('fetch', e => {
   );
 });
 
+// Écouter SKIP_WAITING depuis le client
 self.addEventListener('message', e => {
   if (e.data && e.data.type === 'SKIP_WAITING') {
     self.skipWaiting();

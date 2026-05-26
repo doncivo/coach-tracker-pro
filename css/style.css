@@ -96,7 +96,7 @@ nav.tabs   { flex-shrink: 0; }
 .bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:transparent;font-family:var(--font);font-size:9px;font-weight:600;color:var(--muted);cursor:pointer;padding:0;transition:color .15s;position:relative;min-height:44px}
 .bnav-btn.active{color:var(--teal-d)}
 .bnav-btn.active::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:var(--teal);border-radius:0 0 2px 2px}
-.bnav-icon{font-size:18px;line-height:1}
+.bnav-icon{font-size:24px;line-height:1}
 .bnav-label{font-size:9px;font-weight:600;letter-spacing:.02em}
 /* Bottom nav badge for secondary tabs */
 .bnav-more{position:relative}

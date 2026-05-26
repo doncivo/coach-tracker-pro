@@ -200,9 +200,19 @@ const Router = (() => {
       btn.addEventListener('click', () => navigate(btn.getAttribute('data-tab')));
     });
 
-    // Bottom nav — drawer "Plus"
+    // Bottom nav — drawer "Plus" (items)
+    // iOS Safari fix: touchend sur les boutons du drawer
     document.querySelectorAll('.bnav-more-btn[data-tab]').forEach(btn => {
-      btn.addEventListener('click', () => navigate(btn.getAttribute('data-tab')));
+      let _drawerTouchHandled = false;
+      btn.addEventListener('touchend', function(e) {
+        _drawerTouchHandled = true;
+        e.preventDefault();
+        navigate(btn.getAttribute('data-tab'));
+      }, { passive: false });
+      btn.addEventListener('click', function(e) {
+        if (_drawerTouchHandled) { _drawerTouchHandled = false; return; }
+        navigate(btn.getAttribute('data-tab'));
+      });
     });
 
     // Top nav (desktop)
@@ -211,9 +221,12 @@ const Router = (() => {
     });
 
     // Bouton "Plus" (ouvrir/fermer drawer)
+    // iOS Safari fix: touchend + preventDefault évite les problèmes de click sur position:fixed
     const moreBtnToggle = document.getElementById('bnav-more-btn');
     if (moreBtnToggle) {
-      moreBtnToggle.addEventListener('click', function(e) {
+      let _plusTouchHandled = false;
+
+      function _toggleMoreMenu(e) {
         e.stopPropagation();
         const menu = document.getElementById('bnav-more-menu');
         if (!menu) return;
@@ -221,6 +234,19 @@ const Router = (() => {
         moreBtnToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         const bd = document.getElementById('bnav-backdrop');
         if (bd) bd.style.display = isOpen ? 'block' : 'none';
+      }
+
+      // touchend → prioritaire sur iOS (évite le délai 300ms et les bugs click/fixed)
+      moreBtnToggle.addEventListener('touchend', function(e) {
+        _plusTouchHandled = true;
+        e.preventDefault(); // empêche le click synthétique iOS de se déclencher aussi
+        _toggleMoreMenu(e);
+      }, { passive: false });
+
+      // click → fallback desktop (ignoré si touchend a déjà géré)
+      moreBtnToggle.addEventListener('click', function(e) {
+        if (_plusTouchHandled) { _plusTouchHandled = false; return; }
+        _toggleMoreMenu(e);
       });
     }
 

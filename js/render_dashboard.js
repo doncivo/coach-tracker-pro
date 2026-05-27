@@ -48,13 +48,17 @@ function renderDashboard(){
   wrap.appendChild(hero);
 
   // ── ACTIONS RAPIDES ──
+  // Calculer les données de séance tôt (nécessaires pour le sous-titre du bouton Séance)
+  const _exsEarly     = (todayDay.exercises || []).filter(e => e.name && e.name.trim() && !e.isWarmup);
+  const _doneExsEarly = _exsEarly.filter(e => e.done);
+
   const lastPoids0  = (S.mesures?.poids || []).slice(-1)[0];
   const stepsNow    = parseInt(S.steps?.[todayStr] || 0) || 0;
   const sleepNow    = parseFloat(S.sleep?.[todayStr]?.hours) || 0;
 
   const quickActions = [
     {
-      icon: '▶', label: 'Séance', sub: doneExs.length > 0 ? doneExs.length + '/' + exs.length + ' faits' : 'Commencer',
+      icon: '▶', label: 'Séance', sub: _doneExsEarly.length > 0 ? _doneExsEarly.length + '/' + _exsEarly.length + ' faits' : _exsEarly.length > 0 ? 'Commencer' : 'Repos',
       color: '--teal',
       action: () => switchTab('session'),
     },

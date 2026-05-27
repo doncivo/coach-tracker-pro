@@ -47,7 +47,50 @@ function renderDashboard(){
     </div>`;
   wrap.appendChild(hero);
 
-  // ── STATS RAPIDES ──
+  // ── ACTIONS RAPIDES ──
+  const lastPoids0  = (S.mesures?.poids || []).slice(-1)[0];
+  const stepsNow    = parseInt(S.steps?.[todayStr] || 0) || 0;
+  const sleepNow    = parseFloat(S.sleep?.[todayStr]?.hours) || 0;
+
+  const quickActions = [
+    {
+      icon: '▶', label: 'Séance', sub: doneExs.length > 0 ? doneExs.length + '/' + exs.length + ' faits' : 'Commencer',
+      color: '--teal',
+      action: () => switchTab('session'),
+    },
+    {
+      icon: '⚖', label: 'Peser', sub: lastPoids0 ? lastPoids0.val + 'kg' : 'Non renseigné',
+      color: '--purple',
+      action: () => _quickLogModal('weight'),
+    },
+    {
+      icon: '👟', label: 'Pas', sub: stepsNow >= 1000 ? (stepsNow/1000).toFixed(1) + 'k' : stepsNow > 0 ? String(stepsNow) : 'Non renseigné',
+      color: '--green',
+      action: () => _quickLogModal('steps'),
+    },
+    {
+      icon: '😴', label: 'Sommeil', sub: sleepNow > 0 ? sleepNow + 'h' : 'Non renseigné',
+      color: '--blue',
+      action: () => _quickLogModal('sleep'),
+    },
+  ];
+
+  const qaRow = document.createElement('div');
+  qaRow.className = 'dash-qa-row';
+
+  quickActions.forEach(qa => {
+    const btn = document.createElement('button');
+    btn.className = 'dash-qa-btn';
+    btn.innerHTML = `
+      <span class="dash-qa-icon" style="color:var(${qa.color})">${qa.icon}</span>
+      <span class="dash-qa-label">${qa.label}</span>
+      <span class="dash-qa-sub">${qa.sub}</span>`;
+    btn.ontouchstart = (e) => { e.preventDefault(); qa.action(); };
+    btn.onclick = qa.action;
+    qaRow.appendChild(btn);
+  });
+
+  wrap.appendChild(qaRow);
   const stepsToday = parseInt(S.steps&&S.steps[todayStr]||0)||0;
   const stepsGoal  = S.stepsGoal||10000;
   const stepsPct   = Math.min(100,Math.round(stepsToday/stepsGoal*100));
@@ -278,6 +321,165 @@ function renderDashboard(){
       Charts.donutChart(pc, ppl.map(p=>({label:p.label,value:p.value,color:p.color})),{size:100});
     }
   }, 80);
+}
+
+/* ─────────────────────────────────────────────────────────
+   QUICK LOG MODAL — Saisie rapide poids / pas / sommeil
+───────────────────────────────────────────────────────── */
+function _quickLogModal(type) {
+  // Fermer si déjà ouvert
+  document.getElementById('quick-log-overlay')?.remove();
+
+  const configs = {
+    weight: {
+      title: '⚖ Peser aujourd\'hui',
+      label: 'Poids corporel',
+      unit:  'kg',
+      placeholder: '75.0',
+      inputMode: 'decimal',
+      current: () => {
+        const last = (S.mesures?.poids || []).slice(-1)[0];
+        return last ? last.val : '';
+      },
+      save: (val) => {
+        Store.dispatch({
+          type: 'BODY_ADD_MESURE',
+          payload: { key: 'poids', entry: { val, date: localDateStr() } },
+        });
+        save();
+        renderDashboard();
+        showToast('⚖ Poids enregistré : ' + val + 'kg', 'save', 2000);
+      },
+    },
+    steps: {
+      title: '👟 Pas aujourd\'hui',
+      label: 'Nombre de pas',
+      unit:  'pas',
+      placeholder: '10000',
+      inputMode: 'numeric',
+      current: () => String(parseInt(S.steps?.[localDateStr()] || 0) || ''),
+      save: (val) => {
+        Store.dispatch({
+          type: 'ACTIVITY_SET_STEPS',
+          payload: { date: localDateStr(), value: parseInt(val) || 0 },
+        }, { skipUndo: true });
+        save();
+        renderDashboard();
+        showToast('👟 Pas enregistrés : ' + parseInt(val).toLocaleString('fr'), 'save', 2000);
+      },
+    },
+    sleep: {
+      title: '😴 Sommeil cette nuit',
+      label: 'Heures de sommeil',
+      unit:  'h',
+      placeholder: '7.5',
+      inputMode: 'decimal',
+      current: () => {
+        const sl = S.sleep?.[localDateStr()];
+        return sl?.hours ? String(sl.hours) : '';
+      },
+      save: (val) => {
+        Store.dispatch({
+          type: 'ACTIVITY_SET_SLEEP',
+          payload: { date: localDateStr(), value: { hours: parseFloat(val) || 0, quality: 1 } },
+        }, { skipUndo: true });
+        save();
+        renderDashboard();
+        showToast('😴 Sommeil enregistré : ' + val + 'h', 'save', 2000);
+      },
+    },
+  };
+
+  const cfg = configs[type];
+  if (!cfg) return;
+
+  // ── Overlay ──
+  const overlay = document.createElement('div');
+  overlay.id = 'quick-log-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);z-index:9200;display:flex;align-items:flex-end;justify-content:center';
+
+  const card = document.createElement('div');
+  card.style.cssText = [
+    'background:var(--surface)',
+    'border-radius:24px 24px 0 0',
+    'padding:24px 20px calc(24px + env(safe-area-inset-bottom,0px))',
+    'width:100%', 'max-width:480px',
+    'display:flex', 'flex-direction:column', 'gap:16px',
+  ].join(';');
+
+  // Handle bar
+  const handle = document.createElement('div');
+  handle.style.cssText = 'width:36px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 4px';
+  card.appendChild(handle);
+
+  // Title
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size:17px;font-weight:700;color:var(--text);text-align:center';
+  title.textContent = cfg.title;
+  card.appendChild(title);
+
+  // Current value hint
+  const current = cfg.current();
+  if (current) {
+    const hint = document.createElement('div');
+    hint.style.cssText = 'font-size:12px;color:var(--muted);text-align:center';
+    hint.textContent = 'Dernière valeur : ' + current + ' ' + cfg.unit;
+    card.appendChild(hint);
+  }
+
+  // Input
+  const inputWrap = document.createElement('div');
+  inputWrap.style.cssText = 'display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:14px;padding:12px 16px;border:2px solid var(--teal)';
+
+  const inp = document.createElement('input');
+  inp.type        = 'text';
+  inp.inputMode   = cfg.inputMode;
+  inp.placeholder = cfg.placeholder;
+  inp.value       = current;
+  inp.style.cssText = 'flex:1;border:none;background:transparent;font-size:28px;font-weight:700;font-family:var(--mono);color:var(--text);outline:none;min-width:0;text-align:center;-webkit-appearance:none';
+
+  const unitLbl = document.createElement('span');
+  unitLbl.style.cssText = 'font-size:16px;font-weight:600;color:var(--muted);flex-shrink:0';
+  unitLbl.textContent = cfg.unit;
+
+  inputWrap.appendChild(inp);
+  inputWrap.appendChild(unitLbl);
+  card.appendChild(inputWrap);
+
+  // Save button
+  const saveBtn = document.createElement('button');
+  saveBtn.style.cssText = 'width:100%;padding:15px;border-radius:16px;border:none;background:var(--teal);color:#fff;font-size:16px;font-weight:700;font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none';
+  saveBtn.textContent = 'Enregistrer';
+
+  function doSave() {
+    const v = inp.value.trim().replace(',', '.');
+    if (!v || isNaN(parseFloat(v))) { inp.focus(); return; }
+    cfg.save(v);
+    overlay.remove();
+  }
+
+  saveBtn.ontouchstart = (e) => { e.preventDefault(); doSave(); };
+  saveBtn.onclick = doSave;
+  inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); doSave(); } });
+  card.appendChild(saveBtn);
+
+  // Cancel
+  const cancelBtn = document.createElement('button');
+  cancelBtn.style.cssText = 'width:100%;padding:10px;border-radius:12px;border:none;background:none;color:var(--muted);font-size:14px;font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none';
+  cancelBtn.textContent = 'Annuler';
+  cancelBtn.ontouchstart = (e) => { e.preventDefault(); overlay.remove(); };
+  cancelBtn.onclick = () => overlay.remove();
+  card.appendChild(cancelBtn);
+
+  overlay.appendChild(card);
+
+  overlay.ontouchstart = (e) => { if (e.target === overlay) overlay.remove(); };
+  overlay.onclick      = (e) => { if (e.target === overlay) overlay.remove(); };
+
+  document.body.appendChild(overlay);
+
+  // Focus input after animation
+  setTimeout(() => { inp.focus(); inp.select(); }, 100);
 }
 
 

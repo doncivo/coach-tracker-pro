@@ -1735,3 +1735,51 @@ nav.tabs   { flex-shrink: 0; }
   touch-action: manipulation;
   -webkit-appearance: none;
 }
+
+
+/* ================================================================
+   DASHBOARD — Quick Actions Widget
+   ================================================================ */
+
+.dash-qa-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.dash-qa-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 6px 10px;
+  border-radius: 16px;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-appearance: none;
+  transition: background .12s, transform .1s;
+}
+.dash-qa-btn:active { transform: scale(.96); background: var(--surface); }
+
+.dash-qa-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+.dash-qa-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+}
+.dash-qa-sub {
+  font-size: 9px;
+  color: var(--muted);
+  font-family: var(--mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}

@@ -477,6 +477,128 @@ function _showPlateCalc(targetWeight) {
   setTimeout(() => wInp.focus(), 100);
 }
 
+/* ── Séance libre — ajouter des exercices à la volée ── */
+function _openFreeSession() {
+  const mainEl = document.getElementById('sess-main');
+  if (!mainEl) return;
+  mainEl.innerHTML = '';
+
+  if (!S._freeExercises) S._freeExercises = [];
+
+  const header = document.createElement('div');
+  header.style.cssText = 'padding:12px;background:var(--card);border-radius:14px;margin-bottom:10px;border:1.5px solid var(--purple)';
+  const ht = document.createElement('div');
+  ht.style.cssText = 'font-size:14px;font-weight:700;color:var(--purple);margin-bottom:8px';
+  ht.textContent = '✚ Seance libre';
+  const hs = document.createElement('div');
+  hs.style.cssText = 'font-size:11px;color:var(--muted)';
+  hs.textContent = 'Ajoutez les exercices au fur et a mesure';
+  header.appendChild(ht); header.appendChild(hs);
+  mainEl.appendChild(header);
+
+  // Display free exercises
+  S._freeExercises.forEach((ex, fi) => {
+    const card = document.createElement('div');
+    card.style.cssText = 'background:var(--card);border-radius:12px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--border)';
+    const row1 = document.createElement('div');
+    row1.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:6px';
+    const cb = document.createElement('input'); cb.type='checkbox'; cb.checked=ex.done||false;
+    cb.addEventListener('change', e => { S._freeExercises[fi].done=e.target.checked; _openFreeSession(); });
+    const nm = document.createElement('span');
+    nm.style.cssText = 'flex:1;font-size:13px;font-weight:600;color:var(--text)'+(ex.done?';text-decoration:line-through;opacity:.5':'');
+    nm.textContent = ex.name;
+    const del = document.createElement('button');
+    del.style.cssText = 'border:none;background:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0 4px;touch-action:manipulation;-webkit-appearance:none';
+    del.textContent = '×';
+    del.onclick = () => { S._freeExercises.splice(fi, 1); _openFreeSession(); };
+    row1.appendChild(cb); row1.appendChild(nm); row1.appendChild(del);
+
+    const row2 = document.createElement('div');
+    row2.style.cssText = 'display:flex;gap:6px;align-items:center;flex-wrap:wrap';
+    function mkFreeInp(val, ph, w, onChange) {
+      const i = document.createElement('input');
+      i.type='text'; i.inputMode='decimal'; i.value=val||''; i.placeholder=ph;
+      i.style.cssText='width:'+w+';padding:5px 8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);font-size:14px;font-family:var(--mono);color:var(--text);text-align:center;-webkit-appearance:none';
+      i.addEventListener('input', e => { onChange(e.target.value); });
+      return i;
+    }
+    const wInp=mkFreeInp(ex.weight,'kg','65px',v=>{S._freeExercises[fi].weight=v;});
+    const sInp=mkFreeInp(ex.sets,'sér','45px',v=>{S._freeExercises[fi].sets=v;});
+    const rInp=mkFreeInp(ex.reps,'reps','60px',v=>{S._freeExercises[fi].reps=v;});
+    const sep1=document.createElement('span');sep1.style.cssText='font-size:12px;color:var(--muted)';sep1.textContent='kg ×';
+    const sep2=document.createElement('span');sep2.style.cssText='font-size:12px;color:var(--muted)';sep2.textContent='×';
+    row2.append(wInp,sep1,sInp,sep2,rInp);
+
+    card.appendChild(row1); card.appendChild(row2);
+    mainEl.appendChild(card);
+  });
+
+  // Search + Add exercise
+  const addSection = document.createElement('div');
+  addSection.style.cssText = 'background:var(--card);border-radius:12px;padding:10px 12px;border:1px dashed var(--border)';
+  const addTitle = document.createElement('div');
+  addTitle.style.cssText = 'font-size:11px;font-weight:700;color:var(--muted);margin-bottom:8px';
+  addTitle.textContent = '+ Ajouter un exercice';
+
+  const searchInp = document.createElement('input');
+  searchInp.type='text'; searchInp.placeholder='Chercher dans la bibliothèque...';
+  searchInp.setAttribute('autocomplete','off');
+  searchInp.style.cssText='width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--teal);background:var(--bg);font-size:16px;font-family:var(--font);color:var(--text);-webkit-appearance:none;outline:none;box-sizing:border-box';
+
+  const suggestList = document.createElement('div');
+  suggestList.style.cssText='margin-top:6px;display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto';
+
+  searchInp.addEventListener('input', e => {
+    const q = e.target.value.trim().toLowerCase();
+    suggestList.innerHTML = '';
+    if (q.length < 2) return;
+    const hits = EXERCISE_LIBRARY.filter(l => l.name.toLowerCase().includes(q)).slice(0, 8);
+    hits.forEach(lib => {
+      const item = document.createElement('button');
+      item.style.cssText='display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none';
+      const m = MM[lib.muscle||''];
+      item.innerHTML = '<span style="font-size:12px;font-weight:600;flex:1;color:var(--text)">'+lib.name+'</span>'
+        +(m?'<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:'+m.calBg+';color:'+m.calColor+'">'+m.label.split(' ')[0]+'</span>':'');
+      const add = () => {
+        S._freeExercises.push({
+          name: lib.name, muscle: lib.muscle||'',
+          weight: '', sets: '3', reps: '8-12', done: false,
+        });
+        searchInp.value = '';
+        suggestList.innerHTML = '';
+        _openFreeSession();
+      };
+      item.ontouchstart = (e2) => { e2.preventDefault(); add(); };
+      item.onclick = add;
+      suggestList.appendChild(item);
+    });
+  });
+
+  // Save free session to day
+  const saveBtn = document.createElement('button');
+  saveBtn.style.cssText='width:100%;margin-top:10px;padding:12px;border-radius:12px;border:none;background:var(--purple);color:#fff;font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none';
+  saveBtn.textContent = 'Sauvegarder dans le programme du jour';
+  saveBtn.onclick = () => {
+    const d = S.days[S.sessDay];
+    S._freeExercises.forEach(fe => {
+      d.exercises.push({
+        id: uid(), name: fe.name, muscle: fe.muscle,
+        weight: fe.weight, sets: fe.sets, reps: fe.reps,
+        repsAchieved: '', rpe: '', rir: '', tempo: '', rest: '',
+        note: '', done: fe.done, isWarmup: false, supersetGroup: '', setData: null,
+      });
+    });
+    S._freeExercises = [];
+    S._freeMode = false;
+    save(); renderSession();
+    showToast(S._freeExercises.length+' exercices ajoutes au programme', 'save', 2500);
+  };
+
+  addSection.appendChild(addTitle); addSection.appendChild(searchInp); addSection.appendChild(suggestList);
+  addSection.appendChild(saveBtn);
+  mainEl.appendChild(addSection);
+}
+
 function renderSession(){
   startSessTimer();
   // Injecter bouton partage (share.js)
@@ -494,6 +616,18 @@ function renderSession(){
   // Day selector
   const sel=document.getElementById('sess-day-sel');sel.innerHTML='';
   DAYS_SH.forEach((n,i)=>{const btn=document.createElement('button');btn.className='sess-day-btn'+(S.sessDay===i?' active':'');btn.setAttribute('data-d',i);btn.textContent=n;btn.addEventListener('click',()=>{S.sessDay=i;S.sessStartTime=Date.now();_sessActiveEx=0;save();renderSession();});sel.appendChild(btn);});
+  // Bouton Séance libre
+  const freeBtn = document.createElement('button');
+  freeBtn.className = 'sess-day-btn' + (S._freeMode ? ' active' : '');
+  freeBtn.style.cssText = 'border-color:var(--purple);' + (S._freeMode ? 'background:var(--purple);color:#fff;' : 'color:var(--purple);');
+  freeBtn.textContent = '✚ Libre';
+  freeBtn.title = 'Seance libre — ajouter des exercices à la volée';
+  freeBtn.addEventListener('click', () => {
+    S._freeMode = !S._freeMode;
+    if (S._freeMode) _openFreeSession();
+    else { S._freeMode = false; renderSession(); }
+  });
+  sel.appendChild(freeBtn);
   // Recovery
   const rkey=`${S.sessDay}-${todayStr()}`;
   document.querySelectorAll('.recovery-btn').forEach(btn=>{const r=parseInt(btn.dataset.r);btn.classList.toggle('sel',S.sessRecovery[rkey]===r);btn.onclick=()=>{S.sessRecovery[rkey]=r;save();document.querySelectorAll('.recovery-btn').forEach(b=>b.classList.toggle('sel',parseInt(b.dataset.r)===r));};});
@@ -503,6 +637,9 @@ function renderSession(){
   const d=S.days[S.sessDay];const exercises=d.exercises.filter(e=>e.name.trim());
   updateSessProgress(d,exercises);
   const navEl=document.getElementById('sess-nav');const mainEl=document.getElementById('sess-main');
+
+  // Mode séance libre
+  if (S._freeMode) { navEl.innerHTML=''; _openFreeSession(); return; }
   if(!exercises.length){navEl.innerHTML='';mainEl.innerHTML='<div style="text-align:center;padding:50px;color:var(--muted);font-size:12px">Aucun exercice pour ce jour.<br>Ajoutez des exercices dans le Planning.</div>';return;}
   if(_sessActiveEx>=exercises.length)_sessActiveEx=0;
   renderSessNav(d,exercises);renderSessExercise(d,exercises,_sessActiveEx);

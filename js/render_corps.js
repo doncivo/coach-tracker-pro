@@ -427,7 +427,41 @@ function renderSleepChart(container) {
 }
 
 function renderCorps(){
-  const profilInp=document.getElementById('profil-taille');if(profilInp){profilInp.value=S.profilTaille||'';profilInp.addEventListener('input',e=>{S.profilTaille=parseInt(e.target.value)||0;save();});}
+  const profilInp=document.getElementById('profil-taille');if(profilInp){profilInp.value=S.profilTaille||'';profilInp.addEventListener('input',e=>{S.profilTaille=parseInt(e.target.value)||0;save();renderCorps();});}
+  // Profil poignet + sexe + age
+  const poignetInp=document.getElementById('profil-poignet');if(poignetInp){poignetInp.value=S.profilPoignet||17;poignetInp.addEventListener('input',e=>{S.profilPoignet=parseFloat(e.target.value)||17;save();renderCorps();});}
+  const sexeSelC=document.getElementById('profil-sexe');if(sexeSelC){sexeSelC.value=S.profilSexe||'H';sexeSelC.addEventListener('change',e=>{S.profilSexe=e.target.value;save();renderCorps();});}
+  const ageInp=document.getElementById('profil-age');if(ageInp){ageInp.value=S.profilAge||30;ageInp.addEventListener('input',e=>{S.profilAge=parseInt(e.target.value)||30;save();});}
+  // ── % MG et Ratio taille/hanches ──
+  const bfWhrDiv = document.getElementById('corps-bf-whr');
+  if (bfWhrDiv) {
+    bfWhrDiv.innerHTML = '';
+    const bf = typeof calcBodyFat === 'function' ? calcBodyFat() : null;
+    const whr = typeof calcWHR === 'function' ? calcWHR() : null;
+
+    if (bf !== null) {
+      const cat = typeof bodyFatCategory === 'function' ? bodyFatCategory(bf, S.profilSexe||'H') : null;
+      const chip = document.createElement('div');
+      chip.style.cssText = 'padding:5px 10px;border-radius:10px;background:var(--card);border:1px solid var(--border);font-size:11px;font-weight:600';
+      chip.innerHTML = '<span style="color:var(--muted)">% Masse grasse : </span><strong style="color:'+(cat?cat.color:'var(--text)')+'">'+bf+'%</strong>'+(cat?' <span style="font-size:9px;color:'+cat.color+'">'+cat.label+'</span>':'');
+      bfWhrDiv.appendChild(chip);
+    } else {
+      const hint = document.createElement('div');
+      hint.style.cssText = 'font-size:9px;color:var(--muted);font-style:italic';
+      hint.textContent = 'Renseignez cou + tour de taille + taille profil pour le % masse grasse';
+      bfWhrDiv.appendChild(hint);
+    }
+
+    if (whr) {
+      const sex = S.profilSexe || 'H';
+      const riskOk = (sex==='H' && whr.risk < 0.90) || (sex==='F' && whr.risk < 0.85);
+      const chip2 = document.createElement('div');
+      chip2.style.cssText = 'padding:5px 10px;border-radius:10px;background:var(--card);border:1px solid var(--border);font-size:11px;font-weight:600';
+      chip2.innerHTML = '<span style="color:var(--muted)">Ratio T/H : </span><strong style="color:'+(riskOk?'var(--green)':'var(--red)')+'">'+whr.ratio+'</strong><span style="font-size:9px;color:'+(riskOk?'var(--green)':'var(--red)')+'"> '+(riskOk?'Sain':'Risque')+'</span>';
+      bfWhrDiv.appendChild(chip2);
+    }
+  }
+
   // Steps & Calories
   renderStepsGrid();
   renderCalTracker();
@@ -438,11 +472,125 @@ function renderCorps(){
   MESURES_DEF.forEach(({key,label,unit,icon})=>{
     const entries=(S.mesures[key]||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));
     const card=document.createElement('div');card.className='corps-card';
+
+    // ── Header avec valeur actuelle ──
     const hdr=document.createElement('div');hdr.style.cssText='padding:8px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--bg)';
     const ht=document.createElement('div');ht.style.cssText='font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--teal-d)';ht.textContent=icon+' '+label;
     const latest=entries.length?entries[entries.length-1]:null;
-    if(latest){const lv=document.createElement('div');lv.style.cssText='font-size:11px;font-weight:700;font-family:var(--mono);color:var(--teal-d)';lv.textContent=latest.val+' '+unit;hdr.appendChild(ht);hdr.appendChild(lv);}else hdr.appendChild(ht);
+    const currentVal = latest ? (parseFloat(latest.val||latest.value)||0) : 0;
+    if(latest){const lv=document.createElement('div');lv.style.cssText='font-size:11px;font-weight:700;font-family:var(--mono);color:var(--teal-d)';lv.textContent=(latest.val||latest.value)+' '+unit;hdr.appendChild(ht);hdr.appendChild(lv);}else hdr.appendChild(ht);
     card.appendChild(hdr);
+
+    // ── Objectif suggéré + barre progression ──
+    if(currentVal>0 && typeof calcMesureObjectif==='function'){
+      const objDef = calcMesureObjectif(key);
+      const customObj = S.mesureObjectifs[key];
+      const target = customObj || (objDef ? objDef.athlétique : null);
+
+      if(objDef){
+        const objSection = document.createElement('div');
+        objSection.style.cssText='padding:8px 12px;border-bottom:1px solid var(--border);background:var(--surface)';
+
+        // Ligne : Actuel → Objectif
+        const objRow = document.createElement('div');
+        objRow.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:5px';
+        const objLeft = document.createElement('div');
+        objLeft.style.cssText='font-size:10px;color:var(--muted)';
+        objLeft.textContent='Actuel : '+currentVal+unit;
+        const objRight = document.createElement('div');
+        objRight.style.cssText='display:flex;align-items:center;gap:6px';
+        const objLbl = document.createElement('span');
+        objLbl.style.cssText='font-size:10px;color:var(--muted)';
+        objLbl.textContent='Objectif :';
+
+        // Input objectif personnalisé
+        const objInp = document.createElement('input');
+        objInp.type='text';objInp.inputMode='decimal';
+        objInp.value=customObj||target||'';
+        objInp.placeholder=target||'?';
+        objInp.style.cssText='width:60px;border:1px solid var(--border);border-radius:6px;padding:2px 6px;font-size:12px;font-weight:700;font-family:var(--mono);background:var(--bg);color:var(--text);text-align:center;-webkit-appearance:none';
+        objInp.addEventListener('change',e=>{
+          const v=parseFloat(e.target.value)||null;
+          if(!S.mesureObjectifs)S.mesureObjectifs={};
+          S.mesureObjectifs[key]=v;
+          save();renderCorps();
+        });
+        const objUnit=document.createElement('span');objUnit.style.cssText='font-size:10px;color:var(--muted)';objUnit.textContent=unit;
+        objRight.appendChild(objLbl);objRight.appendChild(objInp);objRight.appendChild(objUnit);
+        objRow.appendChild(objLeft);objRow.appendChild(objRight);
+
+        // Barre de progression
+        if(target){
+          const dir = objDef.direction||'up';
+          let pct;
+          if(dir==='down'){
+            // Plus bas = mieux (taille, hanches si trop grand)
+            const startRef = Math.max(currentVal*1.2, target*1.2);
+            pct = Math.min(100, Math.max(0, (startRef-currentVal)/(startRef-target)*100));
+          } else if(dir==='up'){
+            pct = Math.min(100, Math.max(0, currentVal/target*100));
+          } else {
+            // both — neutral for weight, complex
+            pct = Math.min(100, Math.max(0, Math.min(currentVal,target)/Math.max(currentVal,target)*100));
+          }
+          const delta = Math.round((currentVal - target) * 10) / 10;
+          const reached = Math.abs(delta) < 0.5;
+          const color = reached ? 'var(--green)' : (pct >= 80 ? 'var(--teal)' : pct >= 50 ? 'var(--orange)' : 'var(--red)');
+
+          const barWrap=document.createElement('div');barWrap.style.cssText='height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin:4px 0';
+          const barFill=document.createElement('div');barFill.style.cssText=`height:100%;width:${pct}%;background:${color};border-radius:3px;transition:width .6s`;
+          barWrap.appendChild(barFill);
+
+          const barInfo=document.createElement('div');barInfo.style.cssText='display:flex;justify-content:space-between;font-size:9px;color:var(--muted)';
+          const pctLbl=document.createElement('span');pctLbl.textContent=Math.round(pct)+'% vers objectif';
+          const deltaLbl=document.createElement('span');
+          deltaLbl.style.color=reached?'var(--green)':color;
+          deltaLbl.textContent=reached?'Objectif atteint !':(delta>0?'+':'')+delta+unit+' de difference';
+
+          barInfo.appendChild(pctLbl);barInfo.appendChild(deltaLbl);
+
+          // Suggestions santé vs athlétique
+          const suggestions=document.createElement('div');
+          suggestions.style.cssText='display:flex;gap:4px;margin-top:4px;flex-wrap:wrap';
+          if(objDef.santé&&objDef.santé!==objDef.athlétique){
+            const s1=document.createElement('span');
+            s1.style.cssText='font-size:9px;padding:1px 6px;border-radius:5px;background:rgba(56,161,105,.1);color:var(--green);cursor:pointer;border:1px solid rgba(56,161,105,.2)';
+            s1.textContent='Sante: '+objDef.santé+unit;
+            s1.title='Cliquer pour definir comme objectif';
+            s1.ontouchstart=(e)=>{e.preventDefault();if(!S.mesureObjectifs)S.mesureObjectifs={};S.mesureObjectifs[key]=objDef.santé;save();renderCorps();};
+            s1.onclick=()=>{if(!S.mesureObjectifs)S.mesureObjectifs={};S.mesureObjectifs[key]=objDef.santé;save();renderCorps();};
+            suggestions.appendChild(s1);
+          }
+          const s2=document.createElement('span');
+          s2.style.cssText='font-size:9px;padding:1px 6px;border-radius:5px;background:rgba(91,168,160,.1);color:var(--teal-d);cursor:pointer;border:1px solid rgba(91,168,160,.2)';
+          s2.textContent='Athletique: '+objDef.athlétique+unit;
+          s2.title='Cliquer pour definir comme objectif';
+          s2.ontouchstart=(e)=>{e.preventDefault();if(!S.mesureObjectifs)S.mesureObjectifs={};S.mesureObjectifs[key]=objDef.athlétique;save();renderCorps();};
+          s2.onclick=()=>{if(!S.mesureObjectifs)S.mesureObjectifs={};S.mesureObjectifs[key]=objDef.athlétique;save();renderCorps();};
+          suggestions.appendChild(s2);
+
+          objSection.appendChild(objRow);objSection.appendChild(barWrap);objSection.appendChild(barInfo);objSection.appendChild(suggestions);
+
+          // Estimation date
+          if(typeof estimateDateObjectif==='function'){
+            const est=estimateDateObjectif(key,target);
+            if(est&&!reached){
+              const estEl=document.createElement('div');
+              estEl.style.cssText='font-size:9px;color:var(--muted);margin-top:4px';
+              if(est.message){
+                estEl.textContent='⚠ '+est.message;
+              } else {
+                estEl.textContent='Estimation : atteint en '+est.months+' mois ('+est.date+') au rythme de '+(est.rate>0?'+':'')+est.rate+unit+'/mois';
+              }
+              objSection.appendChild(estEl);
+            }
+          }
+        } else {
+          objSection.appendChild(objRow);
+        }
+        card.appendChild(objSection);
+      }
+    }
     const body=document.createElement('div');body.style.padding='10px 12px';
     if(key==='poids'&&entries.length){const last=entries[entries.length-1];const prev=entries.length>1?entries[entries.length-2]:null;const diff=prev?Math.round((parseFloat(last.val)-parseFloat(prev.val))*10)/10:0;const big=document.createElement('div');big.className='poids-big';big.textContent=last.val;const sub=document.createElement('div');sub.style.cssText='font-size:10px;color:var(--muted);margin-top:2px';sub.textContent=unit+(prev?` · ${diff>0?'+':''}${diff} depuis dernière entrée`:'');body.appendChild(big);body.appendChild(sub);}
     entries.slice(-5).reverse().forEach((e,idx,arr)=>{const me=document.createElement('div');me.className='mesure-entry';const dt=document.createElement('div');dt.className='mesure-date';dt.textContent=new Date(e.date+'T00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'2-digit'});const vl=document.createElement('div');vl.className='mesure-val';vl.textContent=e.value||e.value||'';const un=document.createElement('div');un.className='mesure-unit';un.textContent=unit;const dl=document.createElement('div');dl.className='mesure-delta';const nxt=arr[idx-1];if(nxt){const diff=Math.round((parseFloat(e.value)-parseFloat(nxt.val))*10)/10;dl.textContent=(diff>0?'+':'')+diff;dl.style.color=diff>0?(key==='bras'||key==='poitrine'?'var(--green)':'var(--red)'):(key==='taille'||key==='hanches'?'var(--green)':'var(--red)');}const delBtn=document.createElement('button');delBtn.className='mesure-del';delBtn.textContent='×';delBtn.addEventListener('click',()=>{S.mesures[key].splice(S.mesures[key].indexOf(e),1);save();renderCorps();});me.appendChild(dt);me.appendChild(vl);me.appendChild(un);me.appendChild(dl);me.appendChild(delBtn);body.appendChild(me);});

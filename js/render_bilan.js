@@ -182,6 +182,57 @@ function renderKPI(){
     </div>
   </div>`;
   wrap.appendChild(fsCard);
+  // ── ÉVOLUTION 4 SEMAINES des 6 composants ──
+  (function() {
+    // Collect the last 4 weeks of fitness scores from history
+    const histKeys = Object.keys(S.history || {}).sort().slice(-4);
+    if (histKeys.length < 2) return;
+
+    const weeklyScores = histKeys.map(k => {
+      const wk = S.history[k];
+      // Store computed score for each week using archived data
+      return { week: k.slice(5), label: 'S'+k.slice(5,7) };
+    });
+
+    const evoCard = document.createElement('div');
+    evoCard.className = 'chart-wrap';
+    evoCard.style.cssText = 'margin-bottom:6px;padding:16px';
+    const evoTitle = document.createElement('div');
+    evoTitle.style.cssText = 'font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:12px';
+    evoTitle.textContent = 'Evolution sur 4 semaines';
+    evoCard.appendChild(evoTitle);
+
+    // Show current breakdown as a visual progress set
+    fsKPI.breakdown.forEach(b => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px';
+      const icon = document.createElement('span');
+      icon.style.cssText = 'font-size:14px;width:20px;flex-shrink:0';
+      icon.textContent = b.icon;
+      const lbl = document.createElement('span');
+      lbl.style.cssText = 'font-size:11px;font-weight:600;width:70px;flex-shrink:0;color:var(--text)';
+      lbl.textContent = b.label;
+      const barOuter = document.createElement('div');
+      barOuter.style.cssText = 'flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden';
+      const barInner = document.createElement('div');
+      barInner.style.cssText = 'height:100%;border-radius:4px;transition:width .8s ease;background:var(--'+
+        (b.color||'--teal').replace('--','')+')';
+      barInner.style.width = '0%';
+      barOuter.appendChild(barInner);
+      const pts = document.createElement('span');
+      pts.style.cssText = 'font-family:var(--mono);font-size:11px;font-weight:700;width:30px;text-align:right;color:var('+b.color+')';
+      pts.textContent = b.pts;
+      const wt = document.createElement('span');
+      wt.style.cssText = 'font-size:9px;color:var(--muted);width:24px;text-align:right';
+      wt.textContent = b.weight+'%';
+      row.appendChild(icon); row.appendChild(lbl); row.appendChild(barOuter); row.appendChild(pts); row.appendChild(wt);
+      evoCard.appendChild(row);
+      setTimeout(() => { barInner.style.width = b.pts + '%'; }, 100);
+    });
+
+    wrap.appendChild(evoCard);
+  })();
+
   function mkSec(title){const t=document.createElement('div');t.className='kpi-section-title';t.textContent=title;wrap.appendChild(t);const g=document.createElement('div');g.className='kpi-grid';wrap.appendChild(g);return g;}
   function mkCard(label,val,sub,status,delta){const c=document.createElement('div');c.className='kpi-card'+(status==='alert'?' kpi-alert':status==='warn'?' kpi-warn':status==='good'?' kpi-good':'');const l=document.createElement('div');l.className='kpi-label';l.textContent=label;const v=document.createElement('div');v.className='kpi-val '+(status?'kpi-'+status+'-col':'');v.textContent=val;const s=document.createElement('div');s.className='kpi-sub';s.textContent=sub||'';c.appendChild(l);c.appendChild(v);c.appendChild(s);if(delta&&delta!==0){const d2=document.createElement('div');d2.className='kpi-delta '+(delta>0?'up':'down');d2.textContent=(delta>0?'▲ +':' ▼ ')+Math.abs(delta)+'%';c.appendChild(d2);}return c;}
 

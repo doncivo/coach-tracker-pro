@@ -274,11 +274,25 @@
         <span class="section-title">📏 Mensurations</span>
         <div style="display:flex;align-items:center;gap:6px">
           <label style="font-size:11px;font-weight:700;color:var(--muted)">Taille :</label>
-          <input type="number" id="profil-taille" class="mesure-inp" placeholder="cm" style="width:70px;padding:6px 10px;font-size:15px" min="100" max="250">
+          <input type="number" id="profil-taille" class="mesure-inp" placeholder="cm" style="width:65px;padding:6px 8px;font-size:15px" min="100" max="250">
           <span style="font-size:11px;color:var(--muted)">cm</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <label style="font-size:11px;font-weight:700;color:var(--muted)">Poignet :</label>
+          <input type="number" id="profil-poignet" class="mesure-inp" placeholder="cm" style="width:55px;padding:6px 8px;font-size:15px" min="12" max="25" step="0.1">
+          <span style="font-size:11px;color:var(--muted)">cm</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <label style="font-size:11px;font-weight:700;color:var(--muted)">Sexe :</label>
+          <select id="profil-sexe" style="border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-size:13px;padding:5px 8px;-webkit-appearance:none">
+            <option value="H">Homme</option>
+            <option value="F">Femme</option>
+          </select>
         </div>
         <button class="btn btn-ghost btn-sm" id="add-photo-btn">📸 Photo</button>
       </div>
+      <!-- % MG + WHR -->
+      <div id="corps-bf-whr" style="padding:6px 12px 4px;display:flex;gap:10px;flex-wrap:wrap"></div>
       <div style="padding:8px 12px 12px">
         <div class="corps-grid" id="corps-grid"></div>
         <div id="corps-charts-weight" style="margin-top:10px"></div>
@@ -564,6 +578,7 @@
   <script src="js/store/app.js"></script>
   <script src="js/services/persist.js"></script>
   <script src="js/services/compute.js"></script>
+  <script src="js/services/mesures-objectifs.js"></script>
   <script src="js/services/notify.js"></script>
   <script src="js/services/share.js"></script>
   <script src="js/services/search.js"></script>
@@ -603,7 +618,7 @@
   </script>
 <script>
 (function() {
-  const SW_VERSION = 'ctp-v64';
+  const SW_VERSION = 'ctp-v65';
   if (!('serviceWorker' in navigator)) return;
 
   const RELOAD_KEY = 'ctp-sw-reloaded-' + SW_VERSION;

@@ -95,6 +95,48 @@ function renderDashboard(){
   });
 
   wrap.appendChild(qaRow);
+
+  // ── INDICATEUR DE FATIGUE (RPE moyen 3 dernières séances) ──
+  (function() {
+    const recentRPEs = [];
+    Object.values(S.history || {}).forEach(wk => {
+      (wk.days || []).forEach(d => {
+        (d.exercises || []).forEach(ex => {
+          (ex.setData || []).forEach(s => {
+            if (s.rpe && s.rpe !== '—' && parseFloat(s.rpe) > 0) {
+              recentRPEs.push({ rpe: parseFloat(s.rpe), date: d.date || '' });
+            }
+          });
+        });
+      });
+    });
+    recentRPEs.sort((a, b) => b.date.localeCompare(a.date));
+    const last30 = recentRPEs.slice(0, 30);
+    if (!last30.length) return;
+    const avg = last30.reduce((s, r) => s + r.rpe, 0) / last30.length;
+    const rounded = Math.round(avg * 10) / 10;
+    let status, color, icon, advice;
+    if (avg < 7)       { status='Tres frais';  color='var(--green)';  icon='🟢'; advice='Chargez plus lourd aujourd hui'; }
+    else if (avg < 8)  { status='Frais';        color='var(--teal)';   icon='🟢'; advice='Bonne forme, continuez'; }
+    else if (avg < 8.5){ status='Normal';       color='var(--muted)';  icon='🟡'; advice='Recuperation standard suffisante'; }
+    else if (avg < 9)  { status='Fatigue';      color='var(--orange)'; icon='🟠'; advice='Privilegiez le sommeil ce soir'; }
+    else               { status='Surmenage';    color='var(--red)';    icon='🔴'; advice='Considerez une seance allégée'; }
+    const card = document.createElement('div');
+    card.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--card);border-radius:14px;margin:0 0 10px;border:1px solid var(--border)';
+    const left = document.createElement('div'); left.style.cssText='flex:1';
+    const tl=document.createElement('div');tl.style.cssText='font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em';tl.textContent='Etat de forme';
+    const st=document.createElement('div');st.style.cssText='font-size:16px;font-weight:800;color:'+color+';margin-top:2px';st.textContent=icon+' '+status;
+    const adv=document.createElement('div');adv.style.cssText='font-size:10px;color:var(--muted);margin-top:1px';adv.textContent=advice;
+    left.appendChild(tl);left.appendChild(st);left.appendChild(adv);
+    const right=document.createElement('div');right.style.cssText='text-align:right';
+    const rpe=document.createElement('div');rpe.style.cssText='font-family:var(--mono);font-size:22px;font-weight:800;color:'+color;rpe.textContent=rounded;
+    const rpeL=document.createElement('div');rpeL.style.cssText='font-size:9px;color:var(--muted)';rpeL.textContent='RPE moy.';
+    right.appendChild(rpe);right.appendChild(rpeL);
+    card.appendChild(left);card.appendChild(right);
+    wrap.appendChild(card);
+  })();
+
+
   const stepsToday = parseInt(S.steps&&S.steps[todayStr]||0)||0;
   const stepsGoal  = S.stepsGoal||10000;
   const stepsPct   = Math.min(100,Math.round(stepsToday/stepsGoal*100));

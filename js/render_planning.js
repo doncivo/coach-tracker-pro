@@ -12,6 +12,26 @@ function renderDayTabs(){
     const dateDisp=d.date?new Date(d.date+'T00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}):'';
     const tagsHtml=muscles.length?muscles.map(k=>{const m=MM[k];return`<span class="dt-mtag" style="background:${m.calBg};color:${m.calColor}">${m.label.split(' ')[0]}</span>`;}).join(''):'<span class="dt-mtag" style="opacity:.3">—</span>';
     const st=total===0?'':(pct===100?'✅':pct>0?'🔄':'⬜');
+
+    // ── Code couleur Push/Pull/Legs/Rest ──
+    const muscleTypes = muscles.map(k => MM[k]?.type).filter(Boolean);
+    const hasPush  = muscleTypes.includes('push');
+    const hasPull  = muscleTypes.includes('pull');
+    const hasLegs  = muscleTypes.includes('legs');
+    const hasCore  = muscleTypes.includes('core');
+    const isRest   = muscles.includes('rep') || total === 0;
+    let pplColor = '';
+    if (isRest)           pplColor = 'rgba(180,180,180,.15)';
+    else if (hasPush && hasPull) pplColor = 'rgba(128,90,213,.12)'; // Full body/Upper → purple
+    else if (hasPush)     pplColor = 'rgba(229,62,62,.10)';  // Push → red
+    else if (hasPull)     pplColor = 'rgba(49,130,206,.10)'; // Pull → blue
+    else if (hasLegs)     pplColor = 'rgba(56,161,105,.10)'; // Legs → green
+    else if (hasCore)     pplColor = 'rgba(213,90,213,.10)'; // Core → pink
+    if (pplColor) tab.style.borderBottom = '3px solid ' + (
+      isRest?'var(--border)':hasPush&&hasPull?'var(--purple)':hasPush?'var(--red)':hasPull?'var(--blue)':hasLegs?'var(--green)':'var(--purple)'
+    );
+    if (pplColor) tab.style.background = pplColor;
+
     // Pain alert on worked muscles
     const dayMuscleKeys=getDM(d);
     const recentPains=activePains();

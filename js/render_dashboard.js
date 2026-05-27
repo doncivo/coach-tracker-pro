@@ -520,6 +520,11 @@ const RestTimer = {
     setTimeout(() => this._beep(880, 0.2), 200);
     setTimeout(() => this._beep(1100, 0.3), 400);
 
+    // Auto-fermeture après 8s si l'utilisateur ne fait rien
+    this._autoCloseTimer = setTimeout(() => {
+      if (this._remaining <= 0) this.stop();
+    }, 8000);
+
     // Notification si PWA
     if(typeof Notification !== 'undefined' && Notification.permission === 'granted') {
       try { new Notification('⏱ Repos terminé !', { body: 'Prêt pour la prochaine série de ' + (this._exName||''), icon:'./icons/icon-192.png', silent:true }); } catch(e){}
@@ -529,7 +534,9 @@ const RestTimer = {
   // ── Stopper ──
   stop() {
     clearInterval(this._interval);
+    clearTimeout(this._autoCloseTimer);
     this._interval = null;
+    this._autoCloseTimer = null;
     const overlay = document.getElementById('rest-timer-overlay');
     if(overlay) overlay.style.display = 'none';
     const card = document.getElementById('rest-timer-card');
@@ -576,25 +583,48 @@ const RestTimer = {
 
 // ── Liaisons des boutons du timer ──
 function _initRestTimerButtons() {
-  // Skip
-  document.getElementById('rest-timer-skip')?.addEventListener('click', () => {
-    RestTimer.stop();
-  });
+  // Helper iOS-compatible : touchend + click fallback
+  function _bindBtn(id, fn) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    let _touched = false;
+    el.addEventListener('touchend', function(e) {
+      _touched = true;
+      e.preventDefault();
+      e.stopPropagation();
+      fn();
+    }, { passive: false });
+    el.addEventListener('click', function(e) {
+      if (_touched) { _touched = false; return; }
+      fn();
+    });
+  }
+
+  // Skip / Passer
+  _bindBtn('rest-timer-skip', () => RestTimer.stop());
 
   // Série suivante
-  document.getElementById('rest-timer-next')?.addEventListener('click', () => {
+  _bindBtn('rest-timer-next', () => {
     RestTimer.stop();
-    if(RestTimer._nextSetCb) RestTimer._nextSetCb();
+    if (RestTimer._nextSetCb) RestTimer._nextSetCb();
   });
 
   // +15s
-  document.getElementById('rest-timer-add-btn')?.addEventListener('click', () => {
-    RestTimer.addTime(15);
-  });
+  _bindBtn('rest-timer-add-btn', () => RestTimer.addTime(15));
 
-  // Presets
+  // Presets durée
   document.querySelectorAll('.rest-timer-preset').forEach(btn => {
-    btn.addEventListener('click', () => {
+    let _touched = false;
+    btn.addEventListener('touchend', function(e) {
+      _touched = true;
+      e.preventDefault();
+      const sec = parseInt(btn.dataset.sec);
+      document.querySelectorAll('.rest-timer-preset').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      RestTimer.setDuration(sec);
+    }, { passive: false });
+    btn.addEventListener('click', function() {
+      if (_touched) { _touched = false; return; }
       const sec = parseInt(btn.dataset.sec);
       document.querySelectorAll('.rest-timer-preset').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
@@ -602,10 +632,19 @@ function _initRestTimerButtons() {
     });
   });
 
-  // Fermer en cliquant sur le fond
-  document.getElementById('rest-timer-overlay')?.addEventListener('click', (e) => {
-    if(e.target.id === 'rest-timer-overlay') RestTimer.stop();
-  });
+  // Fermer en cliquant/touchant sur le fond
+  const overlay = document.getElementById('rest-timer-overlay');
+  if (overlay) {
+    overlay.addEventListener('touchend', function(e) {
+      if (e.target.id === 'rest-timer-overlay') {
+        e.preventDefault();
+        RestTimer.stop();
+      }
+    }, { passive: false });
+    overlay.addEventListener('click', function(e) {
+      if (e.target.id === 'rest-timer-overlay') RestTimer.stop();
+    });
+  }
 }
 
 

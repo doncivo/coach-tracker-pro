@@ -1653,3 +1653,85 @@ nav.tabs   { flex-shrink: 0; }
   min-width: 24px;
   text-align: right;
 }
+
+
+/* ================================================================
+   DASHBOARD — Dernières séances
+   ================================================================ */
+
+.dash-hist-card {
+  background: var(--card);
+  border-radius: 18px;
+  padding: 16px;
+  margin: 0 0 12px;
+  border: 1px solid var(--border);
+}
+.dash-hist-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.dash-hist-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.dash-hist-row:last-of-type { border-bottom: none; }
+.dash-hist-left { flex: 1; min-width: 0; }
+.dash-hist-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+}
+.dash-hist-exs {
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+.dash-hist-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.dash-hist-vol {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--teal-d);
+}
+.dash-hist-dur {
+  font-size: 10px;
+  color: var(--muted);
+}
+.dash-hist-pr {
+  font-size: 11px;
+  font-weight: 700;
+  color: #7a5800;
+  background: #fff3cd;
+  border-radius: 8px;
+  padding: 1px 6px;
+}
+.dash-hist-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px;
+  border: none;
+  background: none;
+  color: var(--teal-d);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  text-align: center;
+  touch-action: manipulation;
+  -webkit-appearance: none;
+}

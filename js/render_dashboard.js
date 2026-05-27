@@ -213,6 +213,53 @@ function renderDashboard(){
     wrap.appendChild(alertsWrap);
   }
 
+
+  // ── DERNIÈRES SÉANCES ──
+  const histKeys = Object.keys(S.history || {}).sort().reverse();
+  const recentSessions = [];
+  for (const k of histKeys) {
+    const entries = (S.history[k] || []).filter(e => e.name && e.exercises);
+    entries.forEach(e => recentSessions.push({ ...e, date: k }));
+    if (recentSessions.length >= 3) break;
+  }
+
+  if (recentSessions.length > 0) {
+    const histCard = document.createElement('div');
+    histCard.className = 'dash-hist-card';
+    histCard.innerHTML = '<div class="dash-hist-title">Dernières séances</div>';
+
+    recentSessions.slice(0, 3).forEach(sess => {
+      const d = new Date(sess.date + 'T12:00:00');
+      const dateStr = d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+      const vol = sess.volume >= 1000 ? (sess.volume / 1000).toFixed(1) + 't' : Math.round(sess.volume || 0) + 'kg';
+      const exNames = (sess.exercises || []).filter(e => !e.isWarmup && e.done).map(e => e.name).slice(0, 3);
+      const prsCount = (sess.exercises || []).filter(e => typeof checkPR === 'function' && checkPR(e)).length;
+
+      const row = document.createElement('div');
+      row.className = 'dash-hist-row';
+      row.innerHTML = `
+        <div class="dash-hist-left">
+          <div class="dash-hist-name">${dateStr} — ${sess.name || 'Séance'}</div>
+          <div class="dash-hist-exs">${exNames.join(', ')}${(sess.exercises||[]).filter(e=>!e.isWarmup&&e.done).length > 3 ? ' +' + ((sess.exercises||[]).filter(e=>!e.isWarmup&&e.done).length - 3) : ''}</div>
+        </div>
+        <div class="dash-hist-right">
+          <span class="dash-hist-vol">${vol}</span>
+          ${sess.duration ? `<span class="dash-hist-dur">${sess.duration}'</span>` : ''}
+          ${prsCount > 0 ? `<span class="dash-hist-pr">🏆${prsCount}</span>` : ''}
+        </div>`;
+      histCard.appendChild(row);
+    });
+
+    const seeAllBtn = document.createElement('button');
+    seeAllBtn.className = 'dash-hist-btn';
+    seeAllBtn.textContent = 'Voir toute la progression →';
+    seeAllBtn.ontouchstart = (e) => { e.preventDefault(); switchTab('progression'); };
+    seeAllBtn.onclick = () => switchTab('progression');
+    histCard.appendChild(seeAllBtn);
+
+    wrap.appendChild(histCard);
+  }
+
   // ── VOLUME HEBDO + BREAKDOWN PPL ──
   setTimeout(()=>{
     // Volume chart

@@ -61,6 +61,34 @@ checkOnboarding();
 _initRestTimerButtons(); // no-op depuis v45 — bindings dans RestTimer.start()
 // restoreReminder() retiré — doublon de Notify.restore() ci-dessus
 
+// ── 10. Indicateur hors-ligne ──
+(function() {
+  function _showOfflineBanner(isOffline) {
+    let banner = document.getElementById('offline-banner');
+    if (isOffline) {
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'offline-banner';
+        banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#c53030;color:#fff;text-align:center;font-size:12px;font-weight:700;padding:6px 12px;z-index:99998;';
+        banner.textContent = '📵 Hors-ligne — les données sont sauvegardées localement';
+        document.body.prepend(banner);
+      }
+    } else {
+      if (banner) {
+        banner.textContent = '✓ Connexion rétablie';
+        banner.style.background = '#276749';
+        setTimeout(() => banner?.remove(), 2500);
+      }
+    }
+  }
+
+  window.addEventListener('offline', () => _showOfflineBanner(true));
+  window.addEventListener('online',  () => _showOfflineBanner(false));
+
+  // Vérifier au démarrage si hors-ligne
+  if (!navigator.onLine) _showOfflineBanner(true);
+})();
+
 /* ── 8. Naviguer vers l'onglet de démarrage ── */
 const _startTab = S._currentTab || 'weekly';
 setTimeout(() => Router.navigate(_startTab), 0);

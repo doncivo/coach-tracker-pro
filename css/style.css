@@ -2111,3 +2111,78 @@ nav.tabs   { flex-shrink: 0; }
   transform: scale(0.875);
   width: calc(100% / 0.875);
 }
+
+
+/* ================================================================
+   DASHBOARD — Calendrier d'entraînement
+   ================================================================ */
+
+.dash-cal-card {
+  background: var(--card);
+  border-radius: 18px;
+  padding: 14px 16px;
+  margin: 0 0 12px;
+  border: 1px solid var(--border);
+}
+.dash-cal-title {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+.dash-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+.dash-cal-lbl {
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--muted);
+  text-align: center;
+  padding-bottom: 2px;
+  text-transform: uppercase;
+}
+.dash-cal-cell {
+  aspect-ratio: 1;
+  border-radius: 4px;
+  background: var(--border);
+  opacity: .4;
+}
+.dash-cal-cell.cal-trained {
+  background: var(--teal);
+  opacity: 1;
+}
+.dash-cal-cell.cal-today {
+  opacity: 1;
+}
+.dash-cal-cell.cal-future {
+  opacity: .15;
+}
+.dash-cal-cell.cal-out {
+  opacity: .1;
+}
+
+/* ================================================================
+   PLANNING — Superset button
+   ================================================================ */
+
+.pec-ss-btn {
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-appearance: none;
+  flex-shrink: 0;
+  transition: background .15s, color .15s;
+}
+.plan-ex-card.pec-ss {
+  border-left: 3px solid var(--purple) !important;
+  margin-left: 8px;
+}

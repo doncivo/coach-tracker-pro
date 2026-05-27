@@ -408,7 +408,12 @@ function buildExCard(di, ei, d, onUpdate) {
     + (ex.done        ? ' pec-done'    : '')
     + (ex.isWarmup    ? ' pec-warmup'  : '')
     + (shouldOverload(ex) && !ex.isWarmup ? ' pec-overload' : '')
-    + (checkPR(ex)    ? ' pec-pr'      : '');
+    + (checkPR(ex)    ? ' pec-pr'      : '')
+    + (ex.supersetGroup ? ' pec-ss'    : '');
+  if (ex.supersetGroup) {
+    card.style.borderLeft = '3px solid var(--purple)';
+    card.dataset.ssGroup = ex.supersetGroup;
+  }
 
   // ── Ligne 1 : Checkbox + Nom + Muscle + Statut ──
   const row1 = document.createElement('div');
@@ -587,7 +592,30 @@ function buildExCard(di, ei, d, onUpdate) {
     });
   }
 
-  details.append(rpeWrap, rirWrap, noteInp, delBtn);
+  // Superset group button
+  const ssBtn = document.createElement('button');
+  ssBtn.className = 'pec-ss-btn';
+  ssBtn.title = 'Grouper en superset';
+  const ssGroups = ['', 'A', 'B', 'C', 'D'];
+  function updateSsBtn() {
+    const g = ex.supersetGroup || '';
+    ssBtn.textContent = g ? 'SS-' + g : 'SS';
+    ssBtn.style.background = g ? 'var(--purple)' : 'var(--bg)';
+    ssBtn.style.color = g ? '#fff' : 'var(--muted)';
+    card.style.borderLeft = g ? '3px solid var(--purple)' : '';
+  }
+  updateSsBtn();
+  const cycleGroup = () => {
+    const idx = ssGroups.indexOf(ex.supersetGroup || '');
+    ex.supersetGroup = ssGroups[(idx + 1) % ssGroups.length];
+    updateSsBtn(); save();
+    // Refresh sibling cards with same group
+    renderDayDetail(S.activeDay);
+  };
+  ssBtn.ontouchstart = (e) => { e.preventDefault(); cycleGroup(); };
+  ssBtn.onclick = cycleGroup;
+
+  details.append(rpeWrap, rirWrap, noteInp, ssBtn, delBtn);
   card.appendChild(expand);
   card.appendChild(details);
 

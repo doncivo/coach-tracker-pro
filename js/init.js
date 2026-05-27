@@ -167,6 +167,78 @@ if ('serviceWorker' in navigator && navigator.serviceWorker.ready && typeof navi
   });
 })();
 
+
+/* ── PWA Install Guide — iOS Safari ── */
+(function() {
+  // Ne montrer que sur iOS Safari hors standalone
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isSafari = /safari/i.test(navigator.userAgent) && !/chrome|crios|fxios/i.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+  const dismissed = localStorage.getItem('_pwa_guide_dismissed');
+
+  if (!isIOS || !isSafari || isStandalone || dismissed) return;
+
+  // Attendre 3s avant d'afficher (laisser l'app se charger)
+  setTimeout(() => {
+    if (document.getElementById('pwa-install-guide')) return;
+
+    const banner = document.createElement('div');
+    banner.id = 'pwa-install-guide';
+    banner.style.cssText = [
+      'position:fixed', 'bottom:80px', 'left:12px', 'right:12px',
+      'background:var(--surface)', 'border-radius:16px',
+      'box-shadow:0 4px 24px rgba(0,0,0,.2)',
+      'padding:14px 16px', 'z-index:9500',
+      'border:1.5px solid var(--teal)',
+      'display:flex', 'align-items:flex-start', 'gap:12px',
+    ].join(';');
+
+    const icon = document.createElement('div');
+    icon.style.cssText = 'font-size:26px;flex-shrink:0;margin-top:2px';
+    icon.textContent = '📲';
+
+    const content = document.createElement('div');
+    content.style.cssText = 'flex:1;min-width:0';
+
+    const title = document.createElement('div');
+    title.style.cssText = 'font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px';
+    title.textContent = 'Installer Coach Tracker Pro';
+
+    const steps = document.createElement('div');
+    steps.style.cssText = 'font-size:11px;color:var(--muted);line-height:1.6';
+    steps.textContent = 'Appuyez sur [icone] Partager en bas de Safari, puis Sur l ecran d accueil';
+
+    const closeBtn = document.createElement('button');
+    closeBtn.style.cssText = 'margin-top:8px;padding:6px 14px;border-radius:10px;border:none;background:var(--teal);color:#fff;font-size:12px;font-weight:700;font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none';
+    closeBtn.textContent = 'Compris';
+    closeBtn.ontouchstart = (e) => { e.preventDefault(); dismiss(); };
+    closeBtn.onclick = dismiss;
+
+    content.appendChild(title); content.appendChild(steps); content.appendChild(closeBtn);
+
+    const x = document.createElement('button');
+    x.style.cssText = 'flex-shrink:0;background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0;touch-action:manipulation;-webkit-appearance:none;margin-top:-2px';
+    x.textContent = '✕';
+    x.ontouchstart = (e) => { e.preventDefault(); dismiss(); };
+    x.onclick = dismiss;
+
+    function dismiss() {
+      banner.remove();
+      localStorage.setItem('_pwa_guide_dismissed', '1');
+    }
+
+    banner.appendChild(icon); banner.appendChild(content); banner.appendChild(x);
+    document.body.appendChild(banner);
+
+    // Arrow pointing down toward Safari share button
+    const arrow = document.createElement('div');
+    arrow.style.cssText = 'position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:10px solid var(--teal)';
+    banner.style.position = 'fixed';
+    banner.appendChild(arrow);
+
+  }, 3000);
+})();
+
 const _startTab = S._currentTab || 'weekly';
 setTimeout(() => Router.navigate(_startTab), 0);
 

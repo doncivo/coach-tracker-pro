@@ -321,6 +321,77 @@ function renderDashboard(){
   }
 
 
+  // ── CALENDRIER D'ENTRAÎNEMENT (28 jours) ──
+  (function() {
+    const calCard = document.createElement('div');
+    calCard.className = 'dash-cal-card';
+
+    const calTitle = document.createElement('div');
+    calTitle.className = 'dash-cal-title';
+    calTitle.innerHTML = `🔥 Streak <strong style="color:var(--red)">${st.current}j</strong> &nbsp;·&nbsp; Record <strong>${st.record}j</strong> &nbsp;·&nbsp; ${st.monthActive} séances ce mois`;
+    calCard.appendChild(calTitle);
+
+    // Grille 28 jours (4 semaines)
+    const grid = document.createElement('div');
+    grid.className = 'dash-cal-grid';
+
+    // En-têtes jours
+    ['L','M','M','J','V','S','D'].forEach(d => {
+      const lbl = document.createElement('div');
+      lbl.className = 'dash-cal-lbl'; lbl.textContent = d;
+      grid.appendChild(lbl);
+    });
+
+    // Construire un lookup date → entraîné
+    const trainedDates = new Set();
+    const today = new Date();
+
+    // Semaine courante
+    (S.days || []).forEach(d => {
+      if (d.date && (d.exercises||[]).some(e => e.done && !e.isWarmup)) {
+        trainedDates.add(d.date);
+      }
+    });
+    // Historique
+    Object.values(S.history || {}).forEach(wk => {
+      (wk.days || []).forEach(d => {
+        if (d.date && (d.exercises||[]).some(e => e.done && !e.isWarmup)) {
+          trainedDates.add(d.date);
+        }
+      });
+    });
+
+    // Aligner sur le lundi de la semaine la plus ancienne des 28 derniers jours
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() - 27);
+    // Reculer jusqu'au lundi
+    while (startDate.getDay() !== 1) startDate.setDate(startDate.getDate() - 1);
+
+    const todayStr2 = localDateStr(today);
+    for (let i = 0; i < 35; i++) {
+      const d = new Date(startDate);
+      d.setDate(startDate.getDate() + i);
+      const ds = localDateStr(d);
+      const isFuture = ds > todayStr2;
+      const isToday  = ds === todayStr2;
+      const trained  = trainedDates.has(ds);
+      const inRange  = ds >= localDateStr(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 27));
+
+      const cell = document.createElement('div');
+      cell.className = 'dash-cal-cell'
+        + (trained  ? ' cal-trained'  : '')
+        + (isToday  ? ' cal-today'    : '')
+        + (isFuture ? ' cal-future'   : '')
+        + (!inRange ? ' cal-out'      : '');
+
+      if (isToday && !trained) cell.style.cssText = 'border:2px solid var(--teal)';
+      grid.appendChild(cell);
+    }
+
+    calCard.appendChild(grid);
+    wrap.appendChild(calCard);
+  })();
+
   // ── DERNIÈRES SÉANCES ──
   const histKeys = Object.keys(S.history || {}).sort().reverse();
   const recentSessions = [];

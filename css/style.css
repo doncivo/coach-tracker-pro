@@ -369,12 +369,12 @@ nav.tabs   { flex-shrink: 0; }
 .rest-timer-time { font-family: var(--mono); font-size: 42px; font-weight: 700; color: var(--text); line-height: 1; }
 .rest-timer-label { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
 .rest-timer-presets { display: flex; gap: 8px; width: 100%; }
-.rest-timer-preset { flex: 1; padding: 8px 4px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg); font-family: var(--font); font-size: 12px; font-weight: 700; color: var(--muted); cursor: pointer; text-align: center; }
+.rest-timer-preset { flex: 1; padding: 8px 4px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg); font-family: var(--font); font-size: 12px; font-weight: 700; color: var(--muted); cursor: pointer; text-align: center; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .rest-timer-preset.active { border-color: var(--teal); color: var(--teal-d); }
 .rest-timer-actions { display: flex; gap: 10px; width: 100%; }
-.rest-timer-skip { flex: 1; padding: 12px; border-radius: 14px; border: 1.5px solid var(--border); background: var(--bg); font-family: var(--font); font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; }
-.rest-timer-next { flex: 2; padding: 12px; border-radius: 14px; border: none; background: var(--teal); color: #fff; font-family: var(--font); font-size: 13px; font-weight: 700; cursor: pointer; }
-.rest-timer-add { background: none; border: none; font-size: 20px; cursor: pointer; position: absolute; top: 12px; right: 14px; color: var(--muted); font-family: var(--font); font-weight: 700; }
+.rest-timer-skip { flex: 1; padding: 12px; border-radius: 14px; border: 1.5px solid var(--border); background: var(--bg); font-family: var(--font); font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.rest-timer-next { flex: 2; padding: 12px; border-radius: 14px; border: none; background: var(--teal); color: #fff; font-family: var(--font); font-size: 13px; font-weight: 700; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.rest-timer-add { background: none; border: none; font-size: 20px; cursor: pointer; position: absolute; top: 12px; right: 14px; color: var(--muted); font-family: var(--font); font-weight: 700; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 @keyframes rest-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
 .rest-timer-card.done-pulse { animation: rest-pulse .5s ease 3; }
 

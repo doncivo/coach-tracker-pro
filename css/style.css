@@ -1577,3 +1577,79 @@ nav.tabs   { flex-shrink: 0; }
 .set-card-stat.set-vol-val { color: var(--teal-d); }
 .set-card-stat.set-1rm-val { color: var(--purple, #805ad5); }
 .set-card-stat.set-prev-val { font-style: italic; }
+
+
+/* ================================================================
+   DASHBOARD — Score breakdown card
+   ================================================================ */
+
+.dash-breakdown-card {
+  background: var(--card);
+  border-radius: 18px;
+  padding: 16px;
+  margin: 0 0 12px;
+  border: 1px solid var(--border);
+}
+.dash-breakdown-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.dash-breakdown-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+.dash-breakdown-row:last-child { border-bottom: none; }
+.dash-breakdown-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+.dash-breakdown-icon { font-size: 18px; flex-shrink: 0; }
+.dash-breakdown-info { flex: 1; min-width: 0; }
+.dash-breakdown-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+}
+.dash-breakdown-tip {
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+.dash-breakdown-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.dash-breakdown-bar-wrap {
+  width: 60px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.dash-breakdown-bar {
+  height: 100%;
+  border-radius: 2px;
+  transition: width .6s ease;
+}
+.dash-breakdown-pts {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 24px;
+  text-align: right;
+}

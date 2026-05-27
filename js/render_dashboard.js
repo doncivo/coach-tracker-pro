@@ -83,6 +83,42 @@ function renderDashboard(){
   });
   wrap.appendChild(statsGrid);
 
+  // ── SCORE BREAKDOWN — expliqué et actionnable ──
+  const breakdownCard = document.createElement('div');
+  breakdownCard.className = 'dash-breakdown-card';
+  breakdownCard.innerHTML = `<div class="dash-breakdown-title">Détail du score de forme</div>`;
+
+  const tips = {
+    'Assiduité': s => s >= 80 ? 'Continuez comme ça !' : s >= 50 ? 'Essayez d\'ajouter une séance cette semaine' : 'Visez au moins 3 séances par semaine',
+    'Pas':       s => s >= 80 ? 'Objectif pas atteint ✓' : `Il manque ${Math.round((S.stepsGoal||10000)*(1-s/100)).toLocaleString('fr')} pas aujourd'hui`,
+    'Sommeil':   s => s >= 80 ? 'Récupération optimale' : `Visez ${S._sleepGoal||8}h — vous dormez en dessous`,
+    'Nutrition': s => s >= 80 ? 'Apports bien équilibrés' : 'Renseignez vos repas dans l\'onglet Corps',
+    'Récup.':    s => s >= 80 ? 'Récupération excellente' : 'Notez votre récupération après les séances',
+  };
+
+  fs.breakdown.forEach(b => {
+    const row = document.createElement('div');
+    row.className = 'dash-breakdown-row';
+    const tip  = (tips[b.label] || (() => ''))(b.pts);
+    row.innerHTML = `
+      <div class="dash-breakdown-left">
+        <span class="dash-breakdown-icon">${b.icon}</span>
+        <div class="dash-breakdown-info">
+          <div class="dash-breakdown-name">${b.label}</div>
+          <div class="dash-breakdown-tip">${tip}</div>
+        </div>
+      </div>
+      <div class="dash-breakdown-right">
+        <div class="dash-breakdown-bar-wrap">
+          <div class="dash-breakdown-bar" style="width:${b.pts}%;background:var(${b.color||'--teal'})"></div>
+        </div>
+        <span class="dash-breakdown-pts" style="color:var(${b.color||'--teal'})">${b.pts}</span>
+      </div>`;
+    breakdownCard.appendChild(row);
+  });
+
+  wrap.appendChild(breakdownCard);
+
   // ── SÉANCE DU JOUR ──
   const exs = (todayDay.exercises||[]).filter(e=>e.name&&e.name.trim()&&!e.isWarmup);
   const doneExs = exs.filter(e=>e.done);
@@ -1053,20 +1089,65 @@ ${bc ? `
 </body>
 </html>`;
 
-  // Ouvrir dans un nouvel onglet
-  const win = window.open('', '_blank');
-  if (win) {
-    win.document.write(html);
-    win.document.close();
-    setTimeout(() => win.print(), 800);
+  // ── Partage iOS natif ou fallback ──
+  // Générer le texte de partage (court, lisible)
+  const shareText = [
+    `🏋️ Bilan Coach Tracker Pro — ${today}`,
+    `Score de forme : ${fs.score}/100 (${grade})`,
+    ``,
+    `💪 Cette semaine :`,
+    `  · Séances : ${trained}/7`,
+    `  · Volume  : ${volSem >= 1000 ? (volSem/1000).toFixed(1)+'t' : Math.round(volSem)+'kg'}`,
+    `  · Pas     : ${weekSteps.toLocaleString('fr')}`,
+    `  · Sommeil : ${avgSleep > 0 ? avgSleep.toFixed(1)+'h' : '—'}`,
+    ``,
+    fs.breakdown.map(b => `${b.icon} ${b.label} : ${b.pts}/100`).join('\n'),
+    ``,
+    `Objectif : ${objective}`,
+    poids > 0 ? `Poids actuel : ${poids}kg` : '',
+  ].filter(l => l !== undefined && l !== null).join('\n');
+
+  // Essayer la Share API iOS (feuille de partage native)
+  if (navigator.share) {
+    navigator.share({
+      title: 'Bilan Coach Tracker Pro',
+      text:  shareText,
+    }).then(() => {
+      showToast('Bilan partagé ✓', 'save', 2000);
+    }).catch(err => {
+      // Annulé ou erreur → copier dans le presse-papiers
+      if (err.name !== 'AbortError') _fallbackExport(shareText, html);
+    });
   } else {
-    // Fallback: téléchargement direct
-    const blob = new Blob([html], {type:'text/html;charset=utf-8'});
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href = url; a.download = 'bilan-coach-tracker-'+localDateStr()+'.html';
-    a.click(); URL.revokeObjectURL(url);
-    showToast('📄 Bilan téléchargé — ouvre le fichier et imprime en PDF', 'ok', 5000);
+    _fallbackExport(shareText, html);
+  }
+
+  function _fallbackExport(text, htmlContent) {
+    // 1. Copier le texte dans le presse-papiers
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('📋 Bilan copié dans le presse-papiers', 'save', 3000);
+      }).catch(() => _htmlFallback(htmlContent));
+    } else {
+      _htmlFallback(htmlContent);
+    }
+  }
+
+  function _htmlFallback(htmlContent) {
+    // Dernier recours : ouvrir dans un onglet avec impression
+    const win = window.open('', '_blank');
+    if (win) {
+      win.document.write(htmlContent);
+      win.document.close();
+      setTimeout(() => win.print(), 800);
+    } else {
+      const blob = new Blob([htmlContent], {type:'text/html;charset=utf-8'});
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = 'bilan-coach-tracker-'+localDateStr()+'.html';
+      a.click(); URL.revokeObjectURL(url);
+      showToast('📄 Bilan téléchargé', 'ok', 3000);
+    }
   }
 }
 

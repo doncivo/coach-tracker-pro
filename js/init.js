@@ -55,11 +55,11 @@ if (_notesArea) _notesArea.value = S.notes || '';
 updateStats();
 updateChronoDsp();
 checkWeeklyAutoSave();
-  Notify.restore(); // Restaurer le rappel quotidien
+Notify.restore(); // Restaurer le rappel quotidien
 checkAndAwardAchievements();
 checkOnboarding();
-_initRestTimerButtons();
-restoreReminder();
+_initRestTimerButtons(); // no-op depuis v45 — bindings dans RestTimer.start()
+// restoreReminder() retiré — doublon de Notify.restore() ci-dessus
 
 /* ── 8. Naviguer vers l'onglet de démarrage ── */
 const _startTab = S._currentTab || 'weekly';

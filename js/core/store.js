@@ -107,6 +107,8 @@ const Store = (() => {
      UTILITAIRES INTERNES
   ───────────────────────────────────────────── */
   function _deepClone(obj) {
+    // JSON.parse/stringify: rapide, mais convertit Date→string.
+    // Le state ne contient que des primitives et tableaux → OK.
     try { return JSON.parse(JSON.stringify(obj)); }
     catch(_) { return Object.assign({}, obj); }
   }

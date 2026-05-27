@@ -401,7 +401,7 @@ const Compute = (() => {
 
     // ── Pas (20%) ──
     const avgSteps     = days7.reduce((a, d) => a + (parseInt(steps[d] || 0) || 0), 0) / 7;
-    const stepsScore   = Math.min(100, avgSteps / stepsGoal * 100);
+    const stepsScore   = stepsGoal > 0 ? Math.min(100, avgSteps / stepsGoal * 100) : 0;
 
     // ── Sommeil (20%) ──
     const avgSleep     = days7.reduce((a, d) => {
@@ -413,7 +413,7 @@ const Compute = (() => {
     // ── Nutrition (15%) ──
     const dailyCals    = dailyCalories(calories, days7).map(p => p.cal);
     const avgCal       = dailyCals.reduce((a, v) => a + v, 0) / 7;
-    const calDiff      = Math.abs(avgCal - caloriesGoal) / caloriesGoal;
+    const calDiff      = caloriesGoal > 0 ? Math.abs(avgCal - caloriesGoal) / caloriesGoal : 0;
     const nutScore     = avgCal === 0 ? 50 : Math.max(0, 100 - calDiff * 200);
 
     // ── Récupération (15%) ──
@@ -434,7 +434,7 @@ const Compute = (() => {
     );
 
     return {
-      score: Math.min(100, score),
+      score: isNaN(score) ? 0 : Math.min(100, score),
       breakdown: [
         { icon: '💪', label: 'Assiduité', pts: Math.round(adherence),  max: 100, color: '--teal',   weight: 30 },
         { icon: '👣', label: 'Pas',       pts: Math.round(stepsScore),  max: 100, color: '--green',  weight: 20 },

@@ -208,8 +208,8 @@ const CTPTest = (() => {
   function _testIOS() {
     info('IOS', 'Tests compatibilité iOS Safari');
 
-    if (typeof document === 'undefined') {
-      skip('ios', 'DOM requis pour ces tests');
+    if (typeof document === 'undefined' || typeof getComputedStyle === 'undefined') {
+      skip('ios', 'DOM et getComputedStyle requis — lancez depuis le navigateur');
       return;
     }
 

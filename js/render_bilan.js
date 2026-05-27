@@ -126,9 +126,9 @@ function renderBilan(){
   cont.appendChild(bilanChartsDiv);
 });
 }
-document.getElementById('bilan-prev').addEventListener('click',()=>{S.bilanOffset=(S.bilanOffset||0)-1;save();renderBilan();});
-document.getElementById('bilan-next').addEventListener('click',()=>{if((S.bilanOffset||0)<0){S.bilanOffset++;save();renderBilan();}});
-document.getElementById('export-pdf-btn').addEventListener('click', exportBilanPDF);
+document.getElementById('bilan-prev')?.addEventListener('click',()=>{S.bilanOffset=(S.bilanOffset||0)-1;save();renderBilan();});
+document.getElementById('bilan-next')?.addEventListener('click',()=>{if((S.bilanOffset||0)<0){S.bilanOffset++;save();renderBilan();}});
+document.getElementById('export-pdf-btn')?.addEventListener('click', exportBilanPDF);
 
 /* ══ KPI ══ */
 function computeTonnageComp(){const cur=weekVol();const keys=Object.keys(S.history).sort();const lastKey=keys[keys.length-1];const prev={};if(lastKey){(S.history[lastKey].days||[]).forEach(d=>{(d.exercises||[]).filter(e=>!e.isWarmup).forEach(ex=>{const v=calcVol(ex);if(v&&ex.muscle)prev[ex.muscle]=(prev[ex.muscle]||0)+v;});});}return{cur,prev};}

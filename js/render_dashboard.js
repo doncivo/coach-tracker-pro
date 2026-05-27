@@ -302,6 +302,12 @@ function renderDashboard(){
   if(pains.length>0) alerts.push({icon:'⚠️',txt:`${pains.length} douleur${pains.length>1?'s':''} signalée${pains.length>1?'s':''}`,color:'red',tab:'corps'});
   if(st.current===0&&hours>18) alerts.push({icon:'💪',txt:`Pas encore entraîné aujourd'hui`,color:'teal',tab:'session'});
 
+  // Alerte décharge (deload)
+  const weeksN = S.weekCount || 1;
+  const deloadIn = (5 - ((weeksN - 1) % 5)) % 5 || 5;
+  if (deloadIn === 1) alerts.push({icon:'🔄',txt:'Semaine de décharge recommandée la semaine prochaine — Réduisez le volume de 40%',color:'orange',tab:'bilan'});
+  if (weeksN % 5 === 0) alerts.push({icon:'🔄',txt:'Semaine de décharge ! Réduisez les charges de 40% et récupérez.',color:'red',tab:'bilan'});
+
   if(alerts.length){
     const alertsWrap = document.createElement('div');
     alertsWrap.style.cssText = 'display:flex;flex-direction:column;gap:6px';

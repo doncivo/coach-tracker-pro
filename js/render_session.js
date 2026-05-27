@@ -687,6 +687,7 @@ function render1RMChart(container, exerciseName, color) {
 
 function renderProgression(){
   _renderSessionTimeline();
+  _renderPersonalRecords();
   const mf=document.getElementById('prog-muscle-filter');const cv=mf.value;mf.innerHTML='<option value="">Tous les groupes</option>';
   MUSCLES.filter(m=>m.key!=='rep').forEach(m=>{const o=document.createElement('option');o.value=m.key;o.textContent=m.label;if(m.key===cv)o.selected=true;mf.appendChild(o);});
   const wLimit=document.getElementById('prog-weeks-filter').value;
@@ -770,6 +771,68 @@ cards.innerHTML='';
   if(!cards.children.length)cards.innerHTML='<div class="prog-no-data">Aucun exercice correspondant.</div>';
 }
 
+/* ── Records personnels (all-time PRs) ── */
+function _renderPersonalRecords() {
+  const container = document.getElementById('prog-timeline');
+  if (!container) return;
+
+  // Collecter tous les exercices de l'historique + semaine courante
+  const records = {}; // name → { weight, reps, oneRM, date }
+
+  function processEx(ex, date) {
+    if (!ex.name || ex.isWarmup) return;
+    const w = parseFloat(ex.weight) || 0;
+    const r = parseInt(ex.repsAchieved || ex.reps) || 0;
+    if (!w || !r) return;
+    const orm = typeof calc1RM === 'function' ? (calc1RM(w, r) || w) : w;
+    const prev = records[ex.name];
+    if (!prev || orm > prev.oneRM) {
+      records[ex.name] = { weight: w, reps: r, oneRM: Math.round(orm), date };
+    }
+  }
+
+  // Semaine courante
+  (S.days || []).forEach(d => (d.exercises || []).forEach(e => processEx(e, 'Cette semaine')));
+  // Historique
+  Object.entries(S.history || {}).forEach(([date, wk]) => {
+    ((wk.days || wk) || []).forEach(d => (d.exercises || []).forEach(e => processEx(e, date)));
+  });
+
+  const sorted = Object.entries(records).sort((a, b) => b[1].oneRM - a[1].oneRM).slice(0, 12);
+  if (!sorted.length) return;
+
+  // Vider la section timeline et re-remplir avec records + timeline
+  // On insère le bloc records AVANT la timeline existante
+  const existing = container.querySelector('.prog-records-block');
+  if (existing) existing.remove();
+
+  const block = document.createElement('div');
+  block.className = 'prog-records-block';
+
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px;padding-top:4px';
+  title.textContent = '🏆 Records personnels';
+  block.appendChild(title);
+
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:6px';
+
+  sorted.forEach(([name, rec]) => {
+    const card = document.createElement('div');
+    card.style.cssText = 'background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 12px;cursor:pointer;touch-action:manipulation';
+    card.innerHTML = [
+      `<div style="font-size:11px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${name}</div>`,
+      `<div style="font-family:var(--mono);font-size:16px;font-weight:800;color:var(--teal);margin:2px 0">${rec.weight}kg × ${rec.reps}</div>`,
+      `<div style="font-size:9px;color:var(--muted)">1RM estimé : <strong>${rec.oneRM}kg</strong></div>`,
+      `<div style="font-size:9px;color:var(--muted);margin-top:1px">${rec.date === 'Cette semaine' ? '📅 Cette semaine' : rec.date}</div>`,
+    ].join('');
+    grid.appendChild(card);
+  });
+
+  block.appendChild(grid);
+  container.insertBefore(block, container.firstChild);
+}
+
 /* ── Timeline des séances passées ── */
 function _renderSessionTimeline() {
   const container = document.getElementById('prog-timeline');
@@ -826,6 +889,7 @@ function _renderSessionTimeline() {
     info.innerHTML = [
       `<div style="font-size:12px;font-weight:700;color:var(--text)">${dateStr} — ${sess.name||'Séance'}</div>`,
       `<div style="font-size:10px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${exs.slice(0,3).map(e=>e.name).join(', ')}${exs.length>3?' +'+( exs.length-3):''}</div>`,
+      sess.note ? `<div style="font-size:10px;color:var(--muted);font-style:italic;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">📝 ${sess.note}</div>` : '',
     ].join('');
 
     const stats = document.createElement('div');

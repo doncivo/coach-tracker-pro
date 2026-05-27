@@ -864,6 +864,19 @@ function showSessionComplete(di, d) {
   const btns = document.createElement('div');
   btns.style.cssText = 'display:flex;gap:10px;flex-wrap:wrap;justify-content:center;width:100%;max-width:300px;margin-top:8px';
 
+  // ── Note de séance ──
+  const noteWrap = document.createElement('div');
+  noteWrap.style.cssText = 'width:100%;max-width:300px;background:rgba(255,255,255,.12);border-radius:14px;padding:10px 14px';
+  const noteLbl = document.createElement('div');
+  noteLbl.style.cssText = 'font-size:10px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px';
+  noteLbl.textContent = '📝 Note de séance';
+  const noteTA = document.createElement('textarea');
+  noteTA.rows = 2;
+  noteTA.placeholder = 'Énergie, douleurs, remarques...';
+  noteTA.style.cssText = 'width:100%;border:none;background:transparent;color:#fff;font-family:var(--font);font-size:13px;resize:none;outline:none;line-height:1.5;box-sizing:border-box;-webkit-appearance:none';
+  noteWrap.appendChild(noteLbl); noteWrap.appendChild(noteTA);
+  overlay.appendChild(noteWrap);
+
   const closeBtn = document.createElement('button');
   closeBtn.style.cssText = 'flex:1;padding:13px 20px;border-radius:14px;border:2px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);color:#fff;font-family:var(--font);font-weight:700;font-size:14px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none';
   closeBtn.textContent = 'Fermer';
@@ -890,6 +903,7 @@ function showSessionComplete(di, d) {
   const histEntry = {
     name: DAYS[di]||'Séance', date: sessDate,
     volume: vol, duration: dur, sets: sets,
+    note: noteTA.value.trim(),
     exercises: (d.exercises||[]).map(e => ({
       name:e.name, muscle:e.muscle, weight:e.weight,
       sets:e.sets, reps:e.reps, repsAchieved:e.repsAchieved||'',

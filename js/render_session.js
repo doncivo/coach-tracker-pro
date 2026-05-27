@@ -200,86 +200,203 @@ function renderSessExercise(d,exercises,vi){
     mainEl.appendChild(al);
   }
 
-  // Sets table
-  const setsArea=document.createElement('div');setsArea.className='sess-sets-area';
-  const setsLbl=document.createElement('div');setsLbl.className='sess-sets-label';
-  const setsDoneCount=ex.setData.slice(0,nSets).filter(s=>s.done).length;
-  setsLbl.innerHTML=`<span>Séries</span><span style="font-family:var(--mono);font-size:11px;color:var(--teal-d)">${setsDoneCount}/${nSets} validées${ex.isWarmup?' · Échauffement':''}</span>`;
+  // ══ Vue Carte — remplace le tableau 8 colonnes ══
+  const setsArea = document.createElement('div');
+  setsArea.className = 'sess-sets-area';
+
+  const setsLbl = document.createElement('div');
+  setsLbl.className = 'sess-sets-label';
+  const setsDoneCount = ex.setData.slice(0, nSets).filter(s => s.done).length;
+  setsLbl.innerHTML = `<span>Séries</span><span style="font-family:var(--mono);font-size:11px;color:var(--teal-d)">${setsDoneCount}/${nSets} validées${ex.isWarmup ? ' · Échauffement' : ''}</span>`;
   setsArea.appendChild(setsLbl);
-  const hasPrev=hist.length>0;
-  const table=document.createElement('table');table.className='sess-sets-table';
-  table.innerHTML=`<thead><tr><th>Sér.</th><th>Poids</th><th>=</th><th>Reps</th><th>RPE</th><th>RIR</th><th>Vol.</th><th>1RM</th>${hasPrev?'<th style="color:var(--muted);font-style:italic">Préc.</th>':''}<th></th></tr></thead>`;
-  const tbody=document.createElement('tbody');
-  function refreshNavDots(){const navEl=document.getElementById('sess-nav');if(!navEl)return;const items=navEl.querySelectorAll('.sess-nav-item');const item=items[vi];if(!item)return;const dots=item.querySelectorAll('.sess-nav-set-dot');const sd=ex.setData.slice(0,nSets).filter(s=>s.done).length;dots.forEach((dot,di)=>dot.classList.toggle('dot-done',di<sd));if(ex.done){const num2=item.querySelector('.sess-nav-num');if(num2){num2.classList.add('done-num');num2.textContent='✓';}}}
-  ex.setData.slice(0,nSets).forEach((setD,si)=>{
-    const tr=document.createElement('tr');const isActive2=!setD.done&&si===ex.setData.slice(0,nSets).findIndex(s=>!s.done);
-    tr.className=setD.done?'srow-done':isActive2?'srow-active':ex.isWarmup?'srow-warmup':'';
-    const snum=document.createElement('div');snum.className='snum'+(setD.done?' snum-done':isActive2?' snum-active':ex.isWarmup?' snum-warmup':'');snum.textContent=setD.done?'✓':(si+1);
-    const tdN=document.createElement('td');tdN.appendChild(snum);tr.appendChild(tdN);
-    const wi=document.createElement('input');wi.type='text';wi.className='set-inp inp-w';wi.value=setD.weight||ex.weight||'';wi.placeholder='kg';
-    wi.addEventListener('input',e=>{setD.weight=e.target.value;d.exercises[realIdx].weight=e.target.value;refreshRowCalc();save();updateStats();});
-    const tdW=document.createElement('td');tdW.appendChild(wi);tr.appendChild(tdW);
-    // Copy previous weight button
-    const cpBtn=document.createElement('button');cpBtn.className='set-copy-btn';cpBtn.textContent='=';cpBtn.title='Copier le poids de la série précédente';
-    cpBtn.addEventListener('click',()=>{if(si>0){wi.value=ex.setData[si-1].weight||ex.weight||'';setD.weight=wi.value;refreshRowCalc();save();}});
-    const tdCp=document.createElement('td');tdCp.appendChild(cpBtn);tr.appendChild(tdCp);
-    const ri=document.createElement('input');ri.type='number';ri.className='set-inp inp-r';ri.value=setD.reps||'';ri.placeholder=ex.reps||'?';ri.min=0;ri.max=99;
-    ri.addEventListener('input',e=>{setD.reps=e.target.value;refreshRowCalc();save();});
-    const tdR=document.createElement('td');tdR.appendChild(ri);tr.appendChild(tdR);
-    // RPE
-    const rpeSel=document.createElement('select');rpeSel.className='set-inp inp-rpe';
-    RPE_OPTS.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;if(v===setD.rpe)o.selected=true;rpeSel.appendChild(o);});
-    function applyRpeCol2(){const r=parseFloat(rpeSel.value)||0;rpeSel.style.color=r>=9?'var(--red)':r>=7.5&&r>0?'var(--orange)':r>0?'var(--green)':'var(--muted)';}
-    applyRpeCol2();rpeSel.addEventListener('change',e=>{setD.rpe=e.target.value;applyRpeCol2();save();// Refresh RPE alert
-    renderSessExercise(d,exercises,vi);});
-    const tdRpe=document.createElement('td');tdRpe.appendChild(rpeSel);tr.appendChild(tdRpe);
-    // RIR
-    const rirSel=document.createElement('select');rirSel.className='set-inp inp-rir';
-    RIR_OPTS.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;if(v===setD.rir)o.selected=true;rirSel.appendChild(o);});
-    rirSel.addEventListener('change',e=>{setD.rir=e.target.value;save();});
-    const tdRir=document.createElement('td');tdRir.appendChild(rirSel);tr.appendChild(tdRir);
-    // Vol / 1RM
-    const tdVol=document.createElement('td');tdVol.className='set-vol-val';const td1rm=document.createElement('td');td1rm.className='set-1rm-val';
-    function refreshRowCalc(){const w=parseFloat(wi.value)||0,r=parseInt(ri.value)||0;tdVol.textContent=w&&r&&!ex.isWarmup?Math.round(w*r)+'kg':'—';const rm=calc1RM(wi.value,ri.value);td1rm.textContent=rm&&!ex.isWarmup?rm+'kg':'—';setsLbl.innerHTML=`<span>Séries</span><span style="font-family:var(--mono);font-size:11px;color:var(--teal-d)">${ex.setData.slice(0,nSets).filter(s=>s.done).length}/${nSets} validées</span>`;updateSessProgress(d,exercises);}
-    refreshRowCalc();tr.appendChild(tdVol);tr.appendChild(td1rm);
-    // Prev set
-    if(hasPrev){const tdPrev=document.createElement('td');tdPrev.className='set-prev-val';const ph=hist[0];tdPrev.textContent=ph?`${ph.weight}×${ph.repsAchieved||ph.reps||'?'}`:'—';tr.appendChild(tdPrev);}
-    // Validate button
-    const valBtn=document.createElement('button');valBtn.className='set-val-btn '+(setD.done?'validated':'pending');valBtn.textContent=setD.done?'✓':'✓ Go';
-    [wi,ri].forEach(inp=>inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();valBtn.click();}}));
-    valBtn.addEventListener('click',()=>{
-      setD.done=!setD.done;valBtn.className='set-val-btn '+(setD.done?'validated':'pending');valBtn.textContent=setD.done?'✓':'✓ Go';
-      snum.className='snum'+(setD.done?' snum-done':'');snum.textContent=setD.done?'✓':(si+1);
-      tr.className=setD.done?'srow-done':'';
-      // ── Lancer le minuteur de repos si série validée ──
-      if(setD.done) {
-        const restSec = parseInt(ex.rest) || S._restDuration || _suggestRestTime(ex) || 90;
-        const nextSetIdx = ex.setData.slice(0,nSets).findIndex((s,idx)=>idx>si&&!s.done);
+
+  const hasPrev = hist.length > 0;
+  const cardsWrap = document.createElement('div');
+  cardsWrap.className = 'set-cards';
+
+  function refreshNavDots() {
+    const navEl = document.getElementById('sess-nav');
+    if (!navEl) return;
+    const items = navEl.querySelectorAll('.sess-nav-item');
+    const item  = items[vi];
+    if (!item) return;
+    const dots = item.querySelectorAll('.sess-nav-set-dot');
+    const sd   = ex.setData.slice(0, nSets).filter(s => s.done).length;
+    dots.forEach((dot, di) => dot.classList.toggle('dot-done', di < sd));
+    if (ex.done) {
+      const num2 = item.querySelector('.sess-nav-num');
+      if (num2) { num2.classList.add('done-num'); num2.textContent = '✓'; }
+    }
+  }
+
+  ex.setData.slice(0, nSets).forEach((setD, si) => {
+    const isActive2 = !setD.done && si === ex.setData.slice(0, nSets).findIndex(s => !s.done);
+    const card = document.createElement('div');
+    card.className = 'set-card' + (setD.done ? ' done' : isActive2 ? ' active' : ex.isWarmup ? ' warmup' : '');
+
+    // ── Ligne primaire : numéro + poids + × + reps + bouton Go ──
+    const primary = document.createElement('div');
+    primary.className = 'set-card-primary';
+
+    const snum = document.createElement('div');
+    snum.className = 'set-card-num';
+    snum.textContent = setD.done ? '✓' : (si + 1);
+
+    const wi = document.createElement('input');
+    wi.type = 'text'; wi.inputMode = 'decimal';
+    wi.className = 'set-card-inp set-card-weight';
+    wi.value = setD.weight || ex.weight || '';
+    wi.placeholder = 'kg';
+    wi.addEventListener('input', e => {
+      setD.weight = e.target.value;
+      d.exercises[realIdx].weight = e.target.value;
+      refreshSecondary(); save(); updateStats();
+    });
+
+    const sep = document.createElement('span');
+    sep.className = 'set-card-sep'; sep.textContent = '×';
+
+    const ri = document.createElement('input');
+    ri.type = 'text'; ri.inputMode = 'numeric';
+    ri.className = 'set-card-inp set-card-reps';
+    ri.value = setD.reps || '';
+    ri.placeholder = ex.reps || '?';
+    ri.addEventListener('input', e => { setD.reps = e.target.value; refreshSecondary(); save(); });
+
+    const valBtn = document.createElement('button');
+    valBtn.className = 'set-card-go' + (setD.done ? ' validated' : '');
+    valBtn.textContent = setD.done ? '✓' : '✓ Go';
+    valBtn.setAttribute('touch-action', 'manipulation');
+
+    [wi, ri].forEach(inp => inp.addEventListener('keydown', ev => {
+      if (ev.key === 'Enter') { ev.preventDefault(); valBtn.click(); }
+    }));
+
+    primary.appendChild(snum);
+    primary.appendChild(wi);
+    primary.appendChild(sep);
+    primary.appendChild(ri);
+    primary.appendChild(valBtn);
+    card.appendChild(primary);
+
+    // ── Ligne secondaire : RPE, RIR, Vol, 1RM, Préc ──
+    const secondary = document.createElement('div');
+    secondary.className = 'set-card-secondary';
+
+    const rpeSel = document.createElement('select');
+    rpeSel.className = 'set-card-sel';
+    RPE_OPTS.forEach(v => {
+      const o = document.createElement('option');
+      o.value = v; o.textContent = v;
+      if (v === setD.rpe) o.selected = true;
+      rpeSel.appendChild(o);
+    });
+    function applyRpeColor() {
+      const r = parseFloat(rpeSel.value) || 0;
+      rpeSel.style.color = r >= 9 ? 'var(--red)' : r >= 7.5 && r > 0 ? 'var(--orange)' : r > 0 ? 'var(--green)' : 'var(--muted)';
+    }
+    applyRpeColor();
+    rpeSel.addEventListener('change', e => { setD.rpe = e.target.value; applyRpeColor(); save(); renderSessExercise(d, exercises, vi); });
+
+    const rirSel = document.createElement('select');
+    rirSel.className = 'set-card-sel';
+    RIR_OPTS.forEach(v => {
+      const o = document.createElement('option');
+      o.value = v; o.textContent = v;
+      if (v === setD.rir) o.selected = true;
+      rirSel.appendChild(o);
+    });
+    rirSel.addEventListener('change', e => { setD.rir = e.target.value; save(); });
+
+    const volSpan = document.createElement('span'); volSpan.className = 'set-card-stat set-vol-val';
+    const rmSpan  = document.createElement('span'); rmSpan.className  = 'set-card-stat set-1rm-val';
+
+    function refreshSecondary() {
+      const w = parseFloat(wi.value) || 0;
+      const r = parseInt(ri.value)   || 0;
+      volSpan.textContent = w && r && !ex.isWarmup ? '📦 ' + Math.round(w * r) + 'kg' : '';
+      const rm = calc1RM(wi.value, ri.value);
+      rmSpan.textContent  = rm && !ex.isWarmup ? '🏋 ' + rm + 'kg' : '';
+      const setsDone2 = ex.setData.slice(0, nSets).filter(s => s.done).length;
+      setsLbl.innerHTML = `<span>Séries</span><span style="font-family:var(--mono);font-size:11px;color:var(--teal-d)">${setsDone2}/${nSets} validées</span>`;
+      updateSessProgress(d, exercises);
+    }
+    refreshSecondary();
+
+    const rpeWrap = document.createElement('label'); rpeWrap.className = 'set-card-label';
+    rpeWrap.innerHTML = 'RPE '; rpeWrap.appendChild(rpeSel);
+    const rirWrap = document.createElement('label'); rirWrap.className = 'set-card-label';
+    rirWrap.innerHTML = 'RIR '; rirWrap.appendChild(rirSel);
+
+    secondary.appendChild(rpeWrap);
+    secondary.appendChild(rirWrap);
+    secondary.appendChild(volSpan);
+    secondary.appendChild(rmSpan);
+
+    if (hasPrev) {
+      const ph = hist[0];
+      const prevSpan = document.createElement('span');
+      prevSpan.className = 'set-card-stat set-prev-val';
+      prevSpan.style.color = 'var(--muted)';
+      prevSpan.textContent = ph ? `Préc: ${ph.weight}×${ph.repsAchieved || ph.reps || '?'}` : '';
+      secondary.appendChild(prevSpan);
+    }
+
+    card.appendChild(secondary);
+
+    // ── Validation ──
+    function doValidate() {
+      setD.done = !setD.done;
+      valBtn.className  = 'set-card-go' + (setD.done ? ' validated' : '');
+      valBtn.textContent = setD.done ? '✓' : '✓ Go';
+      snum.textContent  = setD.done ? '✓' : (si + 1);
+      card.className    = 'set-card' + (setD.done ? ' done' : ex.isWarmup ? ' warmup' : '');
+
+      if (setD.done) {
+        const restSec    = parseInt(ex.rest) || S._restDuration || _suggestRestTime(ex) || 90;
+        const nextSetIdx = ex.setData.slice(0, nSets).findIndex((s, idx) => idx > si && !s.done);
         const hasNextSet = nextSetIdx !== -1;
         RestTimer.start(restSec, ex.name, hasNextSet ? () => {
-          // Scroller vers la prochaine série
-          const rows = setsArea.querySelectorAll('.srow-active, tr');
-          if(rows[nextSetIdx]) rows[nextSetIdx].scrollIntoView({behavior:'smooth', block:'nearest'});
+          const cards2 = cardsWrap.querySelectorAll('.set-card');
+          if (cards2[nextSetIdx]) cards2[nextSetIdx].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } : null);
       }
-      const allDone2=ex.setData.filter(s=>s.done);d.exercises[realIdx].repsAchieved=allDone2.map(s=>s.reps).filter(Boolean).join('/');
-      if(ex.setData.slice(0,nSets).every(s=>s.done)){
-        const wasPR=checkPR(d.exercises[realIdx]);d.exercises[realIdx].done=true;
-        numBadge.className='sess-ex-num-big done';numBadge.textContent='✓';
-        if(checkPR(d.exercises[realIdx])&&!wasPR)showPRToast(ex.name);
-        const nextVi=exercises.findIndex((e,i)=>i>vi&&!e.done);
-        if(nextVi>=0)setTimeout(()=>{_sessActiveEx=nextVi;renderSessNav(d,exercises);renderSessExercise(d,exercises,nextVi);},1200);
+
+      const allDone2 = ex.setData.filter(s => s.done);
+      d.exercises[realIdx].repsAchieved = allDone2.map(s => s.reps).filter(Boolean).join('/');
+
+      if (ex.setData.slice(0, nSets).every(s => s.done)) {
+        const wasPR = checkPR(d.exercises[realIdx]);
+        d.exercises[realIdx].done = true;
+        numBadge.className  = 'sess-ex-num-big done';
+        numBadge.textContent = '✓';
+        if (checkPR(d.exercises[realIdx]) && !wasPR) showPRToast(ex.name);
+        const nextVi = exercises.findIndex((e, i) => i > vi && !e.done);
+        if (nextVi >= 0) setTimeout(() => { _sessActiveEx = nextVi; renderSessNav(d, exercises); renderSessExercise(d, exercises, nextVi); }, 1200);
       }
-      refreshNavDots();refreshRowCalc();resetChrono();startChrono();save();updateStats();renderDayTabs();updateSessProgress(d,exercises);
-      if(d.exercises.filter(e=>e.name.trim()&&!e.isWarmup).every(e=>e.done))showSessionComplete(S.sessDay,d);
-    });
-    const tdBtn=document.createElement('td');tdBtn.appendChild(valBtn);tr.appendChild(tdBtn);
-    tbody.appendChild(tr);
+      refreshNavDots(); refreshSecondary(); resetChrono(); startChrono(); save(); updateStats(); renderDayTabs(); updateSessProgress(d, exercises);
+      if (d.exercises.filter(e => e.name.trim() && !e.isWarmup).every(e => e.done)) showSessionComplete(S.sessDay, d);
+    }
+
+    valBtn.ontouchstart = function(e) { e.preventDefault(); e.stopPropagation(); doValidate(); };
+    valBtn.onclick      = function() { doValidate(); };
+
+    cardsWrap.appendChild(card);
   });
-  table.appendChild(tbody);setsArea.appendChild(table);
-  const addSetBtn=document.createElement('button');addSetBtn.className='sess-add-set-btn';addSetBtn.textContent='+ Ajouter une série';
-  addSetBtn.addEventListener('click',()=>{ex.setData.push({weight:ex.weight||'',reps:'',done:false,rpe:'',rir:''});d.exercises[realIdx].sets=String((parseInt(ex.sets)||nSets)+1);ex.sets=d.exercises[realIdx].sets;save();renderSessExercise(d,exercises,vi);});
-  setsArea.appendChild(addSetBtn);mainEl.appendChild(setsArea);
+
+  setsArea.appendChild(cardsWrap);
+
+  const addSetBtn = document.createElement('button');
+  addSetBtn.className   = 'sess-add-set-btn';
+  addSetBtn.textContent = '+ Ajouter une série';
+  addSetBtn.addEventListener('click', () => {
+    ex.setData.push({ weight: ex.weight || '', reps: '', done: false, rpe: '', rir: '' });
+    d.exercises[realIdx].sets = String((parseInt(ex.sets) || nSets) + 1);
+    ex.sets = d.exercises[realIdx].sets;
+    save(); renderSessExercise(d, exercises, vi);
+  });
+  setsArea.appendChild(addSetBtn);
+  mainEl.appendChild(setsArea);
   // Note
   const noteArea=document.createElement('div');noteArea.className='sess-note-area';
   const noteLbl=document.createElement('div');noteLbl.style.cssText='font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:3px';noteLbl.textContent='📝 Note sur cet exercice';

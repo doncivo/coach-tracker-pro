@@ -438,6 +438,7 @@ const RestTimer = {
   _interval: null,
   _total: 90,
   _remaining: 90,
+  _targetTime: null,      // horloge murale — survit au background iOS
   _exName: '',
   _nextSetCb: null,
   _beepCtx: null,
@@ -446,10 +447,11 @@ const RestTimer = {
   // ── Ouvrir le timer ──
   start(durationSec, exName, onNextSet) {
     this.stop();
-    this._total     = durationSec || (S._restDuration || 90);
-    this._remaining = this._total;
-    this._exName    = exName || '';
-    this._nextSetCb = onNextSet || null;
+    this._total      = durationSec || (S._restDuration || 90);
+    this._remaining  = this._total;
+    this._targetTime = Date.now() + this._total * 1000;  // horloge murale
+    this._exName     = exName || '';
+    this._nextSetCb  = onNextSet || null;
 
     const overlay = document.getElementById('rest-timer-overlay');
     const card    = document.getElementById('rest-timer-card');
@@ -466,14 +468,32 @@ const RestTimer = {
 
     overlay.style.display = 'flex';
     this._render();
-
-    // Lier les boutons à chaque ouverture (ontouchstart = plus fiable sur iOS)
     this._bindButtons(overlay);
-
-    this._interval = setInterval(() => this._tick(), 1000);
+    this._interval = setInterval(() => this._tick(), 500); // 500ms pour plus de précision
   },
 
-  // ── Lier les boutons via ontouchstart (iOS Safari reliable) ──
+  // ── Tick — basé sur l'horloge murale (résiste au background iOS) ──
+  _tick() {
+    const newRemaining = Math.max(0, Math.round((this._targetTime - Date.now()) / 1000));
+    if (newRemaining === this._remaining && newRemaining > 0) return; // pas de changement
+    this._remaining = newRemaining;
+    this._render();
+    if (this._remaining <= 1 && this._remaining > 0) {
+      this._beep(880, 0.15); // bip de fin imminent
+    }
+    if (this._remaining <= 0) {
+      this._finish();
+    }
+  },
+
+  // ── Resynchronisation quand l'app revient au premier plan ──
+  _onVisibilityChange() {
+    if (document.visibilityState === 'visible' && this._interval && this._targetTime) {
+      this._remaining = Math.max(0, Math.round((this._targetTime - Date.now()) / 1000));
+      this._render();
+      if (this._remaining <= 0) this._finish();
+    }
+  },
   _bindButtons(overlay) {
     const t = this;
 
@@ -527,15 +547,16 @@ const RestTimer = {
     }
   },
 
-  // ── Tick ──
+  // ── Tick — délégué à _onVisibilityChange + wall clock ──
   _tick() {
-    this._remaining--;
+    const newRemaining = Math.max(0, Math.round((this._targetTime - Date.now()) / 1000));
+    if (newRemaining === this._remaining && newRemaining > 0) return;
+    this._remaining = newRemaining;
     this._render();
-    if (this._remaining <= 0) {
-      this._finish();
-    } else if (this._remaining <= 3) {
+    if (this._remaining === 3 || this._remaining === 2 || this._remaining === 1) {
       this._beep(880, 0.15);
     }
+    if (this._remaining <= 0) this._finish();
   },
 
   // ── Affichage ──
@@ -604,20 +625,22 @@ const RestTimer = {
 
   // ── +temps ──
   addTime(sec) {
-    this._remaining = Math.min(this._remaining + sec, 600);
-    this._total     = Math.max(this._total, this._remaining);
+    this._remaining  = Math.min(this._remaining + sec, 600);
+    this._total      = Math.max(this._total, this._remaining);
+    this._targetTime = Date.now() + this._remaining * 1000; // resync horloge murale
     this._render();
   },
 
   // ── Changer durée ──
   setDuration(sec) {
-    this._total     = sec;
-    this._remaining = sec;
-    S._restDuration = sec;
+    this._total      = sec;
+    this._remaining  = sec;
+    this._targetTime = Date.now() + sec * 1000; // resync horloge murale
+    S._restDuration  = sec;
     save();
     this._render();
     clearInterval(this._interval);
-    this._interval = setInterval(() => this._tick(), 1000);
+    this._interval = setInterval(() => this._tick(), 500);
   },
 
   // ── Son ──
@@ -639,11 +662,14 @@ const RestTimer = {
   }
 };
 
-// _initRestTimerButtons : conservé pour compatibilité mais vide
-// (les bindings sont maintenant faits dans RestTimer.start() via _bindButtons)
+// _initRestTimerButtons : conservé pour compatibilité — bindings faits dans RestTimer.start() via _bindButtons
+// no-op depuis v45 — voir RestTimer.start() → _bindButtons()
 function _initRestTimerButtons() {
-  // Les boutons sont maintenant liés dans RestTimer.start() via ontouchstart
-  // Cette fonction est conservée car appelée dans init.js
+  // Écouter visibilitychange pour resynchroniser le timer quand l'app revient au premier plan
+  document.addEventListener('visibilitychange', () => {
+    RestTimer._onVisibilityChange();
+  });
+  // Les bindings boutons sont maintenant faits dans RestTimer.start() via ontouchstart
 }
 
 

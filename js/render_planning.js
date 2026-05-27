@@ -430,7 +430,7 @@ function buildExCard(di, ei, d, onUpdate) {
   nameInp.placeholder = ex.isWarmup ? 'Échauffement...' : 'Exercice';
   nameInp.value = ex.name || '';
   nameInp.setAttribute('autocomplete','off');
-  nameInp.addEventListener('input', e => { ex.name = e.target.value; onUpdate(); _debouncedSave(); renderDayTabs(); _updateAc(e.target.value); });
+  nameInp.addEventListener('input', e => { ex.name = e.target.value; onUpdate(); _debouncedSave(); _debouncedRenderDayTabs(); _updateAc(e.target.value); });
   nameInp.addEventListener('blur', () => setTimeout(() => { acList.style.display = 'none'; }, 200));
 
   // ── Autocomplete dropdown ──
@@ -634,7 +634,7 @@ function buildExRow(di,ei,d,onUpdate,isDetail){
   const ni=document.createElement('input');ni.type='text';ni.className='ex-name-inp';ni.placeholder=ex.isWarmup?'Échauffement...':'Exercice';ni.value=ex.name||'';
   ni.setAttribute('aria-label','Nom de l exercice');
   ni.setAttribute('autocomplete','off');
-  ni.addEventListener('input',e=>{ex.name=e.target.value;onUpdate();_debouncedSave();renderDayTabs();_showNiAc(e.target.value);});
+  ni.addEventListener('input',e=>{ex.name=e.target.value;onUpdate();_debouncedSave();_debouncedRenderDayTabs();_showNiAc(e.target.value);});
   ni.addEventListener('blur',()=>setTimeout(()=>{niAc.style.display='none';},200));
 
   // ── Autocomplete dropdown (vue tableau) ──

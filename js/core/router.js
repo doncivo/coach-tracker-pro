@@ -24,6 +24,7 @@ const Router = (() => {
   let _routes      = {};   // { tabName: renderFn }
   let _current     = null;
   let _history     = [];   // pile de navigation
+  let _renderCache = {};   // { 'tab-hash-X': lastHash } — évite re-renders inutiles
   let _initialized = false;
 
   // Swipe
@@ -115,10 +116,36 @@ const Router = (() => {
       S._currentTab = tabName; // compat legacy
     }
 
-    // 8. Appeler le renderer
+    // 8. Appeler le renderer — avec cache basé sur hash d'état
     if (_routes[tabName]) {
       try {
-        _routes[tabName]();
+        // Calculer un hash léger de l'état pour éviter les re-renders inutiles
+        const _state   = (typeof Store !== 'undefined') ? Store.getState() : null;
+        const _hashKey = 'tab-hash-' + tabName;
+        let   _hash    = null;
+
+        if (_state) {
+          // Hash basé sur les données pertinentes pour chaque onglet
+          const _relevant = {
+            dashboard:   [_state.training?.weekCount, _state.activity?.steps, _state.body?.mesures?.poids?.length, Date.now() >> 13],
+            weekly:      [JSON.stringify(_state.training?.days?.map(d => [d.exercises?.length, d.exercises?.filter(e=>e.done).length]))],
+            session:     [_state.training?.sessDay, JSON.stringify(_state.training?.days?.[_state.training?.sessDay]?.exercises?.map(e=>[e.done,e.repsAchieved]))],
+            progression: [Object.keys(_state.training?.history||{}).length, _state.training?.weekCount],
+            corps:       [_state.body?.mesures?.poids?.length, _state.activity?.steps, Date.now() >> 14],
+            bilan:       [_state.training?.weekCount, _state.app?.bilanOffset],
+            achievements:[_state.app?.weekCount, JSON.stringify(_state.app?.achievements)],
+          };
+          const _parts = _relevant[tabName];
+          if (_parts) _hash = _parts.join('|');
+        }
+
+        const _prevHash = _renderCache[_hashKey];
+        if (_hash && _hash === _prevHash && !opts.force) {
+          // État identique — skip le re-render complet
+        } else {
+          if (_hash) _renderCache[_hashKey] = _hash;
+          _routes[tabName]();
+        }
       } catch(e) {
         console.error('[Router] Erreur rendu de', tabName, ':', e);
       }
@@ -342,6 +369,12 @@ const Router = (() => {
 
     /** Naviguer vers un onglet */
     navigate,
+
+    /** Forcer un re-render du tab courant (invalide le cache) */
+    invalidate(tabName) {
+      if (tabName) delete _renderCache['tab-hash-' + tabName];
+      else _renderCache = {};
+    },
 
     /** Onglet courant */
     current() { return _current; },

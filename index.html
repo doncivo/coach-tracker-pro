@@ -201,6 +201,7 @@
       <span class="sess-info-chip">⏱ <strong id="sess-duration">0 min</strong></span>
       <span class="sess-info-chip" id="sess-vol-live">📦 <strong>—</strong></span>
       <span class="sess-info-chip" id="sess-1rm-live">🏋️ <strong>—</strong></span>
+      <span class="sess-info-chip sess-1rm-calc-btn" id="sess-1rm-calc-btn" title="Calculateur 1RM">🧮</span>
       <button class="btn btn-ghost btn-sm" id="sess-focus-btn" style="margin-left:auto">🎯 Mode Focus</button>
     </div>
     <!-- Mobile strip nav (horizontal scroll) -->
@@ -601,7 +602,7 @@
   </script>
 <script>
 (function() {
-  const SW_VERSION = 'ctp-v57';
+  const SW_VERSION = 'ctp-v58';
   if (!('serviceWorker' in navigator)) return;
 
   const RELOAD_KEY = 'ctp-sw-reloaded-' + SW_VERSION;

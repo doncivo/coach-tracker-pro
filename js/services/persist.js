@@ -401,6 +401,8 @@ const Persist = (() => {
     // Sync S (legacy) depuis le Store
     const flat = Store.bridge();
     Object.assign(S, flat);
+    // Invalider le cache de rendu du router (état a changé)
+    if (typeof Router !== 'undefined') Router.invalidate();
   };
 
   // load() global

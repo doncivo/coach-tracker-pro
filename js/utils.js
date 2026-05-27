@@ -23,6 +23,13 @@ function debounce(fn, delay) {
 
 const _debouncedSave = debounce(() => save(), 400);
 
+/* ── Debounce renderDayTabs — évite reconstruit des tabs sur chaque frappe ── */
+const _debouncedRenderDayTabs = debounce(() => {
+  if (typeof renderDayTabs === 'function') renderDayTabs();
+}, 300);
+
+
+
 /* ============================================================
    utils.js — Toast + Export + Navigation + Helpers
 ============================================================ */

@@ -537,20 +537,47 @@ const Compute = (() => {
   window.calcBMI           = calcBMI;
   window.calcBMR           = calcBMR;
 
-  window.computeFitnessScore = function() {
-    const s = Store.getState();
-    return fitnessScore({
-      days:         s.training.days,
-      history:      s.training.history,
-      steps:        s.activity.steps,
-      stepsGoal:    s.activity.stepsGoal,
-      sleep:        s.activity.sleep,
-      calories:     s.activity.calories,
-      caloriesGoal: s.activity.caloriesGoal,
-      painLog:      s.body.painLog,
-      sessRecovery: s.training.sessRecovery,
-    });
-  };
+  window.computeFitnessScore = (function() {
+    let _lastHash  = null;
+    let _lastScore = null;
+    let _lastTime  = 0;
+    const TTL = 20000; // 20 secondes
+
+    return function() {
+      const s = Store.getState();
+      const now = Date.now();
+
+      // Hash léger de l'état pertinent
+      const hash = [
+        s.training.weekCount,
+        (s.training.days || []).filter(d => d.exercises?.some(e=>e.done)).length,
+        JSON.stringify(s.activity.steps).length,
+        (s.activity.sleep ? Object.keys(s.activity.sleep).length : 0),
+        (s.activity.calories ? Object.keys(s.activity.calories).length : 0),
+      ].join('|');
+
+      if (_lastScore && hash === _lastHash && (now - _lastTime) < TTL) {
+        return _lastScore; // retourner le résultat mis en cache
+      }
+
+      const result = fitnessScore({
+        days:         s.training.days,
+        history:      s.training.history,
+        steps:        s.activity.steps,
+        stepsGoal:    s.activity.stepsGoal,
+        sleep:        s.activity.sleep,
+        calories:     s.activity.calories,
+        caloriesGoal: s.activity.caloriesGoal,
+        painLog:      s.body.painLog,
+        sessRecovery: s.training.sessRecovery,
+      });
+
+      _lastHash  = hash;
+      _lastScore = result;
+      _lastTime  = now;
+      return result;
+    };
+  })();
 
   window.computeDailyCalories = function(nDays) {
     const s = Store.getState();

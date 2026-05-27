@@ -63,10 +63,152 @@ function _renderWeightSparkline(exName) {
 
 /* ══ SESSION MODE ══ */
 /* _sessActiveEx — déclaré dans constants.js */
+/* ── Calculateur 1RM (Epley, Brzycki, Lombardi) ── */
+function _open1RMCalculator() {
+  document.getElementById('orm-calc-overlay')?.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'orm-calc-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);z-index:9200;display:flex;align-items:flex-end;justify-content:center';
+
+  const sheet = document.createElement('div');
+  sheet.style.cssText = 'background:var(--surface);border-radius:24px 24px 0 0;padding:20px 16px calc(24px + env(safe-area-inset-bottom,0px));width:100%;max-width:480px;max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch';
+
+  sheet.innerHTML = '';
+
+  const handle = document.createElement('div');
+  handle.style.cssText = 'width:36px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 16px';
+
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size:17px;font-weight:700;color:var(--text);margin-bottom:4px';
+  title.textContent = '🧮 Calculateur 1RM';
+
+  const sub = document.createElement('div');
+  sub.style.cssText = 'font-size:11px;color:var(--muted);margin-bottom:16px';
+  sub.textContent = 'Estimez votre maximum sur 1 répétition';
+
+  sheet.appendChild(handle); sheet.appendChild(title); sheet.appendChild(sub);
+
+  // Inputs
+  function mkRow(lbl, placeholder, id) {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:12px';
+    const l = document.createElement('label');
+    l.style.cssText = 'width:90px;font-size:12px;font-weight:600;color:var(--muted);flex-shrink:0';
+    l.textContent = lbl;
+    const inp = document.createElement('input');
+    inp.type = 'text'; inp.inputMode = 'decimal';
+    inp.id = id; inp.placeholder = placeholder;
+    inp.style.cssText = 'flex:1;padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);font-size:16px;font-weight:700;font-family:var(--mono);color:var(--text);-webkit-appearance:none;outline:none';
+    inp.addEventListener('input', compute);
+    wrap.appendChild(l); wrap.appendChild(inp);
+    return wrap;
+  }
+
+  sheet.appendChild(mkRow('Poids (kg)', '100', 'orm-w'));
+  sheet.appendChild(mkRow('Répétitions', '5', 'orm-r'));
+
+  // Result card
+  const result = document.createElement('div');
+  result.id = 'orm-result';
+  result.style.cssText = 'background:var(--card);border-radius:16px;padding:16px;margin:8px 0 16px;display:none';
+  sheet.appendChild(result);
+
+  // Percentages table
+  const pctSection = document.createElement('div');
+  pctSection.id = 'orm-pct';
+  pctSection.style.cssText = 'display:none';
+  sheet.appendChild(pctSection);
+
+  function compute() {
+    const w = parseFloat(document.getElementById('orm-w')?.value?.replace(',','.')) || 0;
+    const r = parseInt(document.getElementById('orm-r')?.value) || 0;
+    if (!w || !r || r < 1 || r > 30) { result.style.display='none'; pctSection.style.display='none'; return; }
+
+    // Formules
+    const epley    = r === 1 ? w : Math.round(w * (1 + r/30) * 10) / 10;
+    const brzycki  = r === 1 ? w : Math.round(w / (1.0278 - 0.0278*r) * 10) / 10;
+    const lombardi = Math.round(Math.pow(w * r, 0.1) * 10) / 10;
+    const avg      = Math.round((epley + brzycki) / 2 * 10) / 10;
+
+    result.style.display = 'block';
+    result.innerHTML = '';
+
+    const bigNum = document.createElement('div');
+    bigNum.style.cssText = 'text-align:center;font-family:var(--mono);font-size:42px;font-weight:800;color:var(--teal)';
+    bigNum.textContent = avg + ' kg';
+    const bigLbl = document.createElement('div');
+    bigLbl.style.cssText = 'text-align:center;font-size:11px;color:var(--muted);margin-bottom:12px';
+    bigLbl.textContent = '1RM estimé (moyenne Epley + Brzycki)';
+
+    const formulas = document.createElement('div');
+    formulas.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:8px';
+    [['Epley',epley],['Brzycki',brzycki]].forEach(([n,v]) => {
+      const c = document.createElement('div');
+      c.style.cssText = 'background:var(--bg);border-radius:10px;padding:8px 10px;text-align:center';
+      c.innerHTML = '<div style="font-size:9px;color:var(--muted);font-weight:600;text-transform:uppercase">'+n+'</div><div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--text)">'+v+'kg</div>';
+      formulas.appendChild(c);
+    });
+
+    result.appendChild(bigNum); result.appendChild(bigLbl); result.appendChild(formulas);
+
+    // Table des % du 1RM
+    pctSection.style.display = 'block';
+    pctSection.innerHTML = '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px">Pourcentages du 1RM estimé</div>';
+    const grid = document.createElement('div');
+    grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:4px';
+    [[100,'Max'],[95,'Force'],[90,'Force'],[85,'Puissance'],[80,'Hypert.'],[75,'Hypert.'],[70,'Endurance'],[65,'Endurance']].forEach(([pct, zone]) => {
+      const cell = document.createElement('div');
+      cell.style.cssText = 'background:var(--card);border-radius:10px;padding:7px 5px;text-align:center;border:1px solid var(--border)';
+      const kg = Math.round(avg * pct / 100 * 2) / 2; // arrondi au 0.5kg
+      cell.innerHTML = '<div style="font-size:8px;color:var(--muted);font-weight:600">'+pct+'%</div><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text)">'+kg+'</div><div style="font-size:7px;color:var(--muted)">'+zone+'</div>';
+      grid.appendChild(cell);
+    });
+    pctSection.appendChild(grid);
+  }
+
+  const close = document.createElement('button');
+  close.style.cssText = 'width:100%;padding:12px;border:none;background:none;color:var(--muted);font-size:14px;font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none;margin-top:8px';
+  close.textContent = 'Fermer';
+  close.ontouchstart = (e) => { e.preventDefault(); overlay.remove(); };
+  close.onclick = () => overlay.remove();
+  sheet.appendChild(close);
+
+  overlay.appendChild(sheet);
+  overlay.ontouchstart = (e) => { if (e.target === overlay) overlay.remove(); };
+  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+  document.body.appendChild(overlay);
+
+  // Pré-remplir avec l'exercice courant
+  setTimeout(() => {
+    const d = S.days[S.sessDay];
+    const exs = (d?.exercises || []).filter(e => e.name && !e.isWarmup);
+    const cur = exs[_sessActiveEx] || exs[0];
+    if (cur?.weight) {
+      const wi = document.getElementById('orm-w');
+      const ri = document.getElementById('orm-r');
+      if (wi) wi.value = cur.weight;
+      if (ri) ri.value = cur.repsAchieved || cur.reps?.split('-')?.[1] || cur.reps?.split('-')?.[0] || '5';
+      compute();
+    }
+    document.getElementById('orm-w')?.focus();
+  }, 100);
+}
+
 function renderSession(){
   startSessTimer();
   // Injecter bouton partage (share.js)
   if (typeof Share !== 'undefined') setTimeout(() => Share.injectShareButton(), 100);
+
+  // ── Calculateur 1RM ──
+  const calcBtn = document.getElementById('sess-1rm-calc-btn');
+  if (calcBtn && !calcBtn._bound) {
+    calcBtn._bound = true;
+    calcBtn.style.cursor = 'pointer';
+    const open1RMCalc = () => _open1RMCalculator();
+    calcBtn.ontouchstart = (e) => { e.preventDefault(); open1RMCalc(); };
+    calcBtn.onclick = open1RMCalc;
+  }
   // Day selector
   const sel=document.getElementById('sess-day-sel');sel.innerHTML='';
   DAYS_SH.forEach((n,i)=>{const btn=document.createElement('button');btn.className='sess-day-btn'+(S.sessDay===i?' active':'');btn.setAttribute('data-d',i);btn.textContent=n;btn.addEventListener('click',()=>{S.sessDay=i;S.sessStartTime=Date.now();_sessActiveEx=0;save();renderSession();});sel.appendChild(btn);});

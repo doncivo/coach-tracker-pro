@@ -436,11 +436,12 @@ function resetOnboarding(){localStorage.removeItem(ONBOARD_KEY);showOnboarding()
 
 const RestTimer = {
   _interval: null,
-  _total: 90,       // durée choisie
-  _remaining: 90,   // secondes restantes
-  _exName: '',      // nom de l'exercice
-  _nextSetCb: null, // callback quand on clique "Série suivante"
-  _beepCtx: null,   // AudioContext pour les bips
+  _total: 90,
+  _remaining: 90,
+  _exName: '',
+  _nextSetCb: null,
+  _beepCtx: null,
+  _autoCloseTimer: null,
 
   // ── Ouvrir le timer ──
   start(durationSec, exName, onNextSet) {
@@ -453,34 +454,91 @@ const RestTimer = {
     const overlay = document.getElementById('rest-timer-overlay');
     const card    = document.getElementById('rest-timer-card');
     const exEl    = document.getElementById('rest-timer-ex-name');
-    if(!overlay) return;
+    if (!overlay) return;
 
-    if(exEl) exEl.textContent = exName || '';
-    card.classList.remove('done-pulse');
+    if (exEl) exEl.textContent = exName || '';
+    if (card) card.classList.remove('done-pulse');
     document.getElementById('rest-ring-fill')?.classList.remove('done');
 
-    // Sync preset buttons to chosen duration
     document.querySelectorAll('.rest-timer-preset').forEach(btn => {
       btn.classList.toggle('active', parseInt(btn.dataset.sec) === this._total);
     });
 
     overlay.style.display = 'flex';
     this._render();
+
+    // Lier les boutons à chaque ouverture (ontouchstart = plus fiable sur iOS)
+    this._bindButtons(overlay);
+
     this._interval = setInterval(() => this._tick(), 1000);
+  },
+
+  // ── Lier les boutons via ontouchstart (iOS Safari reliable) ──
+  _bindButtons(overlay) {
+    const t = this;
+
+    function bind(el, fn) {
+      if (!el) return;
+      // Nettoyer les anciens handlers
+      el.ontouchstart = null;
+      el.onclick      = null;
+      // ontouchstart : se déclenche immédiatement, sans délai iOS
+      el.ontouchstart = function(e) {
+        e.stopPropagation();
+        e.preventDefault(); // empêche le click synthétique
+        fn();
+      };
+      // onclick : fallback desktop uniquement
+      el.onclick = function(e) { fn(); };
+    }
+
+    bind(document.getElementById('rest-timer-skip'), () => t.stop());
+
+    bind(document.getElementById('rest-timer-next'), () => {
+      const cb = t._nextSetCb;
+      t.stop();
+      if (cb) setTimeout(cb, 50);
+    });
+
+    bind(document.getElementById('rest-timer-add-btn'), () => {
+      t.addTime(15);
+    });
+
+    document.querySelectorAll('.rest-timer-preset').forEach(btn => {
+      bind(btn, () => {
+        const sec = parseInt(btn.dataset.sec);
+        document.querySelectorAll('.rest-timer-preset').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        t.setDuration(sec);
+      });
+    });
+
+    // Tap sur le fond = fermer
+    if (overlay) {
+      overlay.ontouchstart = function(e) {
+        if (e.target === overlay) {
+          e.preventDefault();
+          t.stop();
+        }
+      };
+      overlay.onclick = function(e) {
+        if (e.target === overlay) t.stop();
+      };
+    }
   },
 
   // ── Tick ──
   _tick() {
     this._remaining--;
     this._render();
-    if(this._remaining <= 0) {
+    if (this._remaining <= 0) {
       this._finish();
-    } else if(this._remaining <= 3) {
-      this._beep(880, 0.15); // bip de fin imminent
+    } else if (this._remaining <= 3) {
+      this._beep(880, 0.15);
     }
   },
 
-  // ── Mettre à jour l'affichage ──
+  // ── Affichage ──
   _render() {
     const sec  = Math.max(0, this._remaining);
     const min  = Math.floor(sec / 60);
@@ -488,16 +546,13 @@ const RestTimer = {
     const disp = `${min}:${String(s).padStart(2,'0')}`;
 
     const timeEl = document.getElementById('rest-timer-time');
-    if(timeEl) timeEl.textContent = disp;
+    if (timeEl) timeEl.textContent = disp;
 
-    // Anneau SVG
-    const circ = 2 * Math.PI * 68; // r=68
+    const circ = 2 * Math.PI * 68;
     const fill = document.getElementById('rest-ring-fill');
-    if(fill) {
-      const pct  = Math.max(0, this._remaining / this._total);
-      const offset = circ * (1 - pct);
-      fill.style.strokeDashoffset = offset;
-      // Couleur selon temps restant
+    if (fill) {
+      const pct    = Math.max(0, this._remaining / this._total);
+      fill.style.strokeDashoffset = circ * (1 - pct);
       fill.style.stroke = pct > 0.5 ? 'var(--teal)' : pct > 0.25 ? 'var(--orange)' : 'var(--red)';
     }
   },
@@ -507,27 +562,31 @@ const RestTimer = {
     clearInterval(this._interval);
     this._interval = null;
 
-    const card = document.getElementById('rest-timer-card');
-    const fill = document.getElementById('rest-ring-fill');
+    const card   = document.getElementById('rest-timer-card');
+    const fill   = document.getElementById('rest-ring-fill');
     const timeEl = document.getElementById('rest-timer-time');
 
-    if(card) card.classList.add('done-pulse');
-    if(fill) { fill.style.stroke = 'var(--green)'; fill.classList.add('done'); }
-    if(timeEl) timeEl.textContent = '0:00';
+    if (card)   card.classList.add('done-pulse');
+    if (fill)   { fill.style.stroke = 'var(--green)'; fill.classList.add('done'); }
+    if (timeEl) timeEl.textContent = '0:00';
 
-    // Bip triple de fin
-    if(S._restBeep!==false) this._beep(660, 0.2);
-    setTimeout(() => this._beep(880, 0.2), 200);
-    setTimeout(() => this._beep(1100, 0.3), 400);
+    if (S._restBeep !== false) {
+      this._beep(660, 0.2);
+      setTimeout(() => this._beep(880, 0.2), 200);
+      setTimeout(() => this._beep(1100, 0.3), 400);
+    }
 
-    // Auto-fermeture après 8s si l'utilisateur ne fait rien
-    this._autoCloseTimer = setTimeout(() => {
-      if (this._remaining <= 0) this.stop();
-    }, 8000);
+    // Auto-fermeture après 8s
+    this._autoCloseTimer = setTimeout(() => this.stop(), 8000);
 
-    // Notification si PWA
-    if(typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-      try { new Notification('⏱ Repos terminé !', { body: 'Prêt pour la prochaine série de ' + (this._exName||''), icon:'./icons/icon-192.png', silent:true }); } catch(e){}
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      try {
+        new Notification('⏱ Repos terminé !', {
+          body: 'Prêt pour la prochaine série' + (this._exName ? ' de ' + this._exName : ''),
+          icon: './icons/icon-192.png',
+          silent: true
+        });
+      } catch(e) {}
     }
   },
 
@@ -535,39 +594,38 @@ const RestTimer = {
   stop() {
     clearInterval(this._interval);
     clearTimeout(this._autoCloseTimer);
-    this._interval = null;
+    this._interval      = null;
     this._autoCloseTimer = null;
     const overlay = document.getElementById('rest-timer-overlay');
-    if(overlay) overlay.style.display = 'none';
+    if (overlay) overlay.style.display = 'none';
     const card = document.getElementById('rest-timer-card');
-    if(card) card.classList.remove('done-pulse');
+    if (card) card.classList.remove('done-pulse');
   },
 
-  // ── Ajouter du temps ──
+  // ── +temps ──
   addTime(sec) {
     this._remaining = Math.min(this._remaining + sec, 600);
-    this._total = Math.max(this._total, this._remaining);
+    this._total     = Math.max(this._total, this._remaining);
     this._render();
   },
 
-  // ── Changer la durée ──
+  // ── Changer durée ──
   setDuration(sec) {
     this._total     = sec;
     this._remaining = sec;
     S._restDuration = sec;
     save();
     this._render();
-    // Restart interval
     clearInterval(this._interval);
     this._interval = setInterval(() => this._tick(), 1000);
   },
 
-  // ── Son (WebAudio API) ──
+  // ── Son ──
   _beep(freq, dur) {
     try {
-      if(!this._beepCtx) this._beepCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const ctx = this._beepCtx;
-      const osc = ctx.createOscillator();
+      if (!this._beepCtx) this._beepCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const ctx  = this._beepCtx;
+      const osc  = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.connect(gain);
       gain.connect(ctx.destination);
@@ -581,70 +639,11 @@ const RestTimer = {
   }
 };
 
-// ── Liaisons des boutons du timer ──
+// _initRestTimerButtons : conservé pour compatibilité mais vide
+// (les bindings sont maintenant faits dans RestTimer.start() via _bindButtons)
 function _initRestTimerButtons() {
-  // Helper iOS-compatible : touchend + click fallback
-  function _bindBtn(id, fn) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    let _touched = false;
-    el.addEventListener('touchend', function(e) {
-      _touched = true;
-      e.preventDefault();
-      e.stopPropagation();
-      fn();
-    }, { passive: false });
-    el.addEventListener('click', function(e) {
-      if (_touched) { _touched = false; return; }
-      fn();
-    });
-  }
-
-  // Skip / Passer
-  _bindBtn('rest-timer-skip', () => RestTimer.stop());
-
-  // Série suivante
-  _bindBtn('rest-timer-next', () => {
-    RestTimer.stop();
-    if (RestTimer._nextSetCb) RestTimer._nextSetCb();
-  });
-
-  // +15s
-  _bindBtn('rest-timer-add-btn', () => RestTimer.addTime(15));
-
-  // Presets durée
-  document.querySelectorAll('.rest-timer-preset').forEach(btn => {
-    let _touched = false;
-    btn.addEventListener('touchend', function(e) {
-      _touched = true;
-      e.preventDefault();
-      const sec = parseInt(btn.dataset.sec);
-      document.querySelectorAll('.rest-timer-preset').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      RestTimer.setDuration(sec);
-    }, { passive: false });
-    btn.addEventListener('click', function() {
-      if (_touched) { _touched = false; return; }
-      const sec = parseInt(btn.dataset.sec);
-      document.querySelectorAll('.rest-timer-preset').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      RestTimer.setDuration(sec);
-    });
-  });
-
-  // Fermer en cliquant/touchant sur le fond
-  const overlay = document.getElementById('rest-timer-overlay');
-  if (overlay) {
-    overlay.addEventListener('touchend', function(e) {
-      if (e.target.id === 'rest-timer-overlay') {
-        e.preventDefault();
-        RestTimer.stop();
-      }
-    }, { passive: false });
-    overlay.addEventListener('click', function(e) {
-      if (e.target.id === 'rest-timer-overlay') RestTimer.stop();
-    });
-  }
+  // Les boutons sont maintenant liés dans RestTimer.start() via ontouchstart
+  // Cette fonction est conservée car appelée dans init.js
 }
 
 

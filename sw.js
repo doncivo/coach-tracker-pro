@@ -1,4 +1,4 @@
-const CACHE = 'ctp-v44';
+const CACHE = 'ctp-v45';
 const ASSETS = [
   './', './index.html',
   './design/tokens.css', './css/style.css',
@@ -18,7 +18,8 @@ const ASSETS = [
   './js/views/corps.js', './js/views/planning.js',
   './js/views/session.js', './js/views/library.js',
   './js/views/calendar.js', './js/views/achievements.js',
-  './js/views/settings.js', './js/init.js'
+  './js/views/settings.js', './js/init.js',
+  './js/tests/ctp-test.js'
 ];
 
 self.addEventListener('install', e => {

@@ -128,25 +128,27 @@ const Share = (() => {
   ───────────────────────────────────────────── */
 
   function injectShareButton() {
-    // Éviter les doublons
-    if (document.getElementById('share-session-btn')) return;
-
     const container = document.getElementById('sess-progress-area') ||
                       document.querySelector('.sess-topbar') ||
                       document.querySelector('.sess-progress-bar-area');
 
     if (!container) return;
 
+    // Supprimer le bouton existant dans CE container (recréé à chaque renderSession)
+    const existing = container.querySelector('#share-session-btn');
+    if (existing) existing.remove();
+
     const btn = document.createElement('button');
     btn.id        = 'share-session-btn';
     btn.className = 'btn btn-ghost btn-sm';
     btn.style.cssText = 'display:flex;align-items:center;gap:4px;font-size:11px;padding:4px 10px;border-radius:20px;flex-shrink:0';
     btn.innerHTML = '📤 <span>Partager</span>';
-    btn.addEventListener('click', () => shareSession());
-    btn.addEventListener('touchend', function(e) {
+
+    btn.ontouchstart = function(e) {
       e.preventDefault();
       shareSession();
-    }, { passive: false });
+    };
+    btn.onclick = function() { shareSession(); };
 
     container.appendChild(btn);
   }

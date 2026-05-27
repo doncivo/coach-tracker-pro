@@ -253,7 +253,7 @@ function renderSessExercise(d,exercises,vi){
       tr.className=setD.done?'srow-done':'';
       // ── Lancer le minuteur de repos si série validée ──
       if(setD.done) {
-        const restSec = parseInt(ex.rest) || _suggestRestTime(ex) || S._restDuration || 90;
+        const restSec = parseInt(ex.rest) || S._restDuration || _suggestRestTime(ex) || 90;
         const nextSetIdx = ex.setData.slice(0,nSets).findIndex((s,idx)=>idx>si&&!s.done);
         const hasNextSet = nextSetIdx !== -1;
         RestTimer.start(restSec, ex.name, hasNextSet ? () => {

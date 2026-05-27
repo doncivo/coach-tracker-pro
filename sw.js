@@ -1,4 +1,4 @@
-const CACHE = 'ctp-v56';
+const CACHE = 'ctp-v57';
 const ASSETS = [
   './', './index.html',
   './design/tokens.css', './css/style.css',
@@ -23,8 +23,8 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', e => {
-  // Installer immédiatement sans attendre
-  self.skipWaiting();
+  // N'installe pas skipWaiting automatiquement — attendre activation explicite
+  // self.skipWaiting(); // Commenté : évite de couper une session active
   e.waitUntil(
     caches.open(CACHE).then(c => c.addAll(ASSETS))
   );

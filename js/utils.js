@@ -1,3 +1,28 @@
+
+/* ── Anti double-tap pour actions critiques ── */
+const _actionLocks = {};
+function withLock(key, fn, delayMs = 1500) {
+  if (_actionLocks[key]) return; // action déjà en cours
+  _actionLocks[key] = true;
+  try {
+    fn();
+  } finally {
+    setTimeout(() => { delete _actionLocks[key]; }, delayMs);
+  }
+}
+
+
+/* ── Debounce utility for save() on text inputs ── */
+function debounce(fn, delay) {
+  let timer = null;
+  return function(...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
+const _debouncedSave = debounce(() => save(), 400);
+
 /* ============================================================
    utils.js — Toast + Export + Navigation + Helpers
 ============================================================ */

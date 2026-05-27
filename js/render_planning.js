@@ -215,7 +215,7 @@ function renderDayDetail(i){
   const wb=document.createElement('div');wb.style.cssText='padding:7px 12px;background:rgba(255,200,50,.06)';
   const wt=document.createElement('textarea');wt.style.cssText='width:100%;border:none;background:transparent;font-family:var(--font);font-size:11px;color:#7a6020;outline:none;resize:none;line-height:1.5;min-height:30px';
   wt.placeholder="Protocole d échauffement...";wt.value=d.warmup||'';wt.rows=2;
-  wt.addEventListener('input',e=>{S.days[i].warmup=e.target.value;save();});
+  wt.addEventListener('input',e=>{S.days[i].warmup=e.target.value;_debouncedSave();});
   wb.appendChild(wt);ws.appendChild(wb);detail.appendChild(ws);
 
   // Exercises section
@@ -305,7 +305,7 @@ function renderDayDetail(i){
   [{field:'duration',label:'Durée',ph:'min'},{field:'speed',label:'Vitesse',ph:'km/h'},{field:'distance',label:'Distance',ph:'km'}].forEach(({field,label,ph})=>{
     const g=document.createElement('div');g.innerHTML=`<label style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:block;margin-bottom:3px">${label}</label>`;
     const inp=document.createElement('input');inp.type='text';inp.className='inp';inp.placeholder=ph;inp.style.cssText='font-family:var(--mono);font-size:11px;text-align:center;width:100%';inp.value=d.cardio[field]||'';
-    inp.addEventListener('input',e=>{S.days[i].cardio[field]=e.target.value;save();});
+    inp.addEventListener('input',e=>{S.days[i].cardio[field]=e.target.value;_debouncedSave();});
     g.appendChild(inp);cg.appendChild(g);
   });
   cs.appendChild(cg);detail.appendChild(cs);
@@ -430,7 +430,7 @@ function buildExCard(di, ei, d, onUpdate) {
   nameInp.placeholder = ex.isWarmup ? 'Échauffement...' : 'Exercice';
   nameInp.value = ex.name || '';
   nameInp.setAttribute('autocomplete','off');
-  nameInp.addEventListener('input', e => { ex.name = e.target.value; onUpdate(); save(); renderDayTabs(); _updateAc(e.target.value); });
+  nameInp.addEventListener('input', e => { ex.name = e.target.value; onUpdate(); _debouncedSave(); renderDayTabs(); _updateAc(e.target.value); });
   nameInp.addEventListener('blur', () => setTimeout(() => { acList.style.display = 'none'; }, 200));
 
   // ── Autocomplete dropdown ──
@@ -572,7 +572,7 @@ function buildExCard(di, ei, d, onUpdate) {
   // Note
   const noteInp = document.createElement('input');
   noteInp.type = 'text'; noteInp.className = 'pec-note'; noteInp.placeholder = '📝 Note...'; noteInp.value = ex.note || '';
-  noteInp.addEventListener('input', e => { ex.note = e.target.value; save(); });
+  noteInp.addEventListener('input', e => { ex.note = e.target.value; _debouncedSave(); });
 
   // Delete
   const delBtn = document.createElement('button');
@@ -581,8 +581,10 @@ function buildExCard(di, ei, d, onUpdate) {
   delBtn.ontouchstart = (e) => { e.preventDefault(); doDelete(); };
   delBtn.onclick = doDelete;
   function doDelete() {
-    d.exercises.splice(ei, 1);
-    save(); onUpdate(); renderDayDetail(S.activeDay);
+    withLock('del-ex-'+di+'-'+ei, () => {
+      d.exercises.splice(ei, 1);
+      save(); onUpdate(); renderDayDetail(S.activeDay);
+    });
   }
 
   details.append(rpeWrap, rirWrap, noteInp, delBtn);
@@ -632,7 +634,7 @@ function buildExRow(di,ei,d,onUpdate,isDetail){
   const ni=document.createElement('input');ni.type='text';ni.className='ex-name-inp';ni.placeholder=ex.isWarmup?'Échauffement...':'Exercice';ni.value=ex.name||'';
   ni.setAttribute('aria-label','Nom de l exercice');
   ni.setAttribute('autocomplete','off');
-  ni.addEventListener('input',e=>{ex.name=e.target.value;onUpdate();save();renderDayTabs();_showNiAc(e.target.value);});
+  ni.addEventListener('input',e=>{ex.name=e.target.value;onUpdate();_debouncedSave();renderDayTabs();_showNiAc(e.target.value);});
   ni.addEventListener('blur',()=>setTimeout(()=>{niAc.style.display='none';},200));
 
   // ── Autocomplete dropdown (vue tableau) ──
@@ -880,7 +882,7 @@ function showSessionComplete(di, d) {
   const closeBtn = document.createElement('button');
   closeBtn.style.cssText = 'flex:1;padding:13px 20px;border-radius:14px;border:2px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);color:#fff;font-family:var(--font);font-weight:700;font-size:14px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none';
   closeBtn.textContent = 'Fermer';
-  const doClose = () => { overlay.remove(); if(typeof renderDashboard==='function') renderDashboard(); if(typeof switchTab==='function') switchTab('dashboard'); };
+  const doClose = () => withLock('sess-complete-close', () => { overlay.remove(); if(typeof renderDashboard==='function') renderDashboard(); if(typeof switchTab==='function') switchTab('dashboard'); });
   closeBtn.ontouchstart = (e) => { e.preventDefault(); doClose(); };
   closeBtn.onclick = doClose;
 

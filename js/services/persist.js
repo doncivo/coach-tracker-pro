@@ -255,21 +255,75 @@ const Persist = (() => {
   /* ─────────────────────────────────────────────
      IMPORT JSON
   ───────────────────────────────────────────── */
+  /* ── Validation schéma import JSON ── */
+  function _validateImport(raw) {
+    if (!raw || typeof raw !== 'object') throw new Error('Format invalide (pas un objet)');
+
+    // Taille maximale : 10 MB
+    const size = JSON.stringify(raw).length;
+    if (size > 10 * 1024 * 1024) throw new Error('Fichier trop volumineux (max 10 MB)');
+
+    // Champs requis
+    const required = ['training'];
+    for (const k of required) {
+      if (!(k in raw) && !(raw.training)) {
+        // Try legacy format
+        if (!raw.days && !raw.weekType) throw new Error('Structure manquante : ' + k);
+      }
+    }
+
+    // Valider les tableaux critiques
+    if (raw.training?.days && !Array.isArray(raw.training.days))
+      throw new Error('training.days doit être un tableau');
+
+    if (raw.training?.days?.length > 7)
+      throw new Error('Trop de jours (' + raw.training.days.length + ') — max 7');
+
+    // Nettoyer les chaînes dangereuses dans les noms d'exercices
+    function sanitizeStr(s) {
+      if (typeof s !== 'string') return '';
+      return s.replace(/<[^>]*>/g, '').slice(0, 200); // strip HTML, limit length
+    }
+
+    if (raw.training?.days) {
+      raw.training.days.forEach(d => {
+        (d.exercises || []).forEach(ex => {
+          ex.name   = sanitizeStr(ex.name || '');
+          ex.note   = sanitizeStr(ex.note || '');
+          ex.weight = String(parseFloat(ex.weight) || '').slice(0, 10);
+          ex.sets   = String(parseInt(ex.sets) || '').slice(0, 4);
+          ex.reps   = sanitizeStr(ex.reps || '').slice(0, 20);
+        });
+      });
+    }
+
+    return raw;
+  }
+
   function importJSON(file) {
     return new Promise((resolve, reject) => {
+      // Vérifier la taille du fichier avant lecture
+      if (file.size > 10 * 1024 * 1024) {
+        if (typeof showToast === 'function')
+          showToast('❌ Fichier trop volumineux (max 10 MB)', 'error', 4000);
+        reject(new Error('File too large'));
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = e => {
         try {
           const raw      = JSON.parse(e.target.result);
-          const migrated = migrateState(raw);
-          // Charger dans le Store via load()
+          const validated = _validateImport(raw);
+          const migrated = migrateState(validated);
           Store.load._fromObject(migrated);
           if (typeof showToast === 'function')
-            showToast('✅ Données importées', 'save');
+            showToast('✅ Données importées et validées', 'save');
           resolve(migrated);
         } catch(err) {
+          const msg = err.message || 'Fichier invalide';
           if (typeof showToast === 'function')
-            showToast('❌ Fichier invalide', 'error');
+            showToast('❌ Import refusé : ' + msg, 'error', 5000);
           reject(err);
         }
       };
@@ -298,7 +352,12 @@ const Persist = (() => {
               const w    = ex.weight || '';
               const rpe  = ex.rpe || '';
               const vol  = (parseFloat(w) || 0) * (parseInt(reps) || 0);
-              rows.push([week, di + 1, `"${ex.name}"`, ex.muscle, sets, reps, w, rpe, vol].join(','));
+              // Protéger contre CSV injection (cellules commençant par =, +, -, @, TAB, CR)
+              function csvCell(v) {
+                const s = String(v || '');
+                return /^[=+\-@\t\r]/.test(s) ? "'" + s : s;
+              }
+              rows.push([week, di+1, '"'+csvCell(ex.name)+'"', csvCell(ex.muscle), sets, reps, w, rpe, vol].join(','));
             });
           });
         });

@@ -90,6 +90,83 @@ _initRestTimerButtons(); // no-op depuis v45 — bindings dans RestTimer.start()
 })();
 
 /* ── 8. Naviguer vers l'onglet de démarrage ── */
+
+
+/* ── Service Worker update notification ── */
+if ('serviceWorker' in navigator && navigator.serviceWorker.ready && typeof navigator.serviceWorker.ready.then === 'function') {
+  navigator.serviceWorker.ready.then(reg => {
+    reg.addEventListener('updatefound', () => {
+      const newSW = reg.installing;
+      if (!newSW) return;
+      newSW.addEventListener('statechange', () => {
+        if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+          // Nouvelle version disponible — notifier sans forcer le rechargement
+          const banner = document.createElement('div');
+          banner.id = '_sw-update-banner';
+          banner.style.cssText = 'position:fixed;bottom:80px;left:12px;right:12px;background:var(--teal);color:#fff;border-radius:14px;padding:12px 16px;z-index:9999;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 4px 16px rgba(0,0,0,.2)';
+          banner.innerHTML = '';
+          const txt = document.createElement('span');
+          txt.style.cssText = 'font-size:13px;font-weight:600';
+          txt.textContent = '🔄 Mise à jour disponible';
+          const btn = document.createElement('button');
+          btn.style.cssText = 'background:#fff;color:var(--teal);border:none;border-radius:8px;padding:6px 14px;font-weight:700;font-size:12px;cursor:pointer;touch-action:manipulation;-webkit-appearance:none';
+          btn.textContent = 'Actualiser';
+          btn.ontouchstart = (e) => { e.preventDefault(); window.location.reload(); };
+          btn.onclick = () => window.location.reload();
+          banner.appendChild(txt); banner.appendChild(btn);
+          document.body.appendChild(banner);
+          // Auto-dismiss after 30s
+          setTimeout(() => banner?.remove(), 30000);
+        }
+      });
+    });
+  });
+}
+
+/* ── Error boundary — wraps render functions to prevent total crash ── */
+(function() {
+  const _SAFE_RENDERS = [
+    'renderDashboard','renderDayTabs','renderDayDetail','renderSession',
+    'renderProgression','renderBilan','renderCorps','renderGoals','updateStats',
+  ];
+
+  function _showErrorBanner(fnName, err) {
+    // Remove previous banner
+    document.getElementById('_err-boundary-banner')?.remove();
+    const banner = document.createElement('div');
+    banner.id = '_err-boundary-banner';
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#c53030;color:#fff;font-size:12px;font-weight:600;padding:8px 14px;z-index:99999;display:flex;align-items:center;justify-content:space-between;gap:10px';
+    banner.innerHTML = '';
+    const msg = document.createElement('span');
+    msg.textContent = 'Erreur dans ' + fnName + ' - Rechargez si l ecran est vide';
+    const close = document.createElement('button');
+    close.textContent = '✕';
+    close.style.cssText = 'background:none;border:none;color:#fff;font-size:14px;cursor:pointer;padding:0 4px';
+    close.onclick = () => banner.remove();
+    banner.appendChild(msg); banner.appendChild(close);
+    document.body.appendChild(banner);
+    console.error('[CTP Error Boundary]', fnName, err);
+    // Auto-dismiss after 8s
+    setTimeout(() => banner?.remove(), 8000);
+  }
+
+  // Wrap each render function with try-catch
+  window.addEventListener('load', () => {
+    _SAFE_RENDERS.forEach(name => {
+      const original = window[name];
+      if (typeof original !== 'function') return;
+      window[name] = function(...args) {
+        try {
+          return original.apply(this, args);
+        } catch(e) {
+          _showErrorBanner(name, e);
+          // Don't re-throw — prevents total app crash
+        }
+      };
+    });
+  });
+})();
+
 const _startTab = S._currentTab || 'weekly';
 setTimeout(() => Router.navigate(_startTab), 0);
 

@@ -2066,3 +2066,48 @@ nav.tabs   { flex-shrink: 0; }
   width: 100%;
   min-height: 48px;
 }
+
+
+/* ================================================================
+   FIX iOS — Prevent auto-zoom on input focus (font-size ≥ 16px)
+   iOS Safari zooms when any input has font-size < 16px
+   This is a browser limitation, not a design choice.
+   We scale down with transform after focus, not with font-size.
+   ================================================================ */
+
+@supports (-webkit-touch-callout: none) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Maintain visual size by scaling the font — affects only the rendered
+   appearance on iOS, not the layout (no zoom, no reflow) */
+.ex-name-inp,
+.pec-name,
+.pec-inp,
+.pec-note,
+.set-inp,
+.inp-r,
+.inp-rpe,
+.inp-rir,
+.form-group input,
+.form-group select,
+.form-group textarea,
+.inp,
+.inp-note,
+.onboard-inp,
+.steps-goal-inp {
+  font-size: 16px;
+  transform-origin: left center;
+}
+
+/* For visually small inputs, scale down while keeping 16px for iOS */
+.set-inp,
+.inp-r,
+.inp-rpe,
+.inp-rir {
+  font-size: 16px;
+  transform: scale(0.875);
+  width: calc(100% / 0.875);
+}

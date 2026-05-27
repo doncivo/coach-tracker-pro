@@ -1783,3 +1783,134 @@ nav.tabs   { flex-shrink: 0; }
   text-overflow: ellipsis;
   max-width: 100%;
 }
+
+
+/* ================================================================
+   PLANNING — Vue Cartes (mode mobile)
+   ================================================================ */
+
+.plan-ex-card {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 10px 12px;
+  margin-bottom: 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  transition: border-color .15s, opacity .15s;
+}
+.plan-ex-card.pec-done    { opacity: .6; border-color: var(--green); }
+.plan-ex-card.pec-pr      { border-color: #ffd700; }
+.plan-ex-card.pec-overload{ border-color: var(--green); }
+.plan-ex-card.pec-warmup  { border-color: rgba(255,200,50,.5); }
+
+.pec-row1 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pec-cb {
+  width: 18px; height: 18px;
+  flex-shrink: 0;
+  accent-color: var(--teal);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.pec-name {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  font-family: var(--font);
+  outline: none;
+  min-width: 0;
+}
+.pec-badges {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+.pec-muscle {
+  font-size: 9px; font-weight: 700;
+  padding: 2px 6px; border-radius: 8px;
+}
+.pec-badge-pr      { font-size: 9px; font-weight: 700; background: #fff3cd; color: #7a5800; border-radius: 8px; padding: 2px 5px; }
+.pec-badge-ol      { font-size: 9px; font-weight: 700; background: rgba(56,161,105,.12); color: var(--green); border-radius: 8px; padding: 2px 5px; }
+.pec-badge-plateau { font-size: 9px; font-weight: 700; background: rgba(229,62,62,.08); color: var(--red); border-radius: 8px; padding: 2px 5px; }
+
+.pec-row2 {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.pec-inp {
+  padding: 6px 6px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--mono);
+  color: var(--text);
+  text-align: center;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+  min-width: 0;
+}
+.pec-inp:focus { border-color: var(--teal); outline: none; }
+.pec-sep { font-size: 12px; color: var(--muted); font-weight: 600; flex-shrink: 0; }
+.pec-prev { font-size: 10px; color: var(--muted); flex-shrink: 0; font-family: var(--mono); }
+
+.pec-expand {
+  border: none; background: none;
+  font-size: 11px; color: var(--muted);
+  font-family: var(--font); font-weight: 600;
+  cursor: pointer; text-align: left;
+  padding: 0; touch-action: manipulation;
+  -webkit-appearance: none;
+}
+.pec-details {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+}
+.pec-detail-lbl {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 11px; color: var(--muted); font-weight: 600;
+}
+.pec-sel {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 11px;
+  font-family: var(--font);
+  padding: 2px 4px;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+}
+.pec-note {
+  flex: 1;
+  border: none; border-bottom: 1px solid var(--border);
+  background: transparent;
+  font-size: 11px; font-family: var(--font);
+  color: var(--muted);
+  outline: none; padding: 2px 0;
+  min-width: 80px;
+}
+.pec-del {
+  border: none; background: none;
+  font-size: 14px; cursor: pointer;
+  opacity: .6; padding: 2px;
+  touch-action: manipulation; -webkit-appearance: none;
+  margin-left: auto; flex-shrink: 0;
+}

@@ -321,28 +321,83 @@ function _renderBadges() {
   if (!grid) return;
   grid.innerHTML = '';
   let unlockedCount = 0;
+
+  // Calculer la progression vers chaque badge
+  function getProgress(ach) {
+    try {
+      const streak    = computeStreak();
+      const totalDone = Object.values(S.history||{}).flatMap(wk=>(wk.days||[])).flatMap(d=>(d.exercises||[])).filter(e=>e.done&&!e.isWarmup).length
+                      + (S.days||[]).flatMap(d=>d.exercises||[]).filter(e=>e.done&&!e.isWarmup).length;
+      const totalVol  = Object.values(S.history||{}).flatMap(wk=>(wk.days||[])).flatMap(d=>(d.exercises||[]).filter(e=>!e.isWarmup).map(calcVol)).reduce((a,b)=>a+b,0)/1000;
+      const prCount   = (S.days||[]).flatMap(d=>d.exercises||[]).filter(checkPR).length;
+      const avgSleep7 = Object.values(S.sleep||{}).slice(-7).filter(s=>parseFloat(s?.hours)>=7).length;
+
+      const map = {
+        first_session:  { curr: Math.min(1, totalDone), max: 1 },
+        week_streak_3:  { curr: Math.min(3, streak.current), max: 3 },
+        week_streak_7:  { curr: Math.min(7, streak.current), max: 7 },
+        first_pr:       { curr: Math.min(1, prCount), max: 1 },
+        pr_5:           { curr: Math.min(5, prCount), max: 5 },
+        vol_50t:        { curr: Math.min(50, Math.round(totalVol)), max: 50 },
+        vol_100t:       { curr: Math.min(100, Math.round(totalVol)), max: 100 },
+        sessions_10:    { curr: Math.min(10, totalDone), max: 10 },
+        sessions_50:    { curr: Math.min(50, totalDone), max: 50 },
+        sleep_7:        { curr: Math.min(7, avgSleep7), max: 7 },
+        steps_goal_3:   { curr: Math.min(3, lastNDays(7).filter(d=>parseInt(S.steps?.[d]||0)>=(S.stepsGoal||10000)).length), max: 3 },
+        steps_goal_7:   { curr: Math.min(7, lastNDays(7).filter(d=>parseInt(S.steps?.[d]||0)>=(S.stepsGoal||10000)).length), max: 7 },
+      };
+      return map[ach.id] || null;
+    } catch(e) { return null; }
+  }
+
   ACHIEVEMENTS_DEF.forEach(ach => {
     const unlocked = !!S.achievements[ach.id];
     if (unlocked) unlockedCount++;
+
     const card = document.createElement('div');
     card.className = 'ach-card ' + (unlocked ? 'unlocked' : 'locked');
-    card.title = unlocked ? ('Débloqué le ' + S.achievements[ach.id].unlockedAt) : 'Non débloqué';
-    // Safe DOM construction
-    const iconEl = document.createElement('div');iconEl.className = 'ach-icon';iconEl.textContent = ach.icon;
-    const nameEl = document.createElement('div');nameEl.className = 'ach-name';nameEl.textContent = ach.name;
-    const descEl = document.createElement('div');descEl.className = 'ach-desc';descEl.textContent = ach.desc;
-    card.appendChild(iconEl);card.appendChild(nameEl);card.appendChild(descEl);
+    card.title = unlocked ? ('Débloqué le ' + S.achievements[ach.id].unlockedAt) : ach.desc;
+
+    const iconEl = document.createElement('div'); iconEl.className = 'ach-icon'; iconEl.textContent = ach.icon;
+    const nameEl = document.createElement('div'); nameEl.className = 'ach-name'; nameEl.textContent = ach.name;
+    const descEl = document.createElement('div'); descEl.className = 'ach-desc'; descEl.textContent = ach.desc;
+    card.appendChild(iconEl); card.appendChild(nameEl); card.appendChild(descEl);
+
     if (unlocked) {
-      const dateEl = document.createElement('div');dateEl.className = 'ach-date';dateEl.textContent = S.achievements[ach.id].unlockedAt;
+      const dateEl = document.createElement('div');
+      dateEl.className = 'ach-date';
+      dateEl.textContent = '✓ ' + S.achievements[ach.id].unlockedAt;
       card.appendChild(dateEl);
     } else {
-      const lockEl = document.createElement('div');lockEl.style.cssText = 'font-size:9px;color:var(--muted)';lockEl.textContent = '🔒';
-      card.appendChild(lockEl);
+      // Barre de progression vers le badge
+      const prog = getProgress(ach);
+      if (prog && prog.max > 1) {
+        const pct = Math.round(prog.curr / prog.max * 100);
+        const progWrap = document.createElement('div');
+        progWrap.style.cssText = 'margin-top:4px';
+        const progBar = document.createElement('div');
+        progBar.style.cssText = 'height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:2px';
+        const fill = document.createElement('div');
+        fill.style.cssText = `height:100%;width:${pct}%;background:var(--teal);border-radius:2px;transition:width .6s`;
+        progBar.appendChild(fill);
+        const progLbl = document.createElement('div');
+        progLbl.style.cssText = 'font-size:9px;color:var(--muted);text-align:right';
+        progLbl.textContent = prog.curr + '/' + prog.max;
+        progWrap.appendChild(progBar); progWrap.appendChild(progLbl);
+        card.appendChild(progWrap);
+      } else if (prog && prog.curr === 0) {
+        const lockEl = document.createElement('div');
+        lockEl.style.cssText = 'font-size:9px;color:var(--muted);margin-top:4px';
+        lockEl.textContent = '🔒 Non débloqué';
+        card.appendChild(lockEl);
+      }
     }
+
     grid.appendChild(card);
   });
+
   const cnt = document.getElementById('ach-unlocked-count');
-  if (cnt) cnt.textContent = unlockedCount;
+  if (cnt) cnt.textContent = unlockedCount + '/' + ACHIEVEMENTS_DEF.length;
 }
 
 /* ══ BIBLIOTHÈQUE ══ */

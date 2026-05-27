@@ -93,7 +93,8 @@ function renderDayDetail(i){
   const vt=document.createElement('div');vt.className='ex-view-toggle';
   const viewModes=[
     {val:'compact',lbl:'Compact',icon:'☰',tip:'Vue compacte — colonnes essentielles'},
-    {val:'detail',lbl:'Détail',icon:'⊞',tip:'Vue détail — toutes les colonnes (RPE, Tempo, Note…)'}
+    {val:'detail',lbl:'Détail',icon:'⊞',tip:'Vue détail — toutes les colonnes (RPE, Tempo, Note…)'},
+    {val:'cards',lbl:'Cartes',icon:'📱',tip:'Vue cartes — optimisée mobile'},
   ];
   viewModes.forEach((mode,vi)=>{
     const vb=document.createElement('button');
@@ -166,6 +167,19 @@ function renderDayDetail(i){
 function buildExTable(di,tbody,d,onUpdate){
   tbody.innerHTML='';
   const isDetail=_exView==='detail';
+
+  // ── Vue Cartes (mode mobile) ──
+  if (_exView === 'cards') {
+    // Cacher le tableau, utiliser le parent comme conteneur de cartes
+    const wrap = tbody.parentElement;
+    let thead = wrap.querySelector('thead'); if(thead) thead.remove();
+    tbody.style.display = 'block';
+    d.exercises.forEach((_, ei) => {
+      const card = buildExCard(di, ei, d, onUpdate);
+      tbody.appendChild(card);
+    });
+    return;
+  }
   let thead=tbody.parentElement.querySelector('thead');if(thead)thead.remove();
   thead=document.createElement('thead');
   if(isDetail){
@@ -180,6 +194,160 @@ function buildExTable(di,tbody,d,onUpdate){
   d.exercises.forEach((_,ei)=>{
     const row=buildExRow(di,ei,d,onUpdate,isDetail);tbody.appendChild(row);
   });
+}
+
+/* ── Vue Cartes — optimisée mobile ── */
+function buildExCard(di, ei, d, onUpdate) {
+  const ex = d.exercises[ei];
+  const m  = MM[ex.muscle || ''];
+
+  const card = document.createElement('div');
+  card.className = 'plan-ex-card'
+    + (ex.done        ? ' pec-done'    : '')
+    + (ex.isWarmup    ? ' pec-warmup'  : '')
+    + (shouldOverload(ex) && !ex.isWarmup ? ' pec-overload' : '')
+    + (checkPR(ex)    ? ' pec-pr'      : '');
+
+  // ── Ligne 1 : Checkbox + Nom + Muscle + Statut ──
+  const row1 = document.createElement('div');
+  row1.className = 'pec-row1';
+
+  const cb = document.createElement('input');
+  cb.type = 'checkbox'; cb.className = 'pec-cb'; cb.checked = ex.done;
+  cb.setAttribute('aria-label', 'Exercice terminé');
+  cb.addEventListener('change', e => {
+    ex.done = e.target.checked;
+    card.classList.toggle('pec-done', ex.done);
+    if (d.exercises.filter(e => e.name.trim() && !e.isWarmup).every(e => e.done)) showSessionComplete(di, d);
+    onUpdate(); save(); renderDayTabs(); checkAndAwardAchievements();
+  });
+  cb.ontouchstart = (e) => { e.stopPropagation(); };
+
+  const nameInp = document.createElement('input');
+  nameInp.type = 'text'; nameInp.className = 'pec-name';
+  nameInp.placeholder = ex.isWarmup ? 'Échauffement...' : 'Exercice';
+  nameInp.value = ex.name || '';
+  nameInp.addEventListener('input', e => { ex.name = e.target.value; onUpdate(); save(); renderDayTabs(); });
+
+  const badges = document.createElement('div');
+  badges.className = 'pec-badges';
+  if (m) {
+    const mb = document.createElement('span');
+    mb.className = 'pec-muscle';
+    mb.style.cssText = `background:${m.calBg};color:${m.calColor}`;
+    mb.textContent = m.label;
+    badges.appendChild(mb);
+  }
+  if (!ex.isWarmup && checkPR(ex)) {
+    const pb = document.createElement('span');
+    pb.className = 'pec-badge-pr'; pb.textContent = '🏆 PR'; badges.appendChild(pb);
+  }
+  if (!ex.isWarmup && shouldOverload(ex)) {
+    const ob = document.createElement('span');
+    ob.className = 'pec-badge-ol';
+    ob.textContent = '↑ ' + Math.round((parseFloat(ex.weight)||0) * 1.025 / 2.5) * 2.5 + 'kg'; badges.appendChild(ob);
+  }
+  if (isPlateau(ex.name)) {
+    const plb = document.createElement('span');
+    plb.className = 'pec-badge-plateau'; plb.textContent = '⚠ Plateau'; badges.appendChild(plb);
+  }
+
+  row1.appendChild(cb); row1.appendChild(nameInp); row1.appendChild(badges);
+  card.appendChild(row1);
+
+  // ── Ligne 2 : Poids × Séries × Reps ──
+  const row2 = document.createElement('div');
+  row2.className = 'pec-row2';
+
+  function mkInput(val, placeholder, width, onChange) {
+    const inp = document.createElement('input');
+    inp.type = 'text'; inp.inputMode = 'decimal';
+    inp.className = 'pec-inp'; inp.value = val || ''; inp.placeholder = placeholder;
+    inp.style.width = width;
+    inp.addEventListener('input', e => onChange(e.target.value));
+    return inp;
+  }
+
+  const wInp = mkInput(ex.weight, 'kg', '70px', v => { ex.weight = v; refreshCard(); save(); });
+  const sInp = mkInput(ex.sets, 'sér', '40px', v => { ex.sets = v; save(); });
+  const rInp = mkInput(ex.reps, '6-12', '60px', v => { ex.reps = v; save(); });
+  const rAInp = mkInput(ex.repsAchieved, '✓ reps', '70px', v => {
+    const wasPR = checkPR(ex); ex.repsAchieved = v;
+    if (!wasPR && checkPR(ex)) showPRToast(ex.name);
+    card.classList.toggle('pec-pr', checkPR(ex));
+    card.classList.toggle('pec-overload', shouldOverload(ex) && !ex.isWarmup);
+    refreshCard(); onUpdate(); save();
+  });
+  rAInp.style.fontWeight = '700';
+
+  const prevLbl = document.createElement('span');
+  prevLbl.className = 'pec-prev';
+
+  function refreshCard() {
+    const lw = lastW(ex.name);
+    if (shouldOverload(ex) && !ex.isWarmup) prevLbl.innerHTML = `<span style="color:var(--green)">↑${Math.round((parseFloat(ex.weight)||0)*1.025/2.5)*2.5}?</span>`;
+    else if (isFailure(ex)) prevLbl.innerHTML = `<span style="color:var(--red)">↓${Math.round((parseFloat(ex.weight)||0)*0.975/2.5)*2.5}?</span>`;
+    else prevLbl.textContent = lw ? 'Préc: ' + lw : '';
+  }
+  refreshCard();
+
+  const sep1 = document.createElement('span'); sep1.className = 'pec-sep'; sep1.textContent = 'kg';
+  const sep2 = document.createElement('span'); sep2.className = 'pec-sep'; sep2.textContent = '×';
+  const sep3 = document.createElement('span'); sep3.className = 'pec-sep'; sep3.textContent = '→';
+
+  row2.append(wInp, sep1, sInp, sep2, rInp, sep3, rAInp, prevLbl);
+  card.appendChild(row2);
+
+  // ── Ligne 3 (extensible) : RPE, RIR, Muscle ──
+  const expand = document.createElement('button');
+  expand.className = 'pec-expand'; expand.textContent = '▸ Détails';
+  expand.ontouchstart = (e) => { e.preventDefault(); toggleDetails(); };
+  expand.onclick = toggleDetails;
+
+  const details = document.createElement('div');
+  details.className = 'pec-details'; details.style.display = 'none';
+
+  function toggleDetails() {
+    const open = details.style.display === 'none';
+    details.style.display = open ? 'flex' : 'none';
+    expand.textContent = open ? '▾ Détails' : '▸ Détails';
+  }
+
+  // RPE
+  const rpeSel = document.createElement('select'); rpeSel.className = 'pec-sel';
+  RPE_OPTS.forEach(v => { const o = document.createElement('option'); o.value=v; o.textContent=v; if(v===ex.rpe)o.selected=true; rpeSel.appendChild(o); });
+  rpeSel.addEventListener('change', e => { ex.rpe = e.target.value; save(); });
+  const rpeWrap = document.createElement('label'); rpeWrap.className = 'pec-detail-lbl';
+  rpeWrap.innerHTML = 'RPE '; rpeWrap.appendChild(rpeSel);
+
+  // RIR
+  const rirSel = document.createElement('select'); rirSel.className = 'pec-sel';
+  RIR_OPTS.forEach(v => { const o = document.createElement('option'); o.value=v; o.textContent=v; if(v===ex.rir)o.selected=true; rirSel.appendChild(o); });
+  rirSel.addEventListener('change', e => { ex.rir = e.target.value; save(); });
+  const rirWrap = document.createElement('label'); rirWrap.className = 'pec-detail-lbl';
+  rirWrap.innerHTML = 'RIR '; rirWrap.appendChild(rirSel);
+
+  // Note
+  const noteInp = document.createElement('input');
+  noteInp.type = 'text'; noteInp.className = 'pec-note'; noteInp.placeholder = '📝 Note...'; noteInp.value = ex.note || '';
+  noteInp.addEventListener('input', e => { ex.note = e.target.value; save(); });
+
+  // Delete
+  const delBtn = document.createElement('button');
+  delBtn.className = 'pec-del'; delBtn.textContent = '🗑';
+  delBtn.title = 'Supprimer l\'exercice';
+  delBtn.ontouchstart = (e) => { e.preventDefault(); doDelete(); };
+  delBtn.onclick = doDelete;
+  function doDelete() {
+    d.exercises.splice(ei, 1);
+    save(); onUpdate(); renderDayDetail(S.activeDay);
+  }
+
+  details.append(rpeWrap, rirWrap, noteInp, delBtn);
+  card.appendChild(expand);
+  card.appendChild(details);
+
+  return card;
 }
 
 function buildExRow(di,ei,d,onUpdate,isDetail){

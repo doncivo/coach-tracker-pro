@@ -686,6 +686,7 @@ function render1RMChart(container, exerciseName, color) {
 }
 
 function renderProgression(){
+  _renderSessionTimeline();
   const mf=document.getElementById('prog-muscle-filter');const cv=mf.value;mf.innerHTML='<option value="">Tous les groupes</option>';
   MUSCLES.filter(m=>m.key!=='rep').forEach(m=>{const o=document.createElement('option');o.value=m.key;o.textContent=m.label;if(m.key===cv)o.selected=true;mf.appendChild(o);});
   const wLimit=document.getElementById('prog-weeks-filter').value;
@@ -768,6 +769,80 @@ cards.innerHTML='';
   });
   if(!cards.children.length)cards.innerHTML='<div class="prog-no-data">Aucun exercice correspondant.</div>';
 }
+
+/* ── Timeline des séances passées ── */
+function _renderSessionTimeline() {
+  const container = document.getElementById('prog-timeline');
+  if (!container) return;
+  container.innerHTML = '';
+
+  // Collecter toutes les séances de l'historique
+  const sessions = [];
+  Object.entries(S.history || {}).forEach(([date, entries]) => {
+    (entries || []).forEach(sess => {
+      if (sess.name && (sess.volume > 0 || sess.exercises?.length > 0)) {
+        sessions.push({ ...sess, date });
+      }
+    });
+  });
+
+  if (sessions.length === 0) return;
+
+  // Trier par date décroissante
+  sessions.sort((a, b) => b.date.localeCompare(a.date));
+  const recent = sessions.slice(0, 8);
+
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px;padding-top:4px';
+  title.textContent = 'Historique des séances';
+  container.appendChild(title);
+
+  const timeline = document.createElement('div');
+  timeline.style.cssText = 'display:flex;flex-direction:column;gap:0';
+
+  recent.forEach((sess, si) => {
+    const d = new Date(sess.date + 'T12:00:00');
+    const dateStr = d.toLocaleDateString('fr-FR', { weekday:'short', day:'numeric', month:'short' });
+    const vol = sess.volume >= 1000
+      ? (sess.volume/1000).toFixed(1) + 't'
+      : Math.round(sess.volume || 0) + 'kg';
+    const exs = (sess.exercises || []).filter(e => !e.isWarmup && e.done);
+    const prs = exs.filter(e => typeof checkPR === 'function' && checkPR(e));
+
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)';
+
+    // Timeline dot
+    const dot = document.createElement('div');
+    dot.style.cssText = [
+      'width:10px;height:10px;border-radius:50%;flex-shrink:0',
+      prs.length > 0 ? 'background:#ffd700;border:2px solid #7a5800' :
+      si === 0       ? 'background:var(--teal)' :
+                       'background:var(--border)',
+    ].join(';');
+
+    const info = document.createElement('div');
+    info.style.cssText = 'flex:1;min-width:0';
+    info.innerHTML = [
+      `<div style="font-size:12px;font-weight:700;color:var(--text)">${dateStr} — ${sess.name||'Séance'}</div>`,
+      `<div style="font-size:10px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${exs.slice(0,3).map(e=>e.name).join(', ')}${exs.length>3?' +'+( exs.length-3):''}</div>`,
+    ].join('');
+
+    const stats = document.createElement('div');
+    stats.style.cssText = 'display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0';
+    stats.innerHTML = [
+      `<span style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--teal-d)">${vol}</span>`,
+      sess.duration ? `<span style="font-size:9px;color:var(--muted)">${sess.duration}'</span>` : '',
+      prs.length > 0 ? `<span style="font-size:9px;font-weight:700;color:#7a5800;background:#fff3cd;border-radius:6px;padding:1px 4px">🏆${prs.length}</span>` : '',
+    ].join('');
+
+    row.appendChild(dot); row.appendChild(info); row.appendChild(stats);
+    timeline.appendChild(row);
+  });
+
+  container.appendChild(timeline);
+}
+
 document.getElementById('prog-muscle-filter').addEventListener('change',renderProgression);
 document.getElementById('prog-weeks-filter').addEventListener('change',renderProgression);
 document.getElementById('gen-sample-data').addEventListener('click',async()=>{

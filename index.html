@@ -224,6 +224,8 @@
       </div>
       <button class="btn btn-green btn-sm" id="gen-sample-data">💡 Données démo</button>
     </div>
+    <!-- Timeline des séances -->
+    <div id="prog-timeline" style="padding:0 12px 12px"></div>
     <div class="prog-cards" id="prog-cards"></div>
   </div>
 </div>
@@ -598,7 +600,7 @@
   </script>
 <script>
 (function() {
-  const SW_VERSION = 'ctp-v52';
+  const SW_VERSION = 'ctp-v53';
   if (!('serviceWorker' in navigator)) return;
 
   const RELOAD_KEY = 'ctp-sw-reloaded-' + SW_VERSION;

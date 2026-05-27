@@ -190,11 +190,13 @@ function renderDashboard(){
   breakdownCard.innerHTML = `<div class="dash-breakdown-title">Détail du score de forme</div>`;
 
   const tips = {
-    'Assiduité': s => s >= 80 ? 'Continuez comme ça !' : s >= 50 ? 'Essayez d\'ajouter une séance cette semaine' : 'Visez au moins 3 séances par semaine',
-    'Pas':       s => s >= 80 ? 'Objectif pas atteint ✓' : `Il manque ${Math.round((S.stepsGoal||10000)*(1-s/100)).toLocaleString('fr')} pas aujourd'hui`,
-    'Sommeil':   s => s >= 80 ? 'Récupération optimale' : `Visez ${S._sleepGoal||8}h — vous dormez en dessous`,
-    'Nutrition': s => s >= 80 ? 'Apports bien équilibrés' : 'Renseignez vos repas dans l\'onglet Corps',
-    'Récup.':    s => s >= 80 ? 'Récupération excellente' : 'Notez votre récupération après les séances',
+    'Assiduité': s => s >= 90 ? 'Presence exemplaire cette semaine !' : s >= 60 ? 'Bonne presence, continuez !' : 'Essayez de venir au moins 3 fois cette semaine',
+    'Programme': s => s >= 90 ? 'Programme suivi a la lettre !' : s >= 60 ? 'Quelques exercices sautes — restez au programme' : 'Beaucoup d exercices non realises — adaptez le programme',
+    'Pas':       s => s >= 80 ? 'Objectif pas atteint !' : 'Il manque des pas pour atteindre votre objectif',
+    'Sommeil':   s => s >= 80 ? 'Recuperation optimale' : 'Dormez plus pour optimiser vos gains',
+    'Nutrition': s => s >= 80 ? 'Apports bien equilibres' : 'Renseignez vos repas dans Corps',
+    'Recup.':    s => s >= 80 ? 'Recuperation excellente' : 'Notez votre recuperation apres les seances',
+    'Récup.':    s => s >= 80 ? 'Recuperation excellente' : 'Notez votre recuperation apres les seances',
   };
 
   fs.breakdown.forEach(b => {

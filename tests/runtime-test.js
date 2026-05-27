@@ -371,8 +371,9 @@ if (!loadError) {
   try {
     const fs2 = ctx.computeFitnessScore();
     ok('computeFitnessScore score [0,100]', !isNaN(fs2.score) && fs2.score >= 0 && fs2.score <= 100);
-    ok('breakdown 5 items', fs2.breakdown.length === 5);
+    ok('breakdown 6 items', fs2.breakdown.length === 6);
     ok('pas de NaN dans breakdown', fs2.breakdown.every(b => !isNaN(b.pts)));
+    ok('Assiduite et Programme presents', fs2.breakdown.some(b=>b.label==='Assiduité') && fs2.breakdown.some(b=>b.label==='Programme'));
   } catch(e) { ok('computeFitnessScore', false, e.message); }
 
   // Coach

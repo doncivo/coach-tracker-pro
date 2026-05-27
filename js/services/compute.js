@@ -392,14 +392,49 @@ const Compute = (() => {
     const days7    = lastNDays(7);
     const today    = localDateStr();
 
-    // ── Assiduité (30%) ──
-    const plannedDays  = days.filter(d => d.exercises && d.exercises.length > 0).length;
-    const trainedDays  = days7.filter(d => history[d] && history[d].days &&
-                           history[d].days.some(day => day.exercises &&
-                             day.exercises.some(e => e.done))).length;
-    const adherence    = plannedDays > 0 ? Math.min(100, trainedDays / plannedDays * 100) : 50;
+    // ── Assiduité — PRÉSENCE (20%) ──
+    // Binaire : est-ce que tu es allé t'entraîner ce jour ?
+    const plannedDays = days.filter(d =>
+      d.exercises && d.exercises.some(e => e.name && !e.isWarmup)
+    ).length;
 
-    // ── Pas (20%) ──
+    let trainedDaysCount = 0;
+    days7.forEach(dateKey => {
+      if (!history[dateKey]?.days) return;
+      const trained = history[dateKey].days.some(day =>
+        (day.exercises || []).some(e => e.done && !e.isWarmup)
+      );
+      if (trained) trainedDaysCount++;
+    });
+    const assiduiteScore = plannedDays > 0
+      ? Math.min(100, trainedDaysCount / plannedDays * 100)
+      : 50;
+
+    // ── Adhésion programme (15%) ──
+    // Ratio exercices planifiés réalisés / total planifiés
+    let exPlanned = 0, exDone = 0;
+    days7.forEach(dateKey => {
+      if (!history[dateKey]?.days) return;
+      history[dateKey].days.forEach(day => {
+        const exs = (day.exercises || []).filter(e => e.name && !e.isWarmup);
+        exPlanned += exs.length;
+        exDone    += exs.filter(e => e.done).length;
+      });
+    });
+    // Aussi compter la semaine courante si exercises marqués done
+    days.forEach(day => {
+      const exs = (day.exercises || []).filter(e => e.name && !e.isWarmup);
+      const doneExs = exs.filter(e => e.done);
+      if (doneExs.length > 0) {
+        exPlanned += exs.length;
+        exDone    += doneExs.length;
+      }
+    });
+    const adherenceScore = exPlanned > 0
+      ? Math.min(100, exDone / exPlanned * 100)
+      : 50;
+
+    // ── Pas (15%) ──
     const avgSteps     = days7.reduce((a, d) => a + (parseInt(steps[d] || 0) || 0), 0) / 7;
     const stepsScore   = stepsGoal > 0 ? Math.min(100, avgSteps / stepsGoal * 100) : 0;
 
@@ -425,34 +460,40 @@ const Compute = (() => {
     const sleepBonus   = avgSleep >= 7 ? 10 : avgSleep >= 6 ? 0 : -10;
     const recovScore   = Math.max(0, Math.min(100, avgRec + sleepBonus - painPenalty));
 
+    // ── Score global (6 composants, total 100%) ──
     const score = Math.round(
-      adherence  * 0.30 +
-      stepsScore * 0.20 +
-      sleepScore * 0.20 +
-      nutScore   * 0.15 +
-      recovScore * 0.15
+      assiduiteScore  * 0.20 +
+      adherenceScore  * 0.15 +
+      stepsScore      * 0.15 +
+      sleepScore      * 0.20 +
+      nutScore        * 0.15 +
+      recovScore      * 0.15
     );
 
     return {
       score: isNaN(score) ? 0 : Math.min(100, score),
       breakdown: [
-        { icon: '💪', label: 'Assiduité', pts: Math.round(adherence),  max: 100, color: '--teal',   weight: 30 },
-        { icon: '👣', label: 'Pas',       pts: Math.round(stepsScore),  max: 100, color: '--green',  weight: 20 },
-        { icon: '😴', label: 'Sommeil',   pts: Math.round(sleepScore),  max: 100, color: '--purple', weight: 20 },
-        { icon: '🥗', label: 'Nutrition', pts: Math.round(nutScore),    max: 100, color: '--orange', weight: 15 },
-        { icon: '🔋', label: 'Récup.',    pts: Math.round(recovScore),  max: 100, color: '--red',    weight: 15 },
+        { icon: '🏃', label: 'Assiduité',  pts: Math.round(assiduiteScore),  max: 100, color: '--teal',   weight: 20 },
+        { icon: '📋', label: 'Programme',  pts: Math.round(adherenceScore),  max: 100, color: '--purple', weight: 15 },
+        { icon: '👣', label: 'Pas',        pts: Math.round(stepsScore),      max: 100, color: '--green',  weight: 15 },
+        { icon: '😴', label: 'Sommeil',    pts: Math.round(sleepScore),      max: 100, color: '--blue',   weight: 20 },
+        { icon: '🥗', label: 'Nutrition',  pts: Math.round(nutScore),        max: 100, color: '--orange', weight: 15 },
+        { icon: '🔋', label: 'Récup.',     pts: Math.round(recovScore),      max: 100, color: '--red',    weight: 15 },
       ],
       detail: {
-        adherence:   Math.round(adherence),
-        stepsScore:  Math.round(stepsScore),
-        sleepScore:  Math.round(sleepScore),
-        nutScore:    Math.round(nutScore),
-        recovScore:  Math.round(recovScore),
-        avgSteps:    Math.round(avgSteps),
-        avgSleep:    Math.round(avgSleep * 10) / 10,
-        avgCal:      Math.round(avgCal),
-        trainedDays,
+        assiduiteScore: Math.round(assiduiteScore),
+        adherenceScore: Math.round(adherenceScore),
+        stepsScore:     Math.round(stepsScore),
+        sleepScore:     Math.round(sleepScore),
+        nutScore:       Math.round(nutScore),
+        recovScore:     Math.round(recovScore),
+        avgSteps:       Math.round(avgSteps),
+        avgSleep:       Math.round(avgSleep * 10) / 10,
+        avgCal:         Math.round(avgCal),
+        trainedDays:    trainedDaysCount,
         plannedDays,
+        exDone,
+        exPlanned,
       },
     };
   }

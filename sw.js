@@ -1,4 +1,4 @@
-const CACHE = 'ctp-v47';
+const CACHE = 'ctp-v48';
 const ASSETS = [
   './', './index.html',
   './design/tokens.css', './css/style.css',
@@ -7,7 +7,7 @@ const ASSETS = [
   './js/core/store.js',
   './js/store/training.js', './js/store/activity.js',
   './js/store/body.js', './js/store/goals.js', './js/store/app.js',
-  './js/services/persist.js', './js/services/compute.js', './js/services/notify.js', './js/services/share.js',
+  './js/services/persist.js', './js/services/compute.js', './js/services/notify.js', './js/services/share.js', './js/services/search.js', './js/services/coach.js',
   './js/core/state-bridge.js', './js/core/router.js',
   './js/utils.js', './js/charts.js',
   './js/render_dashboard.js', './js/render_planning.js',

@@ -182,6 +182,12 @@ function renderSessExercise(d,exercises,vi){
   const lastPoids=(S.mesures.poids||[]).slice(-1)[0];
   if(lastPoids&&ex.weight){const std=strengthStandard(ex,parseFloat(lastPoids.val));if(std){const sb=document.createElement('span');sb.className='sess-ex-sub-item';sb.style.color=std.color;sb.textContent=std.level;sub.appendChild(sb);}}
   info.appendChild(nameEl);info.appendChild(sub);
+  // Suggestion de progression (Coach service)
+  if (typeof Coach !== 'undefined' && !ex.isWarmup) {
+    const suggestion = Coach.analyzeExercise(ex);
+    const badge      = Coach.renderBadge(suggestion);
+    if (badge) mainEl.appendChild(badge);
+  }
   // Actions
   const acts=document.createElement('div');acts.style.cssText='display:flex;gap:5px;flex-shrink:0;flex-direction:column;align-items:flex-end';
   if(ex.done){const chip=document.createElement('div');chip.style.cssText='padding:5px 12px;border-radius:20px;background:rgba(56,161,105,.12);color:var(--green);font-size:11px;font-weight:700;border:1px solid rgba(56,161,105,.3)';chip.textContent='✅ Terminé';acts.appendChild(chip);}

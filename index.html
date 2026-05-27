@@ -56,6 +56,7 @@
     <button class="hdr-btn hdr-desktop-only btn-import" id="import-btn" title="Importer des données" aria-label="Importer"><span>⬆</span></button>
     <button class="hdr-btn hdr-desktop-only" id="focus-btn" title="Mode focus" aria-label="Mode focus">🎯</button>
     <span id="hdr-fitness-score" style="display:none;cursor:pointer;font-family:var(--mono);font-size:12px;font-weight:700;padding:3px 8px;border-radius:12px;background:var(--teal);color:#fff" onclick="switchTab('dashboard')"></span>
+    <button class="hdr-btn" id="search-btn" aria-label="Rechercher" title="Recherche globale" onclick="Search.open()" style="touch-action:manipulation">🔍</button>
     <button class="hdr-btn" id="darkmode-btn" aria-label="Mode sombre">🌙</button>
     <input type="file" id="import-file" accept=".json" style="display:none">
   </div>
@@ -560,6 +561,8 @@
   <script src="js/services/compute.js"></script>
   <script src="js/services/notify.js"></script>
   <script src="js/services/share.js"></script>
+  <script src="js/services/search.js"></script>
+  <script src="js/services/coach.js"></script>
   <script src="js/core/state-bridge.js"></script>
   <script src="js/core/router.js"></script>
   <script src="js/utils.js"></script>
@@ -595,7 +598,7 @@
   </script>
 <script>
 (function() {
-  const SW_VERSION = 'ctp-v47';
+  const SW_VERSION = 'ctp-v48';
   if (!('serviceWorker' in navigator)) return;
 
   const RELOAD_KEY = 'ctp-sw-reloaded-' + SW_VERSION;

@@ -314,6 +314,21 @@ const Router = (() => {
       }
     });
 
+    // Bouton de recherche globale
+    const searchBtn = document.getElementById('search-btn');
+    if (searchBtn) {
+      let _searchTouched = false;
+      searchBtn.addEventListener('touchend', function(e) {
+        _searchTouched = true;
+        e.preventDefault();
+        if (typeof Search !== 'undefined') Search.open();
+      }, { passive: false });
+      searchBtn.addEventListener('click', function() {
+        if (_searchTouched) { _searchTouched = false; return; }
+        if (typeof Search !== 'undefined') Search.open();
+      });
+    }
+
     // Swipe mobile
     _initSwipe();
   }

@@ -83,11 +83,18 @@ function _open1RMCalculator() {
   title.style.cssText = 'font-size:17px;font-weight:700;color:var(--text);margin-bottom:4px';
   title.textContent = '🧮 Calculateur 1RM';
 
+  // Bouton pour ouvrir le calculateur de disques
+  const platesLink = document.createElement('button');
+  platesLink.style.cssText = 'border:none;background:none;color:var(--teal);font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer;text-decoration:underline;padding:0;margin-bottom:8px;touch-action:manipulation';
+  platesLink.textContent = '🔩 Voir aussi : calculateur de disques';
+  platesLink.ontouchstart = (e) => { e.preventDefault(); overlay.remove(); const w = document.getElementById('orm-w')?.value; _showPlateCalc(parseFloat(w)||0); };
+  platesLink.onclick = () => { overlay.remove(); const w = document.getElementById('orm-w')?.value; _showPlateCalc(parseFloat(w)||0); };
+
   const sub = document.createElement('div');
   sub.style.cssText = 'font-size:11px;color:var(--muted);margin-bottom:16px';
   sub.textContent = 'Estimez votre maximum sur 1 répétition';
 
-  sheet.appendChild(handle); sheet.appendChild(title); sheet.appendChild(sub);
+  sheet.appendChild(handle); sheet.appendChild(title); sheet.appendChild(platesLink); sheet.appendChild(sub);
 
   // Inputs
   function mkRow(lbl, placeholder, id) {
@@ -195,6 +202,281 @@ function _open1RMCalculator() {
   }, 100);
 }
 
+/* ════════════════════════════════════════════════════════════
+   SESSION HELPERS — Swap, Warmup, Quick RPE, Plate Calculator
+   ════════════════════════════════════════════════════════════ */
+
+/* ── Quick RPE picker après validation de série ── */
+function _showQuickRPE(card, setD, onPick) {
+  if (card.querySelector('.quick-rpe-row')) return;
+  const row = document.createElement('div');
+  row.className = 'quick-rpe-row';
+  const lbl = document.createElement('span');
+  lbl.className = 'quick-rpe-lbl'; lbl.textContent = 'RPE :';
+  row.appendChild(lbl);
+  ['7','7.5','8','8.5','9','9.5','10'].forEach(v => {
+    const btn = document.createElement('button');
+    btn.className = 'quick-rpe-btn'; btn.textContent = v;
+    const pick = () => {
+      setD.rpe = v;
+      row.querySelectorAll('.quick-rpe-btn').forEach(b => b.classList.remove('sel'));
+      btn.classList.add('sel');
+      onPick();
+      setTimeout(() => row.remove(), 800);
+    };
+    btn.ontouchstart = (e) => { e.preventDefault(); pick(); };
+    btn.onclick = pick;
+    row.appendChild(btn);
+  });
+  card.appendChild(row);
+  // Auto-dismiss après 12s si pas de sélection
+  setTimeout(() => row?.remove(), 12000);
+}
+
+/* ── Remplacement exercice (alternatives) ── */
+function _showSwapExercise(ex, d, exercises, vi) {
+  document.getElementById('swap-ex-overlay')?.remove();
+  const libEx = EXERCISE_LIBRARY.find(l => l.name === ex.name) ||
+                EXERCISE_LIBRARY.find(l => ex.name.includes(l.name.slice(0, 8)));
+  const alternatives = libEx?.alternatives || [];
+  if (!alternatives.length) { showToast('Aucune alternative disponible', 'warn', 2000); return; }
+
+  const overlay = document.createElement('div');
+  overlay.id = 'swap-ex-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);z-index:9200;display:flex;align-items:flex-end;justify-content:center';
+
+  const sheet = document.createElement('div');
+  sheet.style.cssText = 'background:var(--surface);border-radius:24px 24px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));width:100%;max-width:480px;max-height:75vh;overflow-y:auto;-webkit-overflow-scrolling:touch';
+
+  const handle = document.createElement('div');
+  handle.style.cssText = 'width:36px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 14px';
+
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px';
+  title.textContent = 'Remplacer : ' + ex.name;
+
+  const sub = document.createElement('div');
+  sub.style.cssText = 'font-size:11px;color:var(--muted);margin-bottom:14px';
+  sub.textContent = 'Alternatives suggérées pour ce mouvement';
+
+  sheet.appendChild(handle); sheet.appendChild(title); sheet.appendChild(sub);
+
+  alternatives.forEach(altName => {
+    const altLib = EXERCISE_LIBRARY.find(l => l.name === altName);
+    const btn = document.createElement('button');
+    btn.style.cssText = 'display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:12px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none;margin-bottom:8px';
+
+    const nameDiv = document.createElement('div');
+    nameDiv.style.cssText = 'flex:1;min-width:0';
+    nameDiv.innerHTML = '<div style="font-size:14px;font-weight:600;color:var(--text)">' + altName + '</div>' +
+      (altLib ? '<div style="font-size:10px;color:var(--muted);margin-top:2px">' + (altLib.equipment||'') + (altLib.difficulty?' · '+altLib.difficulty:'') + '</div>' : '');
+
+    const arrow = document.createElement('span');
+    arrow.style.cssText = 'color:var(--teal);font-size:16px;flex-shrink:0'; arrow.textContent = '→';
+
+    btn.appendChild(nameDiv); btn.appendChild(arrow);
+
+    const doSwap = () => {
+      overlay.remove();
+      const realIdx = d.exercises.indexOf(ex);
+      d.exercises[realIdx].name   = altName;
+      d.exercises[realIdx].muscle = altLib?.muscle || ex.muscle;
+      d.exercises[realIdx].setData = null; // reset set data
+      save(); renderSessNav(d, exercises); renderSessExercise(d, exercises, vi);
+      showToast('Exercice remplace : ' + altName, 'save', 2000);
+    };
+    btn.ontouchstart = (e) => { e.preventDefault(); doSwap(); };
+    btn.onclick = doSwap;
+    sheet.appendChild(btn);
+  });
+
+  const cancel = document.createElement('button');
+  cancel.style.cssText = 'width:100%;padding:10px;border:none;background:none;color:var(--muted);font-size:14px;font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none';
+  cancel.textContent = 'Annuler';
+  cancel.ontouchstart = (e) => { e.preventDefault(); overlay.remove(); };
+  cancel.onclick = () => overlay.remove();
+  sheet.appendChild(cancel);
+
+  overlay.appendChild(sheet);
+  overlay.ontouchstart = (e) => { if (e.target === overlay) overlay.remove(); };
+  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+  document.body.appendChild(overlay);
+}
+
+/* ── Échauffement automatique ── */
+function _autoWarmup(ex, d, vi) {
+  const workW = parseFloat(ex.weight) || 0;
+  if (!workW) { showToast('Renseignez le poids de travail dabord', 'warn', 2500); return; }
+
+  const warmupSets = [
+    { pct: 0.40, reps: '12', label: '40%' },
+    { pct: 0.60, reps: '8',  label: '60%' },
+    { pct: 0.80, reps: '4',  label: '80%' },
+  ];
+
+  const realIdx = d.exercises.indexOf(ex);
+  let inserted = 0;
+
+  warmupSets.reverse().forEach(ws => {
+    const w = Math.round(workW * ws.pct / 2.5) * 2.5;
+    const wuEx = {
+      id: uid(), name: ex.name, muscle: ex.muscle,
+      weight: String(w), sets: '1', reps: ws.reps,
+      repsAchieved: '', rpe: '', rir: '', tempo: '', rest: '60',
+      note: 'Echauffement ' + ws.label, done: false, isWarmup: true,
+      supersetGroup: '', setData: null,
+    };
+    d.exercises.splice(realIdx, 0, wuEx);
+    inserted++;
+  });
+
+  save();
+  showToast('Echauffement genere : 3 series avant ' + ex.name, 'save', 2500);
+  renderSessNav(d, d.exercises.filter(e=>e.name.trim()));
+  renderSessExercise(d, d.exercises.filter(e=>e.name.trim()), vi + inserted);
+}
+
+/* ── Calculateur de disques ── */
+function _showPlateCalc(targetWeight) {
+  document.getElementById('plate-calc-overlay')?.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'plate-calc-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);z-index:9300;display:flex;align-items:flex-end;justify-content:center';
+
+  const sheet = document.createElement('div');
+  sheet.style.cssText = 'background:var(--surface);border-radius:24px 24px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));width:100%;max-width:480px';
+
+  const handle = document.createElement('div');
+  handle.style.cssText = 'width:36px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 16px';
+
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size:17px;font-weight:700;color:var(--text);margin-bottom:14px';
+  title.textContent = '🔩 Calculateur de disques';
+
+  sheet.appendChild(handle); sheet.appendChild(title);
+
+  // Bar selector
+  const barRow = document.createElement('div');
+  barRow.style.cssText = 'display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap';
+  const bars = [
+    {lbl:'Olympique 20kg',val:20},
+    {lbl:'Femme 15kg',val:15},
+    {lbl:'EZ 10kg',val:10},
+    {lbl:'Smith/Machine 0kg',val:0},
+  ];
+  let selectedBar = 20;
+  bars.forEach(b => {
+    const btn = document.createElement('button');
+    btn.style.cssText = 'padding:5px 10px;border-radius:8px;border:1.5px solid var(--border);background:' + (b.val===20?'var(--teal)':'var(--bg)') + ';color:' + (b.val===20?'#fff':'var(--muted)') + ';font-size:11px;font-weight:600;font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none';
+    btn.textContent = b.lbl;
+    const pick = () => {
+      selectedBar = b.val;
+      barRow.querySelectorAll('button').forEach((bb,i) => {
+        bb.style.background = bars[i].val===selectedBar?'var(--teal)':'var(--bg)';
+        bb.style.color      = bars[i].val===selectedBar?'#fff':'var(--muted)';
+      });
+      computePlates();
+    };
+    btn.ontouchstart = (e) => { e.preventDefault(); pick(); };
+    btn.onclick = pick;
+    barRow.appendChild(btn);
+  });
+  sheet.appendChild(barRow);
+
+  // Weight input
+  const wRow = document.createElement('div');
+  wRow.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:16px';
+  const wLbl = document.createElement('label');
+  wLbl.style.cssText = 'font-size:12px;font-weight:600;color:var(--muted);flex-shrink:0;width:80px';
+  wLbl.textContent = 'Poids total';
+  const wInp = document.createElement('input');
+  wInp.type='text'; wInp.inputMode='decimal'; wInp.value = targetWeight ? String(targetWeight) : '';
+  wInp.placeholder='100'; wInp.style.cssText='flex:1;padding:10px 14px;border-radius:12px;border:1.5px solid var(--teal);background:var(--bg);font-size:16px;font-weight:700;font-family:var(--mono);color:var(--text);-webkit-appearance:none;outline:none';
+  wInp.addEventListener('input', computePlates);
+  wRow.appendChild(wLbl); wRow.appendChild(wInp);
+  const wUnit = document.createElement('span');
+  wUnit.style.cssText = 'font-size:14px;font-weight:600;color:var(--muted)';
+  wUnit.textContent = 'kg';
+  wRow.appendChild(wUnit);
+  sheet.appendChild(wRow);
+
+  // Result
+  const result = document.createElement('div');
+  result.style.cssText = 'background:var(--card);border-radius:16px;padding:16px;min-height:60px';
+  sheet.appendChild(result);
+
+  const PLATES = [25, 20, 15, 10, 5, 2.5, 1.25];
+  const PLATE_COLORS = {'25':'#e53e3e','20':'#3182ce','15':'#d69e2e','10':'#38a169','5':'#805ad5','2.5':'#dd6b20','1.25':'#718096'};
+
+  function computePlates() {
+    const total = parseFloat(wInp.value.replace(',','.')) || 0;
+    const perSide = (total - selectedBar) / 2;
+    result.innerHTML = '';
+
+    if (total <= selectedBar || perSide < 0) {
+      result.textContent = perSide < 0 ? 'Poids inferieur au poids de barre (' + selectedBar + 'kg)' : 'Entrez un poids supérieur à ' + selectedBar + 'kg';
+      return;
+    }
+
+    // Calculate plates
+    let remaining = Math.round(perSide * 100) / 100;
+    const usedPlates = [];
+    PLATES.forEach(p => {
+      while (remaining >= p - 0.001) {
+        usedPlates.push(p);
+        remaining = Math.round((remaining - p) * 100) / 100;
+      }
+    });
+
+    if (Math.abs(remaining) > 0.1) {
+      result.textContent = 'Impossible avec disques standard (reste ' + remaining + 'kg/cote)';
+      return;
+    }
+
+    // Display
+    const header = document.createElement('div');
+    header.style.cssText = 'font-size:12px;font-weight:600;color:var(--muted);margin-bottom:10px';
+    header.textContent = 'Par cote (' + perSide + 'kg) :';
+    result.appendChild(header);
+
+    const plateRow = document.createElement('div');
+    plateRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;align-items:center';
+
+    if (!usedPlates.length) {
+      plateRow.textContent = 'Barre seule (' + selectedBar + 'kg)';
+    } else {
+      usedPlates.forEach(p => {
+        const chip = document.createElement('span');
+        chip.style.cssText = 'display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;font-family:var(--mono);font-weight:800;font-size:11px;color:#fff;background:' + (PLATE_COLORS[p]||'#718096');
+        chip.textContent = p + 'kg';
+        plateRow.appendChild(chip);
+      });
+    }
+    result.appendChild(plateRow);
+
+    const total2 = document.createElement('div');
+    total2.style.cssText = 'font-size:11px;color:var(--muted);margin-top:10px';
+    total2.textContent = 'Barre ' + selectedBar + 'kg + ' + usedPlates.join('+') + ' + ' + usedPlates.join('+') + ' = ' + total + 'kg';
+    result.appendChild(total2);
+  }
+
+  computePlates();
+
+  const cancel = document.createElement('button');
+  cancel.style.cssText = 'width:100%;padding:10px;border:none;background:none;color:var(--muted);font-size:14px;font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none;margin-top:12px';
+  cancel.textContent = 'Fermer';
+  cancel.ontouchstart = (e) => { e.preventDefault(); overlay.remove(); };
+  cancel.onclick = () => overlay.remove();
+  sheet.appendChild(cancel);
+
+  overlay.appendChild(sheet);
+  overlay.ontouchstart = (e) => { if (e.target === overlay) overlay.remove(); };
+  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+  document.body.appendChild(overlay);
+  setTimeout(() => wInp.focus(), 100);
+}
+
 function renderSession(){
   startSessTimer();
   // Injecter bouton partage (share.js)
@@ -234,6 +516,19 @@ function updateSessProgress(d,exercises){
   const vl=document.getElementById('sess-vol-live');if(vl)vl.innerHTML='📦 <strong>'+(vol>0?Math.round(vol/1000*10)/10+'t':'—')+'</strong>';
   let best1rm=0;d.exercises.forEach(ex=>{const rm=calc1RM(ex.weight,ex.repsAchieved);if(rm>best1rm)best1rm=rm;});
   const r1=document.getElementById('sess-1rm-live');if(r1)r1.innerHTML='🏋️ <strong>'+(best1rm?best1rm+'kg':'—')+'</strong>';
+  // Estimation temps restant
+  const te = document.getElementById('sess-time-est');
+  if (te) {
+    const remaining = exercises.filter(e => !e.done && e.name.trim() && !e.isWarmup);
+    const totalSets = remaining.reduce((sum, e) => {
+      const done = (e.setData||[]).filter(s=>s.done).length;
+      const total = parseInt(e.sets)||3;
+      return sum + Math.max(0, total - done);
+    }, 0);
+    const avgRest = Math.round(remaining.reduce((s,e) => s + (parseInt(e.rest)||S._restDuration||90), 0) / (remaining.length||1));
+    const minLeft = Math.round(totalSets * (avgRest + 40) / 60); // 40s per set effort
+    te.innerHTML = '⏱ <strong>' + (minLeft > 0 ? '~' + minLeft + ' min' : 'Fin !') + '</strong>';
+  }
 }
 function renderSessNav(d,exercises){
   const nav=document.getElementById('sess-nav');nav.innerHTML='';
@@ -334,8 +629,58 @@ function renderSessExercise(d,exercises,vi){
   const acts=document.createElement('div');acts.style.cssText='display:flex;gap:5px;flex-shrink:0;flex-direction:column;align-items:flex-end';
   if(ex.done){const chip=document.createElement('div');chip.style.cssText='padding:5px 12px;border-radius:20px;background:rgba(56,161,105,.12);color:var(--green);font-size:11px;font-weight:700;border:1px solid rgba(56,161,105,.3)';chip.textContent='✅ Terminé';acts.appendChild(chip);}
   const libEx=EXERCISE_LIBRARY.find(e=>ex.name.includes(e.name.slice(0,8)));
-  if(libEx&&libEx.alternatives&&libEx.alternatives.length){const altBtn=document.createElement('button');altBtn.className='btn btn-ghost btn-sm';altBtn.textContent='Alternatives';altBtn.addEventListener('click',()=>{showToast('Alternatives: '+libEx.alternatives.join(', '),'save',4000);});acts.appendChild(altBtn);}
+  if(libEx&&libEx.alternatives&&libEx.alternatives.length){
+    const altBtn=document.createElement('button');
+    altBtn.className='btn btn-ghost btn-sm';
+    altBtn.textContent='🔄 Swap';
+    altBtn.title='Remplacer par un exercice alternatif';
+    altBtn.addEventListener('click',()=>_showSwapExercise(ex, d, exercises, vi));
+    altBtn.ontouchstart=(e)=>{e.preventDefault();_showSwapExercise(ex, d, exercises, vi);};
+    acts.appendChild(altBtn);
+  }
+  // Bouton Échauffement auto
+  if (!ex.isWarmup && ex.weight) {
+    const wuBtn = document.createElement('button');
+    wuBtn.className = 'btn btn-ghost btn-sm';
+    wuBtn.textContent = '🔥 Échauff.';
+    wuBtn.title = 'Générer les séries d\'échauffement';
+    wuBtn.addEventListener('click', () => _autoWarmup(ex, d, vi));
+    wuBtn.ontouchstart = (e) => { e.preventDefault(); _autoWarmup(ex, d, vi); };
+    acts.appendChild(wuBtn);
+  }
   hdr.appendChild(numBadge);hdr.appendChild(info);hdr.appendChild(acts);mainEl.appendChild(hdr);
+
+  // ── BATTEZ VOTRE RECORD ──
+  if (!ex.isWarmup && !ex.done) {
+    const lastRecord = exHist(ex.name).filter(e => e.repsAchieved || e.weight).slice(-1)[0];
+    if (lastRecord) {
+      const lw = parseFloat(lastRecord.weight) || 0;
+      const lr = parseInt(lastRecord.repsAchieved || lastRecord.reps) || 0;
+      const cw = parseFloat(ex.weight) || lw;
+      // Objectif : +1 rep OU +2.5kg
+      const targetMore  = lw > 0 ? lw + 2.5 : null;
+      const targetRep   = lr > 0 ? lr + 1   : null;
+
+      const banner = document.createElement('div');
+      banner.className = 'sess-beat-banner';
+      banner.innerHTML = '';
+
+      const prev = document.createElement('div');
+      prev.className = 'sess-beat-prev';
+      prev.textContent = 'Derniere fois : ' + (lw || '?') + 'kg x ' + (lr || '?');
+
+      const target = document.createElement('div');
+      target.className = 'sess-beat-target';
+      const goals = [];
+      if (targetMore) goals.push(targetMore + 'kg x ' + (lr||'?'));
+      if (targetRep)  goals.push((lw||'?') + 'kg x ' + targetRep);
+      target.textContent = goals.length ? 'Objectif : ' + goals.join(' ou ') : 'Objectif : progresser !';
+
+      banner.appendChild(prev);
+      banner.appendChild(target);
+      mainEl.appendChild(banner);
+    }
+  }
 
   // RPE feedback alert
   if(avgRpe>=9&&ex.setData.some(s=>s.done)){
@@ -492,6 +837,16 @@ function renderSessExercise(d,exercises,vi){
 
     card.appendChild(secondary);
 
+    // ── Note par série (inline, compact) ──
+    const noteRow = document.createElement('div');
+    noteRow.className = 'set-note-row';
+    const noteInpSet = document.createElement('input');
+    noteInpSet.type = 'text'; noteInpSet.className = 'set-note-inp';
+    noteInpSet.placeholder = '📝 Note...'; noteInpSet.value = setD.note || '';
+    noteInpSet.addEventListener('input', e => { setD.note = e.target.value; _debouncedSave(); });
+    noteRow.appendChild(noteInpSet);
+    card.appendChild(noteRow);
+
     // ── Validation ──
     function doValidate() {
       setD.done = !setD.done;
@@ -504,10 +859,37 @@ function renderSessExercise(d,exercises,vi){
         const restSec    = parseInt(ex.rest) || S._restDuration || _suggestRestTime(ex) || 90;
         const nextSetIdx = ex.setData.slice(0, nSets).findIndex((s, idx) => idx > si && !s.done);
         const hasNextSet = nextSetIdx !== -1;
-        RestTimer.start(restSec, ex.name, hasNextSet ? () => {
-          const cards2 = cardsWrap.querySelectorAll('.set-card');
-          if (cards2[nextSetIdx]) cards2[nextSetIdx].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        } : null);
+        const allSetsNow = ex.setData.slice(0, nSets).every(s => s.done);
+
+        // ── Logique Superset ──
+        if (allSetsNow && ex.supersetGroup) {
+          // Chercher le partenaire SS non terminé dans la même séance
+          const ssPartner = exercises.find((e, i) => i !== vi && e.supersetGroup === ex.supersetGroup && !e.done);
+          if (ssPartner) {
+            // Pas de repos — aller directement au partenaire SS
+            const ssIdx = exercises.indexOf(ssPartner);
+            showToast('Superset : passage direct a ' + ssPartner.name, 'save', 2000);
+            setTimeout(() => {
+              _sessActiveEx = ssIdx;
+              renderSessNav(d, exercises);
+              renderSessExercise(d, exercises, ssIdx);
+            }, 400);
+          } else {
+            // Tous les partenaires SS terminés → maintenant le repos
+            RestTimer.start(restSec, ex.name, null);
+          }
+        } else {
+          // Comportement normal
+          RestTimer.start(restSec, ex.name, hasNextSet ? () => {
+            const cards2 = cardsWrap.querySelectorAll('.set-card');
+            if (cards2[nextSetIdx]) cards2[nextSetIdx].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          } : null);
+        }
+
+        // ── RPE rapide post-série (si pas encore renseigné) ──
+        if (!setD.rpe || setD.rpe === '—') {
+          _showQuickRPE(card, setD, () => { refreshSecondary(); save(); });
+        }
       }
 
       const allDone2 = ex.setData.filter(s => s.done);
@@ -519,8 +901,10 @@ function renderSessExercise(d,exercises,vi){
         numBadge.className  = 'sess-ex-num-big done';
         numBadge.textContent = '✓';
         if (checkPR(d.exercises[realIdx]) && !wasPR) showPRToast(ex.name);
-        const nextVi = exercises.findIndex((e, i) => i > vi && !e.done);
-        if (nextVi >= 0) setTimeout(() => { _sessActiveEx = nextVi; renderSessNav(d, exercises); renderSessExercise(d, exercises, nextVi); }, 1200);
+        if (!ex.supersetGroup) {
+          const nextVi = exercises.findIndex((e, i) => i > vi && !e.done);
+          if (nextVi >= 0) setTimeout(() => { _sessActiveEx = nextVi; renderSessNav(d, exercises); renderSessExercise(d, exercises, nextVi); }, 1200);
+        }
       }
       refreshNavDots(); refreshSecondary(); resetChrono(); startChrono(); save(); updateStats(); renderDayTabs(); updateSessProgress(d, exercises);
       if (d.exercises.filter(e => e.name.trim() && !e.isWarmup).every(e => e.done)) showSessionComplete(S.sessDay, d);

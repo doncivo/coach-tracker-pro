@@ -2186,3 +2186,104 @@ nav.tabs   { flex-shrink: 0; }
   border-left: 3px solid var(--purple) !important;
   margin-left: 8px;
 }
+
+
+/* ================================================================
+   SESSION — Beat Your Record banner
+   ================================================================ */
+
+.sess-beat-banner {
+  margin: 8px 12px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, rgba(91,168,160,.1), rgba(91,168,160,.05));
+  border: 1.5px solid rgba(91,168,160,.3);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.sess-beat-prev {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: var(--mono);
+}
+.sess-beat-target {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--teal-d);
+}
+
+/* ================================================================
+   SESSION — Quick RPE picker
+   ================================================================ */
+
+.quick-rpe-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  padding: 8px 10px 6px;
+  background: rgba(91,168,160,.06);
+  border-top: 1px solid var(--border);
+  margin-top: 6px;
+  border-radius: 0 0 10px 10px;
+  animation: quick-rpe-in .2s ease;
+}
+@keyframes quick-rpe-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.quick-rpe-lbl {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.quick-rpe-btn {
+  padding: 4px 8px;
+  border-radius: 7px;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--mono);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-appearance: none;
+  transition: background .1s, color .1s;
+}
+.quick-rpe-btn.sel {
+  background: var(--teal);
+  color: #fff;
+  border-color: var(--teal);
+}
+
+/* ================================================================
+   SESSION — Note par série
+   ================================================================ */
+
+.set-note-row {
+  padding: 4px 8px 8px;
+}
+.set-note-inp {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  font-size: 11px;
+  font-family: var(--font);
+  color: var(--muted);
+  outline: none;
+  padding: 3px 0;
+  box-sizing: border-box;
+}
+.set-note-inp:focus { border-color: var(--teal); }
+
+/* ================================================================
+   SESSION — Temps estimé chip (already in header)
+   ================================================================ */
+
+#sess-time-est { font-size: 11px; }

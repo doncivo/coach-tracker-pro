@@ -2,10 +2,71 @@
    render_session.js — Page Séance + Focus mode
 ============================================================ */
 
+/* ══ TIMER INTELLIGENT ══ */
+function _suggestRestTime(ex) {
+  const name   = (ex.name || '').toLowerCase();
+  const repStr = (ex.reps || '8');
+  const repNum = parseInt(repStr.match(/\d+/)?.[0] || '8');
+  const compounds = ['squat', 'soulevé', 'deadlift', 'développé', 'bench',
+    'tirage', 'traction', 'rowing', 'press', 'fente', 'hip thrust',
+    'leg press', 'rdl', 'soulevé de terre', 'overhead'];
+  const isCompound = compounds.some(c => name.includes(c));
+  if (repNum <= 3)  return 240; // Force max : 4 min
+  if (repNum <= 5)  return 180; // Lourd : 3 min
+  if (isCompound && repNum <= 8)  return 150; // Compound modéré : 2:30
+  if (isCompound)   return 120; // Compound léger : 2 min
+  if (repNum <= 8)  return 90;  // Isolation lourd : 1:30
+  return 60;                    // Isolation léger : 1 min
+}
+
+/* ══ MINI SPARKLINE HISTORIQUE POIDS ══ */
+function _renderWeightSparkline(exName) {
+  const hist = exHist(exName).slice(-10);
+  const weights = hist.map(h => parseFloat(h.weight) || 0).filter(w => w > 0);
+  if (weights.length < 2) return null;
+
+  const W = 110, H = 28;
+  const min = Math.min(...weights);
+  const max = Math.max(...weights);
+  const range = max - min || 1;
+
+  const pts = weights.map((w, i) => {
+    const x = (i / (weights.length - 1)) * (W - 6) + 3;
+    const y = H - 3 - ((w - min) / range) * (H - 6);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+
+  const dots = weights.map((w, i) => {
+    const x = (i / (weights.length - 1)) * (W - 6) + 3;
+    const y = H - 3 - ((w - min) / range) * (H - 6);
+    const isLast = i === weights.length - 1;
+    return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${isLast ? 3 : 2}" fill="${isLast ? 'var(--teal-d)' : 'var(--teal)'}"/>`;
+  }).join('');
+
+  const trend = weights[weights.length - 1] > weights[0] ? '↑' : weights[weights.length - 1] < weights[0] ? '↓' : '→';
+  const trendColor = trend === '↑' ? 'var(--green)' : trend === '↓' ? 'var(--red)' : 'var(--muted)';
+
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex;align-items:center;gap:6px;margin-top:5px;padding:4px 0';
+  wrap.innerHTML = `
+    <svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="overflow:visible;flex-shrink:0">
+      <polyline points="${pts}" fill="none" stroke="var(--teal)" stroke-width="1.5"
+        stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+      ${dots}
+    </svg>
+    <div style="font-size:10px;line-height:1.4;color:var(--muted)">
+      <div style="font-weight:600;color:${trendColor}">${trend} ${weights[weights.length-1]}kg</div>
+      <div>${weights[0]}→${weights[weights.length-1]}kg · ${weights.length}s</div>
+    </div>`;
+  return wrap;
+}
+
 /* ══ SESSION MODE ══ */
 /* _sessActiveEx — déclaré dans constants.js */
 function renderSession(){
   startSessTimer();
+  // Injecter bouton partage (share.js)
+  if (typeof Share !== 'undefined') setTimeout(() => Share.injectShareButton(), 100);
   // Day selector
   const sel=document.getElementById('sess-day-sel');sel.innerHTML='';
   DAYS_SH.forEach((n,i)=>{const btn=document.createElement('button');btn.className='sess-day-btn'+(S.sessDay===i?' active':'');btn.setAttribute('data-d',i);btn.textContent=n;btn.addEventListener('click',()=>{S.sessDay=i;S.sessStartTime=Date.now();_sessActiveEx=0;save();renderSession();});sel.appendChild(btn);});
@@ -114,6 +175,9 @@ function renderSessExercise(d,exercises,vi){
   if(ex.tempo){const tp=document.createElement('span');tp.className='sess-ex-sub-item';tp.textContent='Tempo: '+ex.tempo;sub.appendChild(tp);}
   if(shouldOverload(ex)&&!ex.isWarmup){const cw=parseFloat(ex.weight)||0;const sg=document.createElement('span');sg.className='sess-ex-sub-item';sg.style.cssText='background:rgba(56,161,105,.1);border:1px solid rgba(56,161,105,.3);color:var(--green);font-weight:700';sg.textContent='↑ Surcharge: '+(cw?Math.round((cw*1.025)/2.5)*2.5+'kg':'suggérée');sub.appendChild(sg);}
   if(checkPR(ex)){const prb=document.createElement('span');prb.className='sess-ex-sub-item';prb.style.cssText='background:#fff3cd;border:1px solid #ffd700;color:#7a5800;font-weight:700';prb.textContent='🏆 PR';sub.appendChild(prb);}
+  // Mini sparkline historique poids
+  const sparkline = _renderWeightSparkline(ex.name);
+  if (sparkline) sub.appendChild(sparkline);
   // Strength standard
   const lastPoids=(S.mesures.poids||[]).slice(-1)[0];
   if(lastPoids&&ex.weight){const std=strengthStandard(ex,parseFloat(lastPoids.val));if(std){const sb=document.createElement('span');sb.className='sess-ex-sub-item';sb.style.color=std.color;sb.textContent=std.level;sub.appendChild(sb);}}
@@ -189,7 +253,7 @@ function renderSessExercise(d,exercises,vi){
       tr.className=setD.done?'srow-done':'';
       // ── Lancer le minuteur de repos si série validée ──
       if(setD.done) {
-        const restSec = parseInt(ex.rest) || S._restDuration || 90;
+        const restSec = parseInt(ex.rest) || _suggestRestTime(ex) || S._restDuration || 90;
         const nextSetIdx = ex.setData.slice(0,nSets).findIndex((s,idx)=>idx>si&&!s.done);
         const hasNextSet = nextSetIdx !== -1;
         RestTimer.start(restSec, ex.name, hasNextSet ? () => {

@@ -587,6 +587,15 @@ function renderSettings() {
     btn.textContent='⬇ Exporter'; btn.addEventListener('click', () => document.getElementById('export-btn')?.click());
     return btn;
   });
+  _settingsRow(dataSec, 'Exporter historique CSV', 'Compatible Excel / Google Sheets', () => {
+    const btn = document.createElement('button'); btn.className='btn btn-ghost btn-sm';
+    btn.textContent='📊 Export CSV';
+    btn.addEventListener('click', () => {
+      if (typeof Persist !== 'undefined') Persist.exportCSV();
+      else if (typeof exportCSV === 'function') exportCSV();
+    });
+    return btn;
+  });
   _settingsRow(dataSec, 'Importer des données', 'Restaurer depuis un fichier JSON', () => {
     const btn = document.createElement('button'); btn.className='btn btn-ghost btn-sm';
     btn.textContent='⬆ Importer'; btn.addEventListener('click', () => document.getElementById('import-btn')?.click());

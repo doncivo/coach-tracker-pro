@@ -571,8 +571,17 @@ function openFocusMode(){
   if(!ex.setData||ex.setData.length<nSets)ex.setData=Array.from({length:nSets},()=>({weight:ex.weight||'',reps:'',done:false,rpe:'',rir:''}));
   const top=document.createElement('div');top.className='focus-top';
   const name=document.createElement('div');name.className='focus-ex-name';name.textContent=ex.name;
-  const exit=document.createElement('button');exit.className='focus-exit';exit.textContent='✕ Quitter';exit.addEventListener('click',()=>{overlay.style.display='none';renderSession();});
-  const meta=document.createElement('div');meta.style.cssText='font-size:11px;opacity:.8';meta.textContent=`${ex.sets}×${ex.reps} · Préc: ${lastW(ex.name)||'—'}`;
+  const exit=document.createElement('button');exit.className='focus-exit';exit.textContent='✕ Quitter';
+  const doExit = () => { overlay.style.display='none'; RestTimer.stop(); renderSession(); };
+  exit.ontouchstart = (e) => { e.preventDefault(); doExit(); };
+  exit.addEventListener('click', doExit);
+  const restSec0 = parseInt(ex.rest) || S._restDuration || (typeof _suggestRestTime === 'function' ? _suggestRestTime(ex) : 90) || 90;
+  const nextExFocus = exercises.find((e, i) => i > _sessActiveEx && !e.done);
+  const metaParts = [ex.sets + '×' + ex.reps];
+  if (lastW(ex.name)) metaParts.push('Préc: ' + lastW(ex.name));
+  metaParts.push('Repos: ' + restSec0 + 's');
+  if (nextExFocus) metaParts.push('Suivant: ' + nextExFocus.name);
+  const meta=document.createElement('div');meta.style.cssText='font-size:11px;opacity:.8';meta.textContent=metaParts.join(' · ');
   top.appendChild(name);const topInfo=document.createElement('div');topInfo.style.cssText='display:flex;flex-direction:column;gap:2px;flex:1;margin-left:10px';topInfo.appendChild(meta);top.appendChild(topInfo);top.appendChild(exit);
   overlay.appendChild(top);
   const body=document.createElement('div');body.className='focus-body';
@@ -591,7 +600,64 @@ function openFocusMode(){
     const u2=document.createElement('span');u2.className='focus-unit';u2.textContent='reps';
     const vb=document.createElement('button');vb.className='focus-val-btn'+(setD.done?' f-validated':'');vb.textContent=setD.done?'✓ Fait':'✓';
     [wi,ri].forEach(inp=>inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();vb.click();}}));
-    vb.addEventListener('click',()=>{setD.done=!setD.done;vb.className='focus-val-btn'+(setD.done?' f-validated':'');vb.textContent=setD.done?'✓ Fait':'✓';row.className='focus-set-row'+(setD.done?' f-done':'');sn.textContent=setD.done?'✓':(si+1);if(setD.done){d.exercises[realIdx].repsAchieved=ex.setData.filter(s=>s.done).map(s=>s.reps).join('/');resetChrono();startChrono();}if(ex.setData.slice(0,nSets).every(s=>s.done)){d.exercises[realIdx].done=true;showToast('✅ Exercice terminé !','save');}save();updateStats();renderDayTabs();});
+    // ── Validation série en mode focus ──
+    function doFocusValidate() {
+      setD.done = !setD.done;
+      vb.className  = 'focus-val-btn' + (setD.done ? ' f-validated' : '');
+      vb.textContent = setD.done ? '✓ Fait' : '✓';
+      row.className  = 'focus-set-row' + (setD.done ? ' f-done' : '');
+      sn.textContent = setD.done ? '✓' : (si + 1);
+
+      if (setD.done) {
+        // Mettre à jour repsAchieved
+        d.exercises[realIdx].repsAchieved = ex.setData.filter(s => s.done).map(s => s.reps).filter(Boolean).join('/');
+
+        // Durée de repos
+        const restSec = parseInt(ex.rest) || S._restDuration || (typeof _suggestRestTime === 'function' ? _suggestRestTime(ex) : 90) || 90;
+
+        const allSetsNowDone = ex.setData.slice(0, nSets).every(s => s.done);
+
+        if (allSetsNowDone) {
+          // ── TOUTES LES SÉRIES TERMINÉES ──
+          d.exercises[realIdx].done = true;
+          resetChrono();
+
+          // Trouver l'exercice suivant non terminé
+          const nextVi = exercises.findIndex((e, i) => i > _sessActiveEx && !e.done);
+
+          // Démarrer le timer de repos avec callback auto-avance
+          RestTimer.start(restSec, ex.name, nextVi >= 0 ? () => {
+            _sessActiveEx = nextVi;
+            renderSessNav(d, exercises);
+            openFocusMode(); // rouvrir en mode focus sur le prochain exercice
+          } : null);
+
+          if (nextVi >= 0) {
+            showToast('Repos ' + restSec + 's — puis ' + exercises[nextVi].name, 'save', restSec * 1000);
+          } else {
+            showToast('Exercice termine !', 'save');
+          }
+
+          // Vérifier si toute la séance est terminée
+          if (d.exercises.filter(e => e.name.trim() && !e.isWarmup).every(e => e.done)) {
+            setTimeout(() => {
+              overlay.style.display = 'none';
+              showSessionComplete(S.sessDay, d);
+            }, 800);
+          }
+
+        } else {
+          // ── SÉRIE PARTIELLE — juste démarrer le repos ──
+          resetChrono(); startChrono();
+          RestTimer.start(restSec, ex.name, null);
+        }
+      }
+
+      save(); updateStats(); renderDayTabs(); updateSessProgress(d, exercises);
+    }
+
+    vb.ontouchstart = (e) => { e.preventDefault(); e.stopPropagation(); doFocusValidate(); };
+    vb.addEventListener('click', doFocusValidate);
     row.appendChild(sn);row.appendChild(wi);row.appendChild(u1);row.appendChild(ri);row.appendChild(u2);row.appendChild(vb);body.appendChild(row);
   });
   overlay.appendChild(body);updateChronoDsp();

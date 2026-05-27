@@ -23,9 +23,137 @@ function renderDayTabs(){
     tab.addEventListener('click',()=>{S.activeDay=i;renderDayTabs();renderDayDetail(i);});
     nav.appendChild(tab);
   }
+  _renderWeekHeatmap();
 }
 
-/* ══ DAY DETAIL ══ */
+/* ── Heatmap musculaire hebdomadaire ── */
+function _renderWeekHeatmap() {
+  const wrap = document.getElementById('week-heatmap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  // Groupes musculaires pertinents (hors repos, mobilité, cardio)
+  const groups = [
+    { keys: ['pec','ep','tri'], label: 'Push',  color: '#c0506a' },
+    { keys: ['dos','bic'],      label: 'Pull',  color: '#6050b0' },
+    { keys: ['jam'],            label: 'Legs',  color: '#3a9060' },
+    { keys: ['abd','bas'],      label: 'Core',  color: '#904090' },
+    { keys: ['car'],            label: 'Cardio',color: '#b07800' },
+  ];
+
+  // Calculer le volume par groupe et par jour
+  const volByDayGroup = S.days.map(d => {
+    const result = {};
+    groups.forEach(g => {
+      const vol = (d.exercises || [])
+        .filter(e => !e.isWarmup && g.keys.includes(e.muscle))
+        .reduce((sum, e) => sum + (parseFloat(e.weight)||0) * (parseInt(e.sets)||0) * (parseInt(e.reps)||1), 0);
+      result[g.label] = vol;
+    });
+    return result;
+  });
+
+  const maxVol = Math.max(...volByDayGroup.flatMap(d => Object.values(d)), 1);
+
+  const grid = document.createElement('div');
+  grid.className = 'week-heatmap';
+
+  // En-tête : jours
+  const headerRow = document.createElement('div');
+  headerRow.className = 'whm-row whm-header';
+  const corner = document.createElement('div'); corner.className = 'whm-label'; corner.textContent = '';
+  headerRow.appendChild(corner);
+  S.days.forEach((d, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'whm-day-lbl' + (i === S.activeDay ? ' whm-active' : '');
+    cell.textContent = ['L','M','M','J','V','S','D'][i];
+    cell.ontouchstart = (e) => { e.preventDefault(); S.activeDay=i; renderDayTabs(); renderDayDetail(i); };
+    cell.onclick = () => { S.activeDay=i; renderDayTabs(); renderDayDetail(i); };
+    headerRow.appendChild(cell);
+  });
+  grid.appendChild(headerRow);
+
+  // Lignes : groupes musculaires
+  groups.forEach(g => {
+    const row = document.createElement('div');
+    row.className = 'whm-row';
+
+    const lbl = document.createElement('div');
+    lbl.className = 'whm-label'; lbl.textContent = g.label;
+    lbl.style.color = g.color;
+    row.appendChild(lbl);
+
+    S.days.forEach((d, i) => {
+      const vol = volByDayGroup[i][g.label] || 0;
+      const pct = Math.min(1, vol / maxVol);
+      const cell = document.createElement('div');
+      cell.className = 'whm-cell' + (i === S.activeDay ? ' whm-active' : '');
+      if (vol > 0) {
+        const alpha = 0.15 + pct * 0.85;
+        cell.style.background = g.color;
+        cell.style.opacity = alpha.toFixed(2);
+        cell.title = g.label + ' ' + DAYS_SH[i] + ' : ' + Math.round(vol) + 'kg';
+      }
+      cell.ontouchstart = (e) => { e.preventDefault(); S.activeDay=i; renderDayTabs(); renderDayDetail(i); };
+      cell.onclick = () => { S.activeDay=i; renderDayTabs(); renderDayDetail(i); };
+      row.appendChild(cell);
+    });
+    grid.appendChild(row);
+  });
+
+  wrap.appendChild(grid);
+}
+
+/* ── Copier un jour depuis la semaine précédente ── */
+function _copyDayFromHistory(dayIndex) {
+  // Trouver la semaine archivée la plus récente
+  const histKeys = Object.keys(S.history || {}).sort();
+  if (!histKeys.length) {
+    showToast('Aucun historique disponible', 'warn', 2500);
+    return;
+  }
+
+  const lastKey  = histKeys[histKeys.length - 1];
+  const lastWeek = S.history[lastKey];
+  const srcDay   = lastWeek?.days?.[dayIndex];
+
+  if (!srcDay || !(srcDay.exercises || []).filter(e => e.name?.trim()).length) {
+    showToast('Aucun exercice à copier (sem. ' + lastKey + ')', 'warn', 3000);
+    return;
+  }
+
+  // Copier les exercices sans marquer comme faits
+  const copied = (srcDay.exercises || []).map(e => ({
+    id:            uid(),
+    name:          e.name || '',
+    muscle:        e.muscle || '',
+    weight:        e.weight || '',
+    sets:          e.sets || '',
+    reps:          e.reps || '',
+    repsAchieved:  '',
+    rpe:           e.rpe || '',
+    rir:           e.rir || '',
+    tempo:         e.tempo || '',
+    rest:          e.rest || '',
+    note:          e.note || '',
+    done:          false,
+    isWarmup:      e.isWarmup || false,
+    supersetGroup: e.supersetGroup || '',
+    setData:       null,
+  }));
+
+  save(); // snapshot avant modification
+  Store.dispatch({
+    type:    'TRAINING_UPDATE_DAY',
+    payload: { dayIndex, changes: { exercises: copied } },
+  });
+  save(true);
+  renderDayTabs();
+  renderDayDetail(S.activeDay);
+  showToast('📋 ' + DAYS[dayIndex] + ' copié depuis ' + lastKey, 'save', 2500);
+}
+
+
 /* _exView — déclaré dans constants.js */
 function renderDayDetail(i){
   const detail=document.getElementById('day-detail');const d=S.days[i];
@@ -47,6 +175,12 @@ function renderDayDetail(i){
   const ra=document.createElement('div');ra.className='dhc-actions';
   const lb=document.createElement('button');lb.className='btn btn-teal btn-sm';lb.textContent='⚡ Séance';
   lb.addEventListener('click',()=>{S.sessDay=i;renderSession();document.querySelector('[data-tab="session"]').click();});
+
+  // Copier depuis la semaine précédente
+  const cpBtn=document.createElement('button');cpBtn.className='btn btn-ghost btn-sm';cpBtn.textContent='📋';
+  cpBtn.title='Copier depuis la semaine précédente';
+  cpBtn.addEventListener('click',()=>_copyDayFromHistory(i));
+
   const rb=document.createElement('button');rb.className='btn btn-ghost btn-sm';rb.textContent='↺';
   rb.addEventListener('click',async()=>{
     const ok=await Modal.confirm('Réinitialiser '+DAYS[i]+' ?');
@@ -56,7 +190,7 @@ function renderDayDetail(i){
     save(true); // skipUndo=true to avoid double snapshot
     renderDayTabs();renderDayDetail(i);
   });
-  ra.appendChild(lb);ra.appendChild(rb);hdr.appendChild(ra);detail.appendChild(hdr);
+  ra.appendChild(lb);ra.appendChild(cpBtn);ra.appendChild(rb);hdr.appendChild(ra);detail.appendChild(hdr);
 
   // Pain alerts for muscles planned today
   const todayPains=activePains();
@@ -227,7 +361,47 @@ function buildExCard(di, ei, d, onUpdate) {
   nameInp.type = 'text'; nameInp.className = 'pec-name';
   nameInp.placeholder = ex.isWarmup ? 'Échauffement...' : 'Exercice';
   nameInp.value = ex.name || '';
-  nameInp.addEventListener('input', e => { ex.name = e.target.value; onUpdate(); save(); renderDayTabs(); });
+  nameInp.setAttribute('autocomplete','off');
+  nameInp.addEventListener('input', e => { ex.name = e.target.value; onUpdate(); save(); renderDayTabs(); _updateAc(e.target.value); });
+  nameInp.addEventListener('blur', () => setTimeout(() => { acList.style.display = 'none'; }, 200));
+
+  // ── Autocomplete dropdown ──
+  const acWrap = document.createElement('div');
+  acWrap.style.cssText = 'position:relative;flex:1;min-width:0';
+  const acList = document.createElement('div');
+  acList.className = 'pec-ac-list';
+  acList.style.display = 'none';
+  acWrap.appendChild(nameInp);
+  acWrap.appendChild(acList);
+
+  function _updateAc(q) {
+    const s = q.trim().toLowerCase();
+    if (s.length < 2) { acList.style.display = 'none'; return; }
+    const hits = EXERCISE_LIBRARY.filter(l => l.name.toLowerCase().includes(s)).slice(0, 6);
+    if (!hits.length) { acList.style.display = 'none'; return; }
+    acList.innerHTML = '';
+    hits.forEach(lib => {
+      const item = document.createElement('div');
+      item.className = 'pec-ac-item';
+      const nm = document.createElement('span'); nm.textContent = lib.name;
+      const m = MM[lib.muscle || ''];
+      const badge = document.createElement('span');
+      badge.className = 'pec-muscle';
+      if (m) { badge.style.cssText = `background:${m.calBg};color:${m.calColor}`; badge.textContent = m.label; }
+      item.appendChild(nm); if (m) item.appendChild(badge);
+      const pick = () => {
+        ex.name   = lib.name;
+        if (!ex.muscle) ex.muscle = lib.muscle;
+        nameInp.value = lib.name;
+        acList.style.display = 'none';
+        onUpdate(); save(); renderDayDetail(S.activeDay);
+      };
+      item.ontouchstart = (e) => { e.preventDefault(); pick(); };
+      item.onmousedown  = (e) => { e.preventDefault(); pick(); };
+      acList.appendChild(item);
+    });
+    acList.style.display = 'block';
+  }
 
   const badges = document.createElement('div');
   badges.className = 'pec-badges';
@@ -252,7 +426,7 @@ function buildExCard(di, ei, d, onUpdate) {
     plb.className = 'pec-badge-plateau'; plb.textContent = '⚠ Plateau'; badges.appendChild(plb);
   }
 
-  row1.appendChild(cb); row1.appendChild(nameInp); row1.appendChild(badges);
+  row1.appendChild(cb); row1.appendChild(acWrap); row1.appendChild(badges);
   card.appendChild(row1);
 
   // ── Ligne 2 : Poids × Séries × Reps ──

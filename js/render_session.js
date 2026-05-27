@@ -541,8 +541,8 @@ function renderSessNav(d,exercises){
       const setsDone=ex.setData.slice(0,nSets).filter(s=>s.done).length;
       const isActive=vi===_sessActiveEx;
       const item=document.createElement('div');
-      item.className='sess-strip-item'+(isActive?' active-nav':'')+(ex.done?' done-nav':'');
-      const num=document.createElement('div');num.className='sess-strip-num';num.textContent=ex.done?'✓':(vi+1);num.style.color=ex.done?'var(--green)':isActive?'var(--teal-d)':'var(--muted)';
+      item.className='sess-strip-item'+(isActive?' active-nav':'')+(ex.done?' done-nav':'')+(ex.skipped?' skipped-nav':'');
+      const num=document.createElement('div');num.className='sess-strip-num';num.textContent=ex.done?'✓':ex.skipped?'⏭':(vi+1);num.style.color=ex.done?'var(--green)':ex.skipped?'var(--muted)':isActive?'var(--teal-d)':'var(--muted)';
       const dots=document.createElement('div');dots.className='sess-strip-dots';
       for(let si=0;si<Math.min(nSets,6);si++){const dot=document.createElement('div');dot.className='sess-strip-dot'+(si<setsDone?' dot-done':'');dots.appendChild(dot);}
       item.appendChild(num);item.appendChild(dots);
@@ -558,8 +558,8 @@ function renderSessNav(d,exercises){
     if(!ex.setData||ex.setData.length<nSets)ex.setData=Array.from({length:nSets},()=>({weight:ex.weight||'',reps:'',done:false,rpe:'',rir:''}));
     const setsDone=ex.setData.slice(0,nSets).filter(s=>s.done).length;
     const isActive=vi===_sessActiveEx;
-    const item=document.createElement('div');item.className='sess-nav-item'+(isActive?' active-nav':'')+(ex.done?' done-nav':'');
-    const num=document.createElement('div');num.className='sess-nav-num'+(ex.done?' done-num':isActive?' active-num':'');num.textContent=ex.done?'✓':(vi+1);
+    const item=document.createElement('div');item.className='sess-nav-item'+(isActive?' active-nav':'')+(ex.done?' done-nav':'')+(ex.skipped?' skipped-nav':'');
+    const num=document.createElement('div');num.className='sess-nav-num'+(ex.done?' done-num':ex.skipped?' skip-num':isActive?' active-num':'');num.textContent=ex.done?'✓':ex.skipped?'⏭':(vi+1);
     if(ex.isWarmup)num.className='sess-nav-num snum-warmup';
     const info=document.createElement('div');info.className='sess-nav-info';
     const name=document.createElement('div');name.className='sess-nav-name';name.textContent=ex.name;
@@ -638,6 +638,26 @@ function renderSessExercise(d,exercises,vi){
     altBtn.ontouchstart=(e)=>{e.preventDefault();_showSwapExercise(ex, d, exercises, vi);};
     acts.appendChild(altBtn);
   }
+  // Bouton statut — Prévu / Ignoré
+  if (!ex.isWarmup) {
+    const skipBtn = document.createElement('button');
+    skipBtn.className = 'btn btn-sm ' + (ex.skipped ? 'btn-orange' : 'btn-ghost');
+    skipBtn.textContent = ex.skipped ? '↩ Reprendre' : '⏭ Ignorer';
+    skipBtn.title = ex.skipped ? 'Remettre au programme' : 'Ignorer cet exercice aujourd\'hui';
+    const doSkip = () => {
+      const realIdx2 = d.exercises.indexOf(ex);
+      d.exercises[realIdx2].skipped = !d.exercises[realIdx2].skipped;
+      // Si on ignore, on ne peut pas être "done" en même temps
+      if (d.exercises[realIdx2].skipped) d.exercises[realIdx2].done = false;
+      save(); renderSessNav(d, exercises); renderSessExercise(d, exercises, vi);
+      // Vérifier si tous les exercices sont faits ou ignorés
+      const allDoneOrSkipped = d.exercises.filter(e=>e.name.trim()&&!e.isWarmup).every(e=>e.done||e.skipped);
+      if (allDoneOrSkipped) showSessionComplete(S.sessDay, d);
+    };
+    skipBtn.ontouchstart = (e) => { e.preventDefault(); doSkip(); };
+    skipBtn.onclick = doSkip;
+    acts.appendChild(skipBtn);
+  }
   // Bouton Échauffement auto
   if (!ex.isWarmup && ex.weight) {
     const wuBtn = document.createElement('button');
@@ -651,7 +671,7 @@ function renderSessExercise(d,exercises,vi){
   hdr.appendChild(numBadge);hdr.appendChild(info);hdr.appendChild(acts);mainEl.appendChild(hdr);
 
   // ── BATTEZ VOTRE RECORD ──
-  if (!ex.isWarmup && !ex.done) {
+  if (!ex.isWarmup && !ex.done && !ex.skipped) {
     const lastRecord = exHist(ex.name).filter(e => e.repsAchieved || e.weight).slice(-1)[0];
     if (lastRecord) {
       const lw = parseFloat(lastRecord.weight) || 0;
@@ -694,6 +714,23 @@ function renderSessExercise(d,exercises,vi){
   }
 
   // ══ Vue Carte — remplace le tableau 8 colonnes ══
+  // Si l'exercice est ignoré, afficher un bandeau et masquer les séries
+  if (ex.skipped) {
+    const skipBanner = document.createElement('div');
+    skipBanner.style.cssText = 'margin:8px 12px;padding:16px;background:var(--card);border:2px dashed var(--border);border-radius:14px;text-align:center;opacity:.7';
+    const skipIcon = document.createElement('div');
+    skipIcon.style.cssText = 'font-size:28px;margin-bottom:6px';
+    skipIcon.textContent = '⏭';
+    const skipLbl = document.createElement('div');
+    skipLbl.style.cssText = 'font-size:13px;font-weight:700;color:var(--muted)';
+    skipLbl.textContent = 'Exercice ignore pour cette seance';
+    const skipSub = document.createElement('div');
+    skipSub.style.cssText = 'font-size:10px;color:var(--muted);margin-top:4px';
+    skipSub.textContent = 'Ne compte pas dans l adherence programme';
+    skipBanner.appendChild(skipIcon); skipBanner.appendChild(skipLbl); skipBanner.appendChild(skipSub);
+    mainEl.appendChild(skipBanner);
+    return; // ne pas afficher les séries
+  }
   const setsArea = document.createElement('div');
   setsArea.className = 'sess-sets-area';
 
@@ -907,7 +944,7 @@ function renderSessExercise(d,exercises,vi){
         }
       }
       refreshNavDots(); refreshSecondary(); resetChrono(); startChrono(); save(); updateStats(); renderDayTabs(); updateSessProgress(d, exercises);
-      if (d.exercises.filter(e => e.name.trim() && !e.isWarmup).every(e => e.done)) showSessionComplete(S.sessDay, d);
+      if (d.exercises.filter(e => e.name.trim() && !e.isWarmup).every(e => e.done || e.skipped)) showSessionComplete(S.sessDay, d);
     }
 
     valBtn.ontouchstart = function(e) { e.preventDefault(); e.stopPropagation(); doValidate(); };

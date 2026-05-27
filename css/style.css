@@ -2287,3 +2287,18 @@ nav.tabs   { flex-shrink: 0; }
    ================================================================ */
 
 #sess-time-est { font-size: 11px; }
+
+
+/* ================================================================
+   SESSION — Statut exercice (Prévu / Fait / Ignoré)
+   ================================================================ */
+
+.sess-nav-item.skipped-nav  { opacity: .5; }
+.sess-strip-item.skipped-nav { opacity: .5; }
+.sess-nav-num.skip-num      { color: var(--muted) !important; }
+
+.btn-orange {
+  background: rgba(221,107,32,.12);
+  border-color: rgba(221,107,32,.4);
+  color: var(--orange, #dd6b20);
+}

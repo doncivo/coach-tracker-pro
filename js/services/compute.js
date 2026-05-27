@@ -412,18 +412,19 @@ const Compute = (() => {
 
     // ── Adhésion programme (15%) ──
     // Ratio exercices planifiés réalisés / total planifiés
+    // Les exercices ignorés (skipped) sont exclus du calcul
     let exPlanned = 0, exDone = 0;
     days7.forEach(dateKey => {
       if (!history[dateKey]?.days) return;
       history[dateKey].days.forEach(day => {
-        const exs = (day.exercises || []).filter(e => e.name && !e.isWarmup);
+        const exs = (day.exercises || []).filter(e => e.name && !e.isWarmup && !e.skipped);
         exPlanned += exs.length;
         exDone    += exs.filter(e => e.done).length;
       });
     });
     // Aussi compter la semaine courante si exercises marqués done
     days.forEach(day => {
-      const exs = (day.exercises || []).filter(e => e.name && !e.isWarmup);
+      const exs = (day.exercises || []).filter(e => e.name && !e.isWarmup && !e.skipped);
       const doneExs = exs.filter(e => e.done);
       if (doneExs.length > 0) {
         exPlanned += exs.length;

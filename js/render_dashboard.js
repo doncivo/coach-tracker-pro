@@ -130,7 +130,61 @@ function renderDashboard(){
   });
   wrap.appendChild(statsGrid);
 
-  // ── SCORE BREAKDOWN — expliqué et actionnable ──
+  // ── COURBE POIDS (si ≥3 mesures) ──
+  const weightEntries = (S.mesures?.poids || []).slice(-10);
+  if (weightEntries.length >= 2) {
+    const wCard = document.createElement('div');
+    wCard.className = 'dash-weight-card';
+    const first = parseFloat(weightEntries[0].val || weightEntries[0].value) || 0;
+    const last  = parseFloat(weightEntries[weightEntries.length-1].val || weightEntries[weightEntries.length-1].value) || 0;
+    const diff  = Math.round((last - first) * 10) / 10;
+    const diffStr = (diff > 0 ? '+' : '') + diff + ' kg';
+    const diffColor = diff < 0 ? 'var(--green)' : diff > 0 ? 'var(--orange)' : 'var(--muted)';
+
+    wCard.innerHTML = `
+      <div class="dash-weight-header">
+        <span class="dash-weight-title">⚖️ Évolution du poids</span>
+        <span class="dash-weight-stats">
+          <span style="font-family:var(--mono);font-weight:700;font-size:15px">${last}kg</span>
+          <span style="font-size:11px;color:${diffColor};font-weight:700;margin-left:6px">${diffStr}</span>
+        </span>
+      </div>
+      <div class="dash-weight-spark" id="dash-weight-canvas"></div>`;
+    wrap.appendChild(wCard);
+
+    // Dessiner le sparkline après rendu DOM
+    setTimeout(() => {
+      const sparkWrap = document.getElementById('dash-weight-canvas');
+      if (!sparkWrap) return;
+      const vals = weightEntries.map(e => parseFloat(e.val || e.value) || 0).filter(v => v > 0);
+      if (vals.length < 2) return;
+      const W = sparkWrap.clientWidth || 280, H = 48;
+      const cv = document.createElement('canvas');
+      cv.width = W; cv.height = H; cv.style.cssText = 'width:100%;display:block';
+      sparkWrap.appendChild(cv);
+      const ctx2 = cv.getContext('2d');
+      const min = Math.min(...vals) - 1, max = Math.max(...vals) + 1;
+      const xStep = W / (vals.length - 1);
+      const yPos = v => H - ((v - min) / (max - min)) * (H - 8) - 4;
+      // Fill area
+      const grad = ctx2.createLinearGradient(0, 0, 0, H);
+      grad.addColorStop(0, 'rgba(91,168,160,.25)');
+      grad.addColorStop(1, 'rgba(91,168,160,.02)');
+      ctx2.beginPath();
+      vals.forEach((v, i) => i === 0 ? ctx2.moveTo(0, yPos(v)) : ctx2.lineTo(i * xStep, yPos(v)));
+      ctx2.lineTo((vals.length-1)*xStep, H); ctx2.lineTo(0, H); ctx2.closePath();
+      ctx2.fillStyle = grad; ctx2.fill();
+      // Line
+      ctx2.beginPath();
+      ctx2.strokeStyle = 'var(--teal)'; ctx2.lineWidth = 2; ctx2.lineJoin = 'round';
+      vals.forEach((v, i) => i === 0 ? ctx2.moveTo(0, yPos(v)) : ctx2.lineTo(i * xStep, yPos(v)));
+      ctx2.stroke();
+      // Last dot
+      const lx = (vals.length-1)*xStep, ly = yPos(vals[vals.length-1]);
+      ctx2.beginPath(); ctx2.arc(lx, ly, 3.5, 0, Math.PI*2);
+      ctx2.fillStyle = 'var(--teal)'; ctx2.fill();
+    }, 60);
+  }
   const breakdownCard = document.createElement('div');
   breakdownCard.className = 'dash-breakdown-card';
   breakdownCard.innerHTML = `<div class="dash-breakdown-title">Détail du score de forme</div>`;

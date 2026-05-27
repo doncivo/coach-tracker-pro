@@ -2000,3 +2000,69 @@ nav.tabs   { flex-shrink: 0; }
 }
 .whm-cell:active { transform: scale(.9); }
 .whm-cell.whm-active { outline: 2px solid var(--teal); outline-offset: 1px; }
+
+
+/* ================================================================
+   PLANNING — Autocomplete vue tableau
+   ================================================================ */
+
+.table-ac-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 220px;
+  background: var(--surface);
+  border: 1.5px solid var(--teal);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  z-index: 300;
+  box-shadow: 0 4px 16px rgba(0,0,0,.15);
+  overflow: hidden;
+}
+.table-ac-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--text);
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  touch-action: manipulation;
+  gap: 8px;
+}
+.table-ac-item:last-child { border-bottom: none; }
+.table-ac-item:active { background: var(--bg); }
+
+/* ================================================================
+   DASHBOARD — Courbe poids
+   ================================================================ */
+
+.dash-weight-card {
+  background: var(--card);
+  border-radius: 18px;
+  padding: 14px 16px;
+  margin: 0 0 12px;
+  border: 1px solid var(--border);
+}
+.dash-weight-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.dash-weight-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--muted);
+}
+.dash-weight-stats {
+  display: flex;
+  align-items: baseline;
+}
+.dash-weight-spark {
+  width: 100%;
+  min-height: 48px;
+}

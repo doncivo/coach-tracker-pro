@@ -250,6 +250,19 @@ function renderDayDetail(i){
     vt.appendChild(vb);
   });
   eright.appendChild(em);eright.appendChild(vt);
+
+  // Bouton programme prédéfini
+  if(typeof PROGRAMS!=='undefined'&&PROGRAMS.length){
+    const progBtn=document.createElement('button');
+    progBtn.className='btn btn-ghost btn-sm';
+    progBtn.style.cssText='font-size:10px;padding:3px 8px;border:1px solid var(--border)';
+    progBtn.textContent='📋 Programme';
+    progBtn.title='Charger un programme prédéfini';
+    progBtn.addEventListener('click',()=>_showProgramPicker());
+    progBtn.ontouchstart=(e)=>{e.stopPropagation();};
+    eright.appendChild(progBtn);
+  }
+
   eh.appendChild(et);eh.appendChild(eright);es.appendChild(eh);
   const tw=document.createElement('div');tw.className='ex-table-wrap';
   const tb=document.createElement('table');tb.className='ex-table';tb.setAttribute('role','table');tb.setAttribute('aria-label','Exercices du jour');
@@ -296,6 +309,61 @@ function renderDayDetail(i){
     g.appendChild(inp);cg.appendChild(g);
   });
   cs.appendChild(cg);detail.appendChild(cs);
+}
+
+/* ── Sélecteur de programme prédéfini ── */
+function _showProgramPicker() {
+  document.getElementById('prog-picker-overlay')?.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'prog-picker-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:9100;display:flex;align-items:flex-end;justify-content:center';
+
+  const sheet = document.createElement('div');
+  sheet.style.cssText = 'background:var(--surface);border-radius:24px 24px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));width:100%;max-width:480px;max-height:80vh;overflow-y:auto;-webkit-overflow-scrolling:touch';
+
+  const handle = document.createElement('div');
+  handle.style.cssText = 'width:36px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 16px';
+  sheet.appendChild(handle);
+
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px';
+  title.textContent = '📋 Charger un programme';
+  const sub = document.createElement('div');
+  sub.style.cssText = 'font-size:11px;color:var(--muted);margin-bottom:16px';
+  sub.textContent = 'Remplace le planning de la semaine entière';
+  sheet.appendChild(title); sheet.appendChild(sub);
+
+  (PROGRAMS||[]).forEach(prog => {
+    const btn = document.createElement('button');
+    btn.style.cssText = 'display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px 16px;border-radius:14px;border:1.5px solid var(--border);background:var(--card);font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none;margin-bottom:8px';
+    const icon = document.createElement('span'); icon.style.cssText = 'font-size:26px;flex-shrink:0'; icon.textContent = prog.icon||'💪';
+    const info = document.createElement('div'); info.style.cssText = 'flex:1;min-width:0';
+    info.innerHTML = '<div style="font-size:14px;font-weight:700;color:var(--text)">'+prog.label+'</div><div style="font-size:11px;color:var(--muted);margin-top:2px">'+(prog.description||'')+'</div>';
+    btn.appendChild(icon); btn.appendChild(info);
+    const doLoad = async () => {
+      overlay.remove();
+      const ok = await Modal.confirm('Charger "'+prog.label+'" ? Le planning actuel sera remplacé.');
+      if(!ok) return;
+      if(typeof loadProgram==='function'){
+        loadProgram(prog.id);
+        renderDayTabs(); renderDayDetail(0);
+        showToast('✅ Programme '+prog.label+' chargé','save',2500);
+      }
+    };
+    btn.ontouchstart=(e)=>{e.preventDefault();doLoad();}; btn.onclick=doLoad;
+    sheet.appendChild(btn);
+  });
+
+  const cancel = document.createElement('button');
+  cancel.style.cssText = 'width:100%;padding:10px;border:none;background:none;color:var(--muted);font-size:14px;font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none;margin-top:4px';
+  cancel.textContent = 'Annuler';
+  cancel.ontouchstart=(e)=>{e.preventDefault();overlay.remove();}; cancel.onclick=()=>overlay.remove();
+  sheet.appendChild(cancel);
+  overlay.appendChild(sheet);
+  overlay.ontouchstart=(e)=>{if(e.target===overlay)overlay.remove();};
+  overlay.onclick=(e)=>{if(e.target===overlay)overlay.remove();};
+  document.body.appendChild(overlay);
 }
 
 function buildExTable(di,tbody,d,onUpdate){
@@ -563,13 +631,37 @@ function buildExRow(di,ei,d,onUpdate,isDetail){
   // tbody_ref resolved lazily via closure (tr not in DOM yet when buildExRow is called)
   const ni=document.createElement('input');ni.type='text';ni.className='ex-name-inp';ni.placeholder=ex.isWarmup?'Échauffement...':'Exercice';ni.value=ex.name||'';
   ni.setAttribute('aria-label','Nom de l exercice');
-  ni.addEventListener('input',e=>{ex.name=e.target.value;onUpdate();save();renderDayTabs();});
-  // Autocomplete from library
-  ni.addEventListener('keyup',e=>{if(ni.value.length<2)return;const match=EXERCISE_LIBRARY.filter(l=>l.name.toLowerCase().includes(ni.value.toLowerCase())).slice(0,4);if(match.length&&e.key!=='Enter'){/* could show dropdown */}});
+  ni.setAttribute('autocomplete','off');
+  ni.addEventListener('input',e=>{ex.name=e.target.value;onUpdate();save();renderDayTabs();_showNiAc(e.target.value);});
+  ni.addEventListener('blur',()=>setTimeout(()=>{niAc.style.display='none';},200));
+
+  // ── Autocomplete dropdown (vue tableau) ──
+  const niAc=document.createElement('div');niAc.className='table-ac-list';niAc.style.display='none';
+  function _showNiAc(q){
+    const s=q.trim().toLowerCase();
+    if(s.length<2){niAc.style.display='none';return;}
+    const hits=EXERCISE_LIBRARY.filter(l=>l.name.toLowerCase().includes(s)).slice(0,5);
+    if(!hits.length){niAc.style.display='none';return;}
+    niAc.innerHTML='';
+    hits.forEach(lib=>{
+      const item=document.createElement('div');item.className='table-ac-item';
+      const nm=document.createElement('span');nm.textContent=lib.name;
+      const m=MM[lib.muscle||''];
+      if(m){const badge=document.createElement('span');badge.className='pec-muscle';badge.style.cssText='background:'+m.calBg+';color:'+m.calColor+';float:right';badge.textContent=m.label;item.appendChild(nm);item.appendChild(badge);}
+      else item.appendChild(nm);
+      const pick=()=>{ex.name=lib.name;if(!ex.muscle)ex.muscle=lib.muscle;ni.value=lib.name;niAc.style.display='none';onUpdate();save();renderDayDetail(S.activeDay);};
+      item.ontouchstart=(e)=>{e.preventDefault();pick();};
+      item.onmousedown=(e)=>{e.preventDefault();pick();};
+      niAc.appendChild(item);
+    });
+    niAc.style.display='block';
+  }
   nameWrap.appendChild(dh);
   if(ex.isWarmup){const wb=document.createElement('span');wb.className='warmup-badge';wb.textContent='Éch.';nameWrap.appendChild(wb);}
   if(ex.supersetGroup){const sb=document.createElement('span');sb.className='superset-badge';sb.textContent='SS-'+ex.supersetGroup;nameWrap.appendChild(sb);}
+  nameWrap.style.position='relative';
   nameWrap.appendChild(ni);
+  nameWrap.appendChild(niAc);
   if(checkPR(ex)){const prb=document.createElement('span');prb.className='pr-badge-sm';prb.textContent='PR';nameWrap.appendChild(prb);}
   if(isPlateau(ex.name)){const pb=document.createElement('span');pb.style.cssText='font-size:8px;color:var(--red);font-weight:700';pb.textContent='Plateau';nameWrap.appendChild(pb);}
   tr.appendChild(td(nameWrap));

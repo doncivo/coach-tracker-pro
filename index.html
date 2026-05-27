@@ -250,12 +250,14 @@
       <div class="card" style="margin:10px 12px 0">
         <div class="card-hdr">
           <div class="card-title">🍽️ Calories & Macros</div>
-          <div style="display:flex;align-items:center;gap:6px">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
             <span style="font-size:11px;color:var(--muted)">Objectif :</span>
             <input type="number" id="cal-goal-inp" class="steps-goal-inp" value="2500" min="500" max="6000" step="50">
             <span style="font-size:11px;color:var(--muted)">kcal/j</span>
+            <button class="btn btn-ghost btn-sm" id="tdee-calc-btn" style="font-size:10px;padding:3px 8px" title="Calculer TDEE basé sur votre activité réelle">🔢 TDEE</button>
           </div>
         </div>
+        <div id="tdee-suggestion" style="padding:0 12px 8px;display:none"></div>
         <div style="padding:0 12px 12px" id="cal-tracker-wrap">
           <div class="cal-day-selector">
             <button class="cal-day-nav" id="cal-day-prev">&#8249;</button>
@@ -618,7 +620,7 @@
   </script>
 <script>
 (function() {
-  const SW_VERSION = 'ctp-v65';
+  const SW_VERSION = 'ctp-v66';
   if (!('serviceWorker' in navigator)) return;
 
   const RELOAD_KEY = 'ctp-sw-reloaded-' + SW_VERSION;

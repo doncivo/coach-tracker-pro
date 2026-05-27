@@ -144,6 +144,72 @@ function renderCalTracker() {
     });
   }
 
+  // ── TDEE dynamique ──
+  const tdeeBtn = document.getElementById('tdee-calc-btn');
+  if (tdeeBtn && !tdeeBtn._bound) {
+    tdeeBtn._bound = true;
+    const calcAndShow = () => {
+      const poids = parseFloat((S.mesures?.poids||[]).slice(-1)[0]?.val) || 75;
+      const taille = S.profilTaille || 175;
+      const age = S.profilAge || 30;
+      const sex = S.profilSexe || 'H';
+
+      // BMR (Mifflin-St Jeor)
+      const bmr = sex==='H'
+        ? Math.round(10*poids + 6.25*taille - 5*age + 5)
+        : Math.round(10*poids + 6.25*taille - 5*age - 161);
+
+      // Activité réelle : séances last 7 days
+      const trainedDays7 = Object.values(S.history||{})
+        .flatMap(wk=>(wk.days||[]))
+        .filter(d=>{
+          const today=new Date(); const dDate=new Date(d.date+'T12:00:00');
+          const diff=(today-dDate)/(1000*60*60*24);
+          return diff<=7 && (d.exercises||[]).some(e=>e.done&&!e.isWarmup);
+        }).length;
+
+      const mult = trainedDays7>=5?1.725:trainedDays7>=3?1.55:trainedDays7>=1?1.375:1.2;
+      const tdee = Math.round(bmr * mult);
+
+      const sug = document.getElementById('tdee-suggestion');
+      if (!sug) return;
+      sug.style.display='block';
+      sug.innerHTML='';
+
+      const row=document.createElement('div');
+      row.style.cssText='background:rgba(91,168,160,.08);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px';
+
+      const info=document.createElement('div');
+      info.style.cssText='font-size:11px;color:var(--text)';
+      info.innerHTML='<strong>BMR :</strong> '+bmr+' kcal &nbsp; <strong>Activité :</strong> '+trainedDays7+' séances/sem (×'+mult+') &nbsp; → <strong style="color:var(--teal-d)">TDEE : '+tdee+' kcal</strong>';
+
+      const goals=[
+        {label:'Sèche (-20%)',   kcal:Math.round(tdee*0.80), color:'var(--blue)'},
+        {label:'Maintenance',    kcal:tdee,                   color:'var(--teal)'},
+        {label:'Prise (+15%)',   kcal:Math.round(tdee*1.15),  color:'var(--green)'},
+      ];
+      const btns=document.createElement('div');btns.style.cssText='display:flex;gap:6px;flex-wrap:wrap';
+      goals.forEach(g=>{
+        const b=document.createElement('button');
+        b.style.cssText='padding:5px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-size:11px;font-weight:600;font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none;color:'+g.color;
+        b.textContent=g.label+' : '+g.kcal+' kcal';
+        const apply=()=>{
+          S.caloriesGoal=g.kcal;
+          if(goalInp)goalInp.value=g.kcal;
+          save(); renderCalTracker();
+          sug.style.display='none';
+          showToast('Objectif calorique : '+g.kcal+' kcal/j','save',2000);
+        };
+        b.ontouchstart=(e)=>{e.preventDefault();apply();}; b.onclick=apply;
+        btns.appendChild(b);
+      });
+
+      row.appendChild(info); row.appendChild(btns);
+      sug.appendChild(row);
+    };
+    tdeeBtn.ontouchstart=(e)=>{e.preventDefault();calcAndShow();}; tdeeBtn.onclick=calcAndShow;
+  }
+
   if (lbl) {
     lbl.textContent = calDayLabel(_calDayOffset);
     // Capitalize first letter
@@ -469,7 +535,11 @@ function renderCorps(){
   renderSleepGrid();// Nutrition grid
   renderNutriGrid();// Mesures
   const grid=document.getElementById('corps-grid');grid.innerHTML='';
-  MESURES_DEF.forEach(({key,label,unit,icon})=>{
+  // Group paired measurements (G/D) together
+  const renderedPairs = new Set();
+  MESURES_DEF.forEach(({key,label,unit,icon,pair,hidden})=>{
+    // Skip hidden entries (they're rendered as part of their pair)
+    if (hidden && renderedPairs.has(pair)) return;
     const entries=(S.mesures[key]||[]).slice().sort((a,b)=>a.date.localeCompare(b.date));
     const card=document.createElement('div');card.className='corps-card';
 
@@ -613,7 +683,80 @@ function renderCorps(){
     addBtn.textContent='+ Ajouter';
     valInp.addEventListener('keydown',e=>{if(e.key==='Enter')addBtn.click();});
     addBtn.addEventListener('click',()=>{if(!valInp.value)return;if(!S.mesures[key])S.mesures[key]=[];Store.dispatch({type:'BODY_ADD_MESURE',payload:{key:key,entry:{value:parseFloat(valInp.value),date:todayStr()}}});S.mesures[key].sort((a,b)=>a.date.localeCompare(b.date));valInp.value='';save();renderCorps();});
-    form.appendChild(dateInp);form.appendChild(valInp);form.appendChild(addBtn);body.appendChild(form);card.appendChild(body);grid.appendChild(card);
+    form.appendChild(dateInp);form.appendChild(valInp);form.appendChild(addBtn);body.appendChild(form);
+
+    // ── Asymétrie G/D ──
+    if (pair) {
+      renderedPairs.add(key);
+      const pairDef = MESURES_DEF.find(m => m.key === pair);
+      if (pairDef) {
+        // Input pour le membre gauche
+        const pairSection = document.createElement('div');
+        pairSection.style.cssText = 'border-top:1px dashed var(--border);margin-top:8px;padding-top:8px';
+        const pairTitle = document.createElement('div');
+        pairTitle.style.cssText = 'font-size:10px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase';
+        pairTitle.textContent = '↕ Comparaison G/D';
+
+        // Valeurs actuelles
+        const rightVal = parseFloat(currentVal) || 0;
+        const pairEntries = (S.mesures[pair] || []).slice().sort((a,b)=>a.date.localeCompare(b.date));
+        const pairLatest = pairEntries.length ? pairEntries[pairEntries.length-1] : null;
+        const leftVal = pairLatest ? (parseFloat(pairLatest.val || pairLatest.value) || 0) : 0;
+
+        // Asymmetry display
+        if (rightVal > 0 && leftVal > 0) {
+          const diff = Math.abs(rightVal - leftVal);
+          const asymRow = document.createElement('div');
+          asymRow.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:6px 10px;border-radius:8px;background:'+(diff>1?'rgba(229,62,62,.08)':'rgba(56,161,105,.08)');
+          const asymIcon = document.createElement('span');
+          asymIcon.textContent = diff > 1 ? '⚠️' : '✅';
+          const asymText = document.createElement('div');
+          asymText.style.cssText = 'font-size:11px;flex:1';
+          asymText.innerHTML = '<strong>D:</strong> '+rightVal+'cm &nbsp; <strong>G:</strong> '+leftVal+'cm';
+          const asymDiff = document.createElement('span');
+          asymDiff.style.cssText = 'font-size:11px;font-weight:700;color:'+(diff>1?'var(--red)':'var(--green)');
+          asymDiff.textContent = diff > 1 ? 'Écart '+diff.toFixed(1)+'cm' : 'Symétrique';
+          asymRow.appendChild(asymIcon); asymRow.appendChild(asymText); asymRow.appendChild(asymDiff);
+          pairSection.appendChild(pairTitle); pairSection.appendChild(asymRow);
+        } else {
+          pairSection.appendChild(pairTitle);
+        }
+
+        // Form to add LEFT side measurement
+        const pairForm = document.createElement('div');
+        pairForm.style.cssText = 'display:flex;align-items:center;gap:6px';
+        const pairLbl = document.createElement('label');
+        pairLbl.style.cssText = 'font-size:11px;font-weight:700;color:var(--muted);width:70px';
+        pairLbl.textContent = 'Gauche :';
+        if (pairLatest) {
+          const curG = document.createElement('span');
+          curG.style.cssText = 'font-size:12px;font-weight:700;font-family:var(--mono);color:var(--teal-d);width:50px';
+          curG.textContent = (pairLatest.val||pairLatest.value)+unit;
+          pairForm.appendChild(pairLbl); pairForm.appendChild(curG);
+        }
+        const pairValInp = document.createElement('input');
+        pairValInp.type='number'; pairValInp.className='mesure-inp';
+        pairValInp.placeholder=unit; pairValInp.step='0.1';
+        pairValInp.style.cssText='width:70px;font-size:16px;padding:6px 8px;text-align:center';
+        pairValInp.setAttribute('inputmode','decimal');
+        const pairAddBtn = document.createElement('button');
+        pairAddBtn.className='btn btn-ghost btn-sm'; pairAddBtn.textContent='+ G';
+        pairValInp.addEventListener('keydown', e=>{if(e.key==='Enter')pairAddBtn.click();});
+        pairAddBtn.addEventListener('click', ()=>{
+          if(!pairValInp.value)return;
+          if(!S.mesures[pair])S.mesures[pair]=[];
+          Store.dispatch({type:'BODY_ADD_MESURE',payload:{key:pair,entry:{value:parseFloat(pairValInp.value),val:parseFloat(pairValInp.value),date:todayStr()}}});
+          S.mesures[pair].sort((a,b)=>a.date.localeCompare(b.date));
+          pairValInp.value=''; save(); renderCorps();
+        });
+        if(!pairLatest) pairForm.appendChild(pairLbl);
+        pairForm.appendChild(pairValInp); pairForm.appendChild(pairAddBtn);
+        pairSection.appendChild(pairForm);
+        body.appendChild(pairSection);
+      }
+    }
+
+    card.appendChild(body);grid.appendChild(card);
   });
   renderStreakHeatmap();
   renderPainList();

@@ -482,8 +482,32 @@ function renderDashboard(){
     wrap.appendChild(histCard);
   }
 
-  // ── VOLUME HEBDO + BREAKDOWN PPL ──
+  // ── VOLUME HEBDO + BREAKDOWN PPL + COMPARAISON -4 SEMAINES ──
   setTimeout(()=>{
+    // Comparaison -4 semaines
+    const volData8 = computeWeeklyVolume(8);
+    const curWeekVol  = volData8.find(v=>v.label==='Cette sem.')?.value || 0;
+    const week4AgoVol = volData8.length >= 5 ? volData8[volData8.length-5]?.value || 0 : 0;
+    if (curWeekVol > 0 && week4AgoVol > 0) {
+      const delta4 = Math.round((curWeekVol - week4AgoVol) / week4AgoVol * 100);
+      const comp4Card = document.createElement('div');
+      comp4Card.style.cssText = 'background:var(--card);border-radius:14px;padding:10px 14px;margin-bottom:10px;border:1px solid var(--border);display:flex;align-items:center;justify-content:space-between';
+      const cl = document.createElement('div');
+      const ct=document.createElement('div');ct.style.cssText='font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em';ct.textContent='vs il y a 4 semaines';
+      const cv=document.createElement('div');cv.style.cssText='font-size:14px;font-weight:700;color:var(--text);margin-top:2px';
+      cv.textContent = (curWeekVol>=1000?(curWeekVol/1000).toFixed(1)+'t':Math.round(curWeekVol)+'kg') + ' cette semaine';
+      cl.appendChild(ct);cl.appendChild(cv);
+      const cr = document.createElement('div');cr.style.cssText='text-align:right';
+      const cd=document.createElement('div');
+      cd.style.cssText='font-size:18px;font-weight:800;color:'+(delta4>0?'var(--green)':delta4<0?'var(--red)':'var(--muted)');
+      cd.textContent=(delta4>0?'+':'')+delta4+'%';
+      const cs=document.createElement('div');cs.style.cssText='font-size:9px;color:var(--muted)';
+      cs.textContent=(week4AgoVol>=1000?(week4AgoVol/1000).toFixed(1)+'t':Math.round(week4AgoVol)+'kg')+' à S-4';
+      cr.appendChild(cd);cr.appendChild(cs);
+      comp4Card.appendChild(cl);comp4Card.appendChild(cr);
+      wrap.appendChild(comp4Card);
+    }
+
     // Volume chart
     const volData = computeWeeklyVolume(8);
     if(volData.some(v=>v.value>0)){

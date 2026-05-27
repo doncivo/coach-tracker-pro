@@ -201,6 +201,12 @@ function renderDayDetail(i){
   cpBtn.title='Copier depuis la semaine précédente';
   cpBtn.addEventListener('click',()=>_copyDayFromHistory(i));
 
+  // Templates sauvegardables
+  const tplBtn=document.createElement('button');tplBtn.className='btn btn-ghost btn-sm';tplBtn.textContent='⭐';
+  tplBtn.title='Sauvegarder / Charger un template';
+  tplBtn.addEventListener('click',()=>_showTemplates(i));
+  tplBtn.ontouchstart=(e)=>{e.preventDefault();_showTemplates(i);}
+
   const rb=document.createElement('button');rb.className='btn btn-ghost btn-sm';rb.textContent='↺';
   rb.addEventListener('click',async()=>{
     const ok=await Modal.confirm('Réinitialiser '+DAYS[i]+' ?');
@@ -210,7 +216,7 @@ function renderDayDetail(i){
     save(true); // skipUndo=true to avoid double snapshot
     renderDayTabs();renderDayDetail(i);
   });
-  ra.appendChild(lb);ra.appendChild(cpBtn);ra.appendChild(rb);hdr.appendChild(ra);detail.appendChild(hdr);
+  ra.appendChild(lb);ra.appendChild(cpBtn);ra.appendChild(tplBtn);ra.appendChild(rb);hdr.appendChild(ra);detail.appendChild(hdr);
 
   // Pain alerts for muscles planned today
   const todayPains=activePains();
@@ -329,6 +335,129 @@ function renderDayDetail(i){
     g.appendChild(inp);cg.appendChild(g);
   });
   cs.appendChild(cg);detail.appendChild(cs);
+}
+
+
+/* ── Templates de séance sauvegardables ── */
+function _showTemplates(dayIndex) {
+  document.getElementById('template-overlay')?.remove();
+
+  const d = S.days[dayIndex];
+  const templates = S.dayTemplates || [];
+
+  const overlay = document.createElement('div');
+  overlay.id = 'template-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);z-index:9100;display:flex;align-items:flex-end;justify-content:center';
+
+  const sheet = document.createElement('div');
+  sheet.style.cssText = 'background:var(--surface);border-radius:24px 24px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));width:100%;max-width:480px;max-height:80vh;overflow-y:auto;-webkit-overflow-scrolling:touch';
+
+  const handle = document.createElement('div');
+  handle.style.cssText = 'width:36px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 14px';
+
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size:16px;font-weight:700;color:var(--text);margin-bottom:14px';
+  title.textContent = '⭐ Templates de seance';
+
+  sheet.appendChild(handle); sheet.appendChild(title);
+
+  // Save current day as template
+  const curExs = (d.exercises||[]).filter(e=>e.name.trim()&&!e.isWarmup);
+  if (curExs.length > 0) {
+    const saveSection = document.createElement('div');
+    saveSection.style.cssText = 'background:var(--card);border-radius:14px;padding:12px 14px;margin-bottom:12px;border:1.5px solid var(--teal)';
+    const saveLbl = document.createElement('div');
+    saveLbl.style.cssText = 'font-size:12px;font-weight:700;color:var(--teal-d);margin-bottom:8px';
+    saveLbl.textContent = 'Sauvegarder ' + DAYS[dayIndex] + ' (' + curExs.length + ' exercices)';
+
+    const nameRow = document.createElement('div');
+    nameRow.style.cssText = 'display:flex;gap:8px';
+    const nameInp = document.createElement('input');
+    nameInp.type='text'; nameInp.placeholder='Nom du template (ex: Push A)';
+    nameInp.style.cssText = 'flex:1;padding:8px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-size:16px;font-family:var(--font);color:var(--text);-webkit-appearance:none;outline:none';
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'btn btn-teal btn-sm';
+    saveBtn.textContent = '💾 Sauver';
+    const doSave = () => {
+      const name = nameInp.value.trim() || (DAYS[dayIndex] + ' ' + new Date().toLocaleDateString('fr-FR', {day:'2-digit',month:'2-digit'}));
+      if (!S.dayTemplates) S.dayTemplates = [];
+      S.dayTemplates.push({
+        id: uid(),
+        name,
+        createdAt: localDateStr(),
+        exercises: curExs.map(e => ({
+          name: e.name, muscle: e.muscle, weight: e.weight,
+          sets: e.sets, reps: e.reps, rest: e.rest, tempo: e.tempo,
+          rpe: '', rir: '', note: '', done: false, isWarmup: false,
+          supersetGroup: e.supersetGroup||'', setData: null,
+        })),
+      });
+      save();
+      overlay.remove();
+      showToast('Template "' + name + '" sauvegarde', 'save', 2500);
+    };
+    saveBtn.ontouchstart=(e)=>{e.preventDefault();doSave();}; saveBtn.onclick=doSave;
+    nameInp.addEventListener('keydown',e=>{if(e.key==='Enter')doSave();});
+    nameRow.appendChild(nameInp); nameRow.appendChild(saveBtn);
+    saveSection.appendChild(saveLbl); saveSection.appendChild(nameRow);
+    sheet.appendChild(saveSection);
+  }
+
+  // List of existing templates
+  if (templates.length > 0) {
+    const listTitle = document.createElement('div');
+    listTitle.style.cssText = 'font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px';
+    listTitle.textContent = 'Templates sauvegardés (' + templates.length + ')';
+    sheet.appendChild(listTitle);
+
+    templates.forEach((tpl, ti) => {
+      const tplBtn2 = document.createElement('div');
+      tplBtn2.style.cssText = 'display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--card);border-radius:12px;border:1px solid var(--border);margin-bottom:8px';
+
+      const info = document.createElement('div');
+      info.style.cssText = 'flex:1;min-width:0';
+      info.innerHTML = '<div style="font-size:13px;font-weight:700;color:var(--text)">' + tpl.name + '</div>' +
+        '<div style="font-size:10px;color:var(--muted);margin-top:1px">' + tpl.exercises.length + ' exercices · ' + tpl.createdAt + '</div>';
+
+      const loadBtn = document.createElement('button');
+      loadBtn.className='btn btn-teal btn-sm'; loadBtn.textContent='Charger';
+      const doLoad = async () => {
+        overlay.remove();
+        const ok = await Modal.confirm('Charger "' + tpl.name + '" ? Les exercices actuels seront remplaces.');
+        if (!ok) return;
+        save();
+        Store.dispatch({ type:'TRAINING_UPDATE_DAY', payload:{ dayIndex, changes:{ exercises: tpl.exercises.map(e=>({...e,id:uid(),done:false,repsAchieved:'',setData:null})) }}});
+        save(true);
+        renderDayTabs(); renderDayDetail(dayIndex);
+        showToast('Template "' + tpl.name + '" charge', 'save', 2000);
+      };
+      loadBtn.ontouchstart=(e)=>{e.preventDefault();doLoad();}; loadBtn.onclick=doLoad;
+
+      const delBtn = document.createElement('button');
+      delBtn.style.cssText='border:none;background:none;color:var(--muted);font-size:16px;cursor:pointer;padding:2px 4px;touch-action:manipulation;-webkit-appearance:none';
+      delBtn.textContent='×';
+      delBtn.onclick=()=>{ S.dayTemplates.splice(ti,1); save(); overlay.remove(); };
+
+      tplBtn2.appendChild(info); tplBtn2.appendChild(loadBtn); tplBtn2.appendChild(delBtn);
+      sheet.appendChild(tplBtn2);
+    });
+  } else if (curExs.length === 0) {
+    const empty = document.createElement('div');
+    empty.style.cssText = 'text-align:center;padding:20px;color:var(--muted);font-size:13px';
+    empty.textContent = 'Aucun template. Ajoutez des exercices dans ce jour pour en sauvegarder un.';
+    sheet.appendChild(empty);
+  }
+
+  const cancel = document.createElement('button');
+  cancel.style.cssText = 'width:100%;padding:10px;border:none;background:none;color:var(--muted);font-size:14px;font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none;margin-top:6px';
+  cancel.textContent = 'Fermer';
+  cancel.ontouchstart=(e)=>{e.preventDefault();overlay.remove();}; cancel.onclick=()=>overlay.remove();
+  sheet.appendChild(cancel);
+
+  overlay.appendChild(sheet);
+  overlay.ontouchstart=(e)=>{if(e.target===overlay)overlay.remove();};
+  overlay.onclick=(e)=>{if(e.target===overlay)overlay.remove();};
+  document.body.appendChild(overlay);
 }
 
 /* ── Sélecteur de programme prédéfini ── */

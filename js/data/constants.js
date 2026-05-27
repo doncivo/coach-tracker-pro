@@ -221,14 +221,17 @@ const TRACKING=['Échauffement','Séance principale','Récupération'];
 const RPE_OPTS=['—','6','7','7.5','8','8.5','9','9.5','10'];
 const RIR_OPTS=['—','0','1','2','3','4','5'];
 const MESURES_DEF=[
-  {key:'poids',label:'Poids corporel',unit:'kg',icon:'⚖️'},
-  {key:'poitrine',label:'Poitrine',unit:'cm',icon:'📏'},
-  {key:'taille',label:'Tour de taille',unit:'cm',icon:'📏'},
-  {key:'hanches',label:'Hanches',unit:'cm',icon:'📏'},
-  {key:'bras',label:'Bras (contracté)',unit:'cm',icon:'💪'},
-  {key:'cuisse',label:'Cuisse',unit:'cm',icon:'🦵'},
-  {key:'cou',label:'Tour de cou',unit:'cm',icon:'📏'},
-  {key:'mollet',label:'Mollet',unit:'cm',icon:'🦵'},
+  {key:'poids',    label:'Poids corporel',  unit:'kg', icon:'⚖️'},
+  {key:'poitrine', label:'Poitrine',         unit:'cm', icon:'📏'},
+  {key:'taille',   label:'Tour de taille',   unit:'cm', icon:'📏'},
+  {key:'hanches',  label:'Hanches',           unit:'cm', icon:'📏'},
+  {key:'bras',     label:'Bras droit',        unit:'cm', icon:'💪', pair:'bras-g'},
+  {key:'bras-g',   label:'Bras gauche',       unit:'cm', icon:'💪', pair:'bras',  hidden:true},
+  {key:'cuisse',   label:'Cuisse droite',     unit:'cm', icon:'🦵', pair:'cuisse-g'},
+  {key:'cuisse-g', label:'Cuisse gauche',     unit:'cm', icon:'🦵', pair:'cuisse', hidden:true},
+  {key:'cou',      label:'Tour de cou',       unit:'cm', icon:'📏'},
+  {key:'mollet',   label:'Mollet droit',      unit:'cm', icon:'🦵', pair:'mollet-g'},
+  {key:'mollet-g', label:'Mollet gauche',     unit:'cm', icon:'🦵', pair:'mollet', hidden:true},
 ];
 const BODY_PARTS=['Épaule droite','Épaule gauche','Coude droit','Coude gauche','Poignet droit','Poignet gauche','Genou droit','Genou gauche','Cheville droite','Cheville gauche','Bas du dos','Cou','Hanche droite','Hanche gauche'];
 const PAIN_LEVELS=[{val:1,emoji:'🟡',label:'Légère'},{val:2,emoji:'🟠',label:'Modérée'},{val:3,emoji:'🔴',label:'Forte'}];
@@ -349,6 +352,7 @@ let S={
   profilSexe:'H',
   profilAge:30,
   mesureObjectifs:{},
+  dayTemplates:[],
   objective:{text:'',targetDate:'',targetWeight:'',targetExercise:'',targetLoad:''},
   achievements:{},
   undoStack:[],

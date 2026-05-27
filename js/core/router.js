@@ -149,11 +149,44 @@ const Router = (() => {
   /* ─────────────────────────────────────────────
      SWIPE GESTURE (mobile)
   ───────────────────────────────────────────── */
+
+  // Vérifie si un élément (ou un de ses parents) est scrollable horizontalement
+  function _isHorizontallyScrollable(el) {
+    while (el && el !== document.body) {
+      const style    = window.getComputedStyle(el);
+      const overflow = style.overflowX;
+      const canScroll = overflow === 'auto' || overflow === 'scroll';
+      if (canScroll && el.scrollWidth > el.clientWidth) return true;
+      el = el.parentElement;
+    }
+    return false;
+  }
+
+  // Vérifie si le touch vient d'un élément interactif (input, select, bouton, etc.)
+  function _isInteractiveElement(el) {
+    const tags = ['INPUT', 'SELECT', 'TEXTAREA', 'BUTTON', 'A'];
+    while (el && el !== document.body) {
+      if (tags.includes(el.tagName)) return true;
+      if (el.getAttribute('contenteditable') === 'true') return true;
+      el = el.parentElement;
+    }
+    return false;
+  }
+
+  let _swipeOriginEl = null; // élément source du touch
+
   function _initSwipe() {
     document.addEventListener('touchstart', e => {
-      _swipeStartX  = e.touches[0].clientX;
-      _swipeStartY  = e.touches[0].clientY;
-      _swipeActive  = true;
+      _swipeOriginEl = e.target;
+      _swipeStartX   = e.touches[0].clientX;
+      _swipeStartY   = e.touches[0].clientY;
+
+      // Désactiver immédiatement si l'élément est interactif ou scrollable
+      if (_isInteractiveElement(_swipeOriginEl) || _isHorizontallyScrollable(_swipeOriginEl)) {
+        _swipeActive = false;
+      } else {
+        _swipeActive = true;
+      }
     }, { passive: true });
 
     document.addEventListener('touchmove', e => {
@@ -162,6 +195,10 @@ const Router = (() => {
       const dy = e.touches[0].clientY - _swipeStartY;
       // Annuler si scroll vertical dominant
       if (Math.abs(dy) > Math.abs(dx) * 1.5) {
+        _swipeActive = false;
+      }
+      // Annuler si on glisse sur un conteneur scrollable (détection en cours de mouvement)
+      if (_swipeActive && _isHorizontallyScrollable(_swipeOriginEl)) {
         _swipeActive = false;
       }
     }, { passive: true });

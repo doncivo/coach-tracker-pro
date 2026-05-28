@@ -376,6 +376,17 @@ window.addEventListener('load', () => {
     exportBtn.addEventListener('click', exportPlanningCSV);
     exportBtn.ontouchstart = (e) => { e.stopPropagation(); };
   }
+
+  const icsBtn = document.getElementById('export-ics-btn');
+  if (icsBtn) {
+    icsBtn.addEventListener('click', () => { if(typeof ICSExport!=='undefined') ICSExport.showExportModal(); });
+    icsBtn.ontouchstart = (e) => { e.stopPropagation(); };
+  }
+  const coachPlanBtn = document.getElementById('coach-ia-planning-btn');
+  if (coachPlanBtn) {
+    coachPlanBtn.addEventListener('click', () => { if(typeof ClaudeCoach!=='undefined') ClaudeCoach.showChat(); });
+    coachPlanBtn.ontouchstart = (e) => { e.stopPropagation(); };
+  }
 });
 
 })();

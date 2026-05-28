@@ -353,6 +353,7 @@ let S={
   profilAge:30,
   mesureObjectifs:{},
   dayTemplates:[],
+  apiKeys:{ usda:'DEMO_KEY', spotify:'', spotifyToken:'', googleCalId:'' },
   objective:{text:'',targetDate:'',targetWeight:'',targetExercise:'',targetLoad:''},
   achievements:{},
   undoStack:[],

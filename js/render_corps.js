@@ -380,6 +380,9 @@ function renderCalTracker() {
     scanBtn.className = 'btn btn-ghost';
     scanBtn.style.cssText = 'font-size:11px;padding:5px 10px;min-height:30px;flex:1';
     scanBtn.innerHTML = '📷 Scanner code-barres';
+    const usdaBtn = document.createElement('button');usdaBtn.style.cssText='font-size:11px;padding:5px 10px;min-height:30px;flex:1;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--teal-d);font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none';usdaBtn.textContent='🔍 USDA';
+    usdaBtn.addEventListener('click',()=>{if(typeof USDA!=='undefined')USDA.showSearch(result=>{nameInp.value=result.name;calInp.value=result.cal;protInp.value=result.protein;carbInp.value=result.carbs;fatInp.value=result.fat;});});usdaBtn.ontouchstart=(e)=>{e.stopPropagation();};
+    scanRow.appendChild(usdaBtn);
     scanBtn.addEventListener('click', () => {
       window._barcodeCb = (result) => {
         // Si le résultat est un code-barres brut (barcode), appeler Open Food Facts

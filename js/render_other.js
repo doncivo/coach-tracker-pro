@@ -453,8 +453,17 @@ function renderLibrary(){
     };
     wgerBtn.ontouchstart=(e)=>{e.preventDefault();toggleWger();};
     wgerBtn.onclick=toggleWger;
-    wgerRow.appendChild(wgerBtn);
-    body.appendChild(wgerRow); body.appendChild(wgerPanel);
+    // PubMed button
+    const pubmedBtn=document.createElement('button');pubmedBtn.className='btn btn-ghost btn-sm';pubmedBtn.style.cssText='flex:1;font-size:10px;border-color:rgba(229,62,62,.3);color:var(--red)';pubmedBtn.textContent='📚 PubMed';
+    const pubmedPanel=document.createElement('div');pubmedPanel.style.cssText='margin-top:6px;display:none';
+    let pubmedLoaded=false;
+    const togglePubmed=()=>{
+      if(pubmedPanel.style.display==='none'){pubmedPanel.style.display='block';pubmedBtn.textContent='▲ PubMed';if(!pubmedLoaded){pubmedLoaded=true;if(typeof PubMed!=='undefined')PubMed.showStudies(ex.name,pubmedPanel);}}
+      else{pubmedPanel.style.display='none';pubmedBtn.textContent='📚 PubMed';}
+    };
+    pubmedBtn.ontouchstart=(e)=>{e.preventDefault();togglePubmed();}; pubmedBtn.onclick=togglePubmed;
+    wgerRow.appendChild(wgerBtn); wgerRow.appendChild(pubmedBtn);
+    body.appendChild(wgerRow); body.appendChild(wgerPanel); body.appendChild(pubmedPanel);
     body.appendChild(addBtn);card.appendChild(body);grid.appendChild(card);
   });
   if(!filtered.length)grid.innerHTML='<div class="prog-no-data">Aucun exercice trouvé.</div>';
@@ -551,6 +560,26 @@ function renderSettings() {
     btn.style.cssText = 'background:rgba(56,161,105,.1);color:var(--green);border-color:rgba(56,161,105,.3)';
     btn.textContent = '✅ Active';
     return btn;
+  });
+  _settingsRow(apiSec, 'Coach IA (Claude)', 'Conseils personnalises et generation de programme', () => {
+    const btn=document.createElement('button');btn.className='btn btn-teal btn-sm';btn.textContent='🤖 Ouvrir le Coach';
+    btn.addEventListener('click',()=>{if(typeof ClaudeCoach!=='undefined')ClaudeCoach.showChat();});
+    btn.ontouchstart=(e)=>{e.stopPropagation();};
+    return btn;
+  });
+  _settingsRow(apiSec, 'Spotify', 'Musique pendant la seance', () => {
+    const token = typeof SpotifyPlayer!=='undefined'?SpotifyPlayer.getToken():null;
+    const btn=document.createElement('button');btn.className='btn btn-ghost btn-sm';
+    btn.style.cssText=token?'background:rgba(29,185,84,.12);color:#1DB954;border-color:rgba(29,185,84,.3)':'';
+    btn.textContent=token?'✅ Connecte - Ouvrir':'♫ Connecter Spotify';
+    btn.addEventListener('click',()=>{if(typeof SpotifyPlayer!=='undefined')SpotifyPlayer.showPlayer();});
+    btn.ontouchstart=(e)=>{e.stopPropagation();};
+    return btn;
+  });
+  _settingsRow(apiSec, 'USDA Food API Key', 'Optionnel : cle pour plus de requetes (api.nal.usda.gov)', () => {
+    const inp=document.createElement('input');inp.type='text';inp.className='settings-inp';inp.placeholder='DEMO_KEY (default)';inp.value=S.apiKeys?.usda||'DEMO_KEY';
+    inp.addEventListener('change',e=>{if(!S.apiKeys)S.apiKeys={};S.apiKeys.usda=e.target.value||'DEMO_KEY';save();});
+    return inp;
   });
   wrap.appendChild(apiSec);
 

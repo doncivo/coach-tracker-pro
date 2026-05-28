@@ -119,8 +119,10 @@
     <div class="plan-csv-bar">
       <span style="font-size:11px;font-weight:700;color:var(--muted)">Planning</span>
       <div style="display:flex;gap:6px">
-        <button class="btn btn-ghost btn-sm" id="import-csv-btn" title="Importer un programme CSV">📥 Importer CSV</button>
-        <button class="btn btn-ghost btn-sm" id="export-csv-planning-btn" title="Exporter le planning en CSV">📤 Exporter CSV</button>
+        <button class="btn btn-ghost btn-sm" id="import-csv-btn" title="Importer un programme CSV">📥 CSV</button>
+        <button class="btn btn-ghost btn-sm" id="export-csv-planning-btn" title="Exporter le planning en CSV">📤 CSV</button>
+        <button class="btn btn-ghost btn-sm" id="export-ics-btn" title="Exporter vers Calendrier iPhone">📅 Cal.</button>
+        <button class="btn btn-ghost btn-sm" id="coach-ia-planning-btn" title="Coach IA">🤖</button>
       </div>
     </div>
     <input type="file" id="import-csv-file" accept=".csv" style="display:none">
@@ -211,6 +213,8 @@
       <span class="sess-info-chip" id="sess-1rm-live">🏋️ <strong>—</strong></span>
       <span class="sess-info-chip" id="sess-time-est">⏱ <strong>—</strong></span>
       <span class="sess-info-chip sess-1rm-calc-btn" id="sess-1rm-calc-btn" title="Calculateur 1RM">🧮</span>
+      <span class="sess-info-chip" id="sess-spotify-btn" title="Musique Spotify" style="cursor:pointer">♫</span>
+      <span class="sess-info-chip" id="sess-coach-btn" title="Coach IA" style="cursor:pointer">🤖</span>
       <button class="btn btn-ghost btn-sm" id="sess-focus-btn" style="margin-left:auto">🎯 Mode Focus</button>
     </div>
     <!-- Mobile strip nav (horizontal scroll) -->
@@ -300,6 +304,7 @@
           </select>
         </div>
         <button class="btn btn-ghost btn-sm" id="add-photo-btn">📸 Photo</button>
+        <button class="btn btn-ghost btn-sm" id="coach-ia-corps-btn" title="Coach IA" style="color:var(--teal)">🤖 Coach</button>
       </div>
       <!-- % MG + WHR -->
       <div id="corps-bf-whr" style="padding:6px 12px 4px;display:flex;gap:10px;flex-wrap:wrap"></div>
@@ -591,6 +596,7 @@
   <script src="js/services/mesures-objectifs.js"></script>
   <script src="js/services/csv-planning.js"></script>
   <script src="js/services/api-integrations.js"></script>
+  <script src="js/services/api-extended.js"></script>
   <script src="js/services/notify.js"></script>
   <script src="js/services/share.js"></script>
   <script src="js/services/search.js"></script>
@@ -630,7 +636,7 @@
   </script>
 <script>
 (function() {
-  const SW_VERSION = 'ctp-v68';
+  const SW_VERSION = 'ctp-v69';
   if (!('serviceWorker' in navigator)) return;
 
   const RELOAD_KEY = 'ctp-sw-reloaded-' + SW_VERSION;

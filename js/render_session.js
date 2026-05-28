@@ -613,6 +613,20 @@ function renderSession(){
     calcBtn.ontouchstart = (e) => { e.preventDefault(); open1RMCalc(); };
     calcBtn.onclick = open1RMCalc;
   }
+  // ── Spotify ──
+  const spotBtn = document.getElementById('sess-spotify-btn');
+  if (spotBtn && !spotBtn._bound) {
+    spotBtn._bound = true;
+    spotBtn.ontouchstart = (e) => { e.preventDefault(); if(typeof SpotifyPlayer!=='undefined') SpotifyPlayer.showPlayer(); };
+    spotBtn.onclick = () => { if(typeof SpotifyPlayer!=='undefined') SpotifyPlayer.showPlayer(); };
+  }
+  // ── Coach IA ──
+  const coachBtn = document.getElementById('sess-coach-btn');
+  if (coachBtn && !coachBtn._bound) {
+    coachBtn._bound = true;
+    coachBtn.ontouchstart = (e) => { e.preventDefault(); if(typeof ClaudeCoach!=='undefined') ClaudeCoach.showChat(); };
+    coachBtn.onclick = () => { if(typeof ClaudeCoach!=='undefined') ClaudeCoach.showChat(); };
+  }
   // Day selector
   const sel=document.getElementById('sess-day-sel');sel.innerHTML='';
   DAYS_SH.forEach((n,i)=>{const btn=document.createElement('button');btn.className='sess-day-btn'+(S.sessDay===i?' active':'');btn.setAttribute('data-d',i);btn.textContent=n;btn.addEventListener('click',()=>{S.sessDay=i;S.sessStartTime=Date.now();_sessActiveEx=0;save();renderSession();});sel.appendChild(btn);});

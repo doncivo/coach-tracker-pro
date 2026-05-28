@@ -924,6 +924,11 @@ function renderSessExercise(d,exercises,vi){
     snum.className = 'set-card-num';
     snum.textContent = setD.done ? '✓' : (si + 1);
 
+    // ── Wrapper poids avec nudge ±2.5kg ──
+    const wiWrap = document.createElement('div');
+    wiWrap.className = 'set-weight-controls';
+    const wiMinus = document.createElement('button');
+    wiMinus.type='button'; wiMinus.className='set-weight-nudge'; wiMinus.textContent='−';
     const wi = document.createElement('input');
     wi.type = 'text'; wi.inputMode = 'decimal';
     wi.className = 'set-card-inp set-card-weight';
@@ -934,6 +939,18 @@ function renderSessExercise(d,exercises,vi){
       d.exercises[realIdx].weight = e.target.value;
       refreshSecondary(); save(); updateStats();
     });
+    const wiPlus = document.createElement('button');
+    wiPlus.type='button'; wiPlus.className='set-weight-nudge'; wiPlus.textContent='+';
+    const doNudge = (delta) => {
+      const cur = parseFloat(wi.value) || parseFloat(ex.weight) || 0;
+      const nv  = Math.max(0, Math.round((cur + delta) * 4) / 4); // arrondi 0.25
+      wi.value = nv; setD.weight = String(nv);
+      d.exercises[realIdx].weight = String(nv);
+      refreshSecondary(); save(); updateStats();
+    };
+    wiMinus.ontouchstart=(e)=>{e.preventDefault();doNudge(-2.5);}; wiMinus.onclick=()=>doNudge(-2.5);
+    wiPlus.ontouchstart=(e)=>{e.preventDefault();doNudge(2.5);};  wiPlus.onclick=()=>doNudge(2.5);
+    wiWrap.appendChild(wiMinus); wiWrap.appendChild(wi); wiWrap.appendChild(wiPlus);
 
     const sep = document.createElement('span');
     sep.className = 'set-card-sep'; sep.textContent = '×';
@@ -955,7 +972,7 @@ function renderSessExercise(d,exercises,vi){
     }));
 
     primary.appendChild(snum);
-    primary.appendChild(wi);
+    primary.appendChild(wiWrap);
     primary.appendChild(sep);
     primary.appendChild(ri);
     primary.appendChild(valBtn);

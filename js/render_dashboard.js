@@ -267,7 +267,7 @@ function renderDashboard(){
 
   wrap.appendChild(breakdownCard);
 
-  // ── SÉANCE DU JOUR ──
+  // ── SÉANCE DU JOUR (prominente, au-dessus des stats) ──
   const exs = (todayDay.exercises||[]).filter(e=>e.name&&e.name.trim()&&!e.isWarmup);
   const doneExs = exs.filter(e=>e.done);
   const isRest  = exs.length===0||(exs[0]&&exs[0].name&&exs[0].name.toLowerCase().includes('repos'));

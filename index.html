@@ -2,6 +2,22 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
+<style>
+  /* Critical CSS — évite l'écran noir au démarrage PWA */
+  :root { background: #f2f4f7; }
+  @media (prefers-color-scheme: dark) { :root { background: #0f1117; } }
+  body { background: #f2f4f7; transition: none; }
+  @media (prefers-color-scheme: dark) { body { background: #0f1117; } }
+  /* Splash loader */
+  #app-splash {
+    position: fixed; inset: 0; background: #f2f4f7;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 99999; transition: opacity .3s ease;
+  }
+  @media (prefers-color-scheme: dark) { #app-splash { background: #0f1117; } }
+  #app-splash svg { animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity:.5; transform:scale(.95); } 50% { opacity:1; transform:scale(1); } }
+</style>
 <script>
 (function(){
   var _rl = location.reload.bind(location);
@@ -42,6 +58,12 @@
   <!-- v37-ios-fixes -->
 </head>
 <body>
+<div id="app-splash" aria-hidden="true">
+  <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+    <rect width="56" height="56" rx="14" fill="#5ba8a0"/>
+    <text x="28" y="38" font-size="26" text-anchor="middle" fill="white">💪</text>
+  </svg>
+</div>
 <div class="save-badge" id="save-badge">✓ Sauvegardé</div>
 <header class="hdr">
   <span style="font-size:18px;flex-shrink:0">🏋️</span>
@@ -639,7 +661,7 @@
   </script>
 <script>
 (function() {
-  const SW_VERSION = 'ctp-v73';
+  const SW_VERSION = 'ctp-v74';
   if (!('serviceWorker' in navigator)) return;
 
   const RELOAD_KEY = 'ctp-sw-reloaded-' + SW_VERSION;

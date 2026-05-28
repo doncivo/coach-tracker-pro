@@ -1,3 +1,20 @@
+
+/* ── Masquer le splash screen après chargement ── */
+(function() {
+  function hideSplash() {
+    const splash = document.getElementById('app-splash');
+    if (!splash) return;
+    splash.style.opacity = '0';
+    setTimeout(() => splash.remove(), 320);
+  }
+  // Masquer dès que le DOM est prêt et que les scripts sont chargés
+  if (document.readyState === 'complete') {
+    setTimeout(hideSplash, 100);
+  } else {
+    window.addEventListener('load', () => setTimeout(hideSplash, 100));
+  }
+})();
+
 /* ============================================================
    init.js — Point d'entrée Coach Tracker Pro
    Ordre: Store.load → Router.register → Router.init → navigate

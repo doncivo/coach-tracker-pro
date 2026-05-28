@@ -353,7 +353,7 @@ let S={
   profilAge:30,
   mesureObjectifs:{},
   dayTemplates:[],
-  apiKeys:{ usda:'DEMO_KEY', spotify:'', spotifyToken:'', googleCalId:'' },
+  apiKeys:{ usda:'DEMO_KEY', spotify:'', spotifyToken:'', googleCalId:'', claude:'' },
   watchData:{
     hrv:{},        // date → ms (HRV nightly average)
     rhr:{},        // date → bpm (resting heart rate)

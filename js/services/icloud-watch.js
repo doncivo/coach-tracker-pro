@@ -245,8 +245,18 @@ const AppleWatch = {
     let hkWorkout = null;
     try { hkWorkout = params.get('hk_workout') ? JSON.parse(decodeURIComponent(params.get('hk_workout'))) : null; } catch(e) {}
 
-    const hasNew = hkHRV || hkRHR || hkVO2 || hkDeep || hkCalAct;
+    // Paramètres legacy HealthKitBridge (hk_steps, hk_sleep, hk_weight)
+    const hkSteps  = parseInt(params.get('hk_steps'))   || null;
+    const hkSleep  = parseFloat(params.get('hk_sleep')) || null;
+    const hkWeight = parseFloat(params.get('hk_weight'))|| null;
+
+    const hasNew = hkHRV || hkRHR || hkVO2 || hkDeep || hkCalAct || hkSteps || hkSleep || hkWeight;
     if (!hasNew) return false;
+
+    // Sync legacy steps/sleep/weight via Store
+    if (hkSteps)  Store.dispatch({ type:'ACTIVITY_SET_STEPS', payload:{ date:hkDate, value:hkSteps }}, {skipUndo:true});
+    if (hkSleep)  Store.dispatch({ type:'ACTIVITY_SET_SLEEP', payload:{ date:hkDate, value:{ hours:hkSleep, quality:1 }}}, {skipUndo:true});
+    if (hkWeight) Store.dispatch({ type:'BODY_ADD_MESURE', payload:{ key:'poids', entry:{ val:hkWeight, date:hkDate }}});
 
     AppleWatch._importWatchData({ date:hkDate, hrv:hkHRV, rhr:hkRHR, vo2max:hkVO2, sleepDeep:hkDeep, sleepRem:hkREM, sleepCore:hkCore, calActive:hkCalAct, exerciseMin:hkExMin, spo2:hkSpO2, skinTemp:hkSkinT, workout:hkWorkout });
     window.history.replaceState({}, '', window.location.pathname);

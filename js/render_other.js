@@ -609,6 +609,17 @@ function renderSettings() {
     btn.ontouchstart=(e)=>{e.stopPropagation();};
     return btn;
   });
+  _settingsRow(apiSec, 'Coach IA — Cle API Anthropic', 'console.anthropic.com → API Keys', () => {
+    const wrap2=document.createElement('div');wrap2.style.cssText='display:flex;gap:6px;align-items:center';
+    const inp=document.createElement('input');inp.type='password';inp.className='settings-inp';
+    inp.placeholder='sk-ant-...';inp.value=S.apiKeys?.claude||'';
+    inp.style.cssText='flex:1;font-family:var(--mono);font-size:12px';
+    inp.addEventListener('change',e=>{if(!S.apiKeys)S.apiKeys={};S.apiKeys.claude=e.target.value.trim();save();showToast('Cle Claude sauvegardee','save',2000);});
+    const eye=document.createElement('button');eye.style.cssText='border:none;background:none;font-size:16px;cursor:pointer;padding:0 4px;touch-action:manipulation;color:var(--muted)';eye.textContent='👁';
+    eye.onclick=()=>{inp.type=inp.type==='password'?'text':'password';};
+    wrap2.appendChild(inp);wrap2.appendChild(eye);
+    return wrap2;
+  });
   _settingsRow(apiSec, 'USDA Food API Key', 'Optionnel : cle pour plus de requetes (api.nal.usda.gov)', () => {
     const inp=document.createElement('input');inp.type='text';inp.className='settings-inp';inp.placeholder='DEMO_KEY (default)';inp.value=S.apiKeys?.usda||'DEMO_KEY';
     inp.addEventListener('change',e=>{if(!S.apiKeys)S.apiKeys={};S.apiKeys.usda=e.target.value||'DEMO_KEY';save();});

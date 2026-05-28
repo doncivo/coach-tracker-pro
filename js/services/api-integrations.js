@@ -366,6 +366,7 @@ const WgerAPI = {
     const resp = await fetch(url);
     if (!resp.ok) throw new Error('Wger : impossible de rechercher');
     const data = await resp.json();
+    if (Object.keys(WgerAPI._cache).length > 50) delete WgerAPI._cache[Object.keys(WgerAPI._cache)[0]];
     WgerAPI._cache[url] = data.suggestions || [];
     return data.suggestions || [];
   },
@@ -377,6 +378,7 @@ const WgerAPI = {
     const resp = await fetch(url);
     if (!resp.ok) throw new Error('Wger : exercice introuvable');
     const data = await resp.json();
+    if (Object.keys(WgerAPI._cache).length > 50) delete WgerAPI._cache[Object.keys(WgerAPI._cache)[0]];
     WgerAPI._cache[url] = data;
     return data;
   },
@@ -470,7 +472,6 @@ window.WgerAPI = WgerAPI;
 
 window.addEventListener('load', () => {
   // Lire les donnees HealthKit depuis l'URL
-  setTimeout(() => {
-    if (typeof Store !== 'undefined') HealthKitBridge.readURLParams();
-  }, 800);
+  // Lecture des params URL déléguée à AppleWatch.readWatchData() (icloud-watch.js)
+  // HealthKitBridge.readURLParams() désactivé pour éviter le double dispatch
 });

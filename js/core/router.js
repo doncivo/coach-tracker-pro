@@ -127,11 +127,11 @@ const Router = (() => {
         if (_state) {
           // Hash basé sur les données pertinentes pour chaque onglet
           const _relevant = {
-            dashboard:   [_state.training?.weekCount, _state.activity?.steps, _state.body?.mesures?.poids?.length, Date.now() >> 13],
+            dashboard:   [_state.training?.weekCount, _state.activity?.steps, _state.body?.mesures?.poids?.length],
             weekly:      [JSON.stringify(_state.training?.days?.map(d => [d.exercises?.length, d.exercises?.filter(e=>e.done).length]))],
             session:     [_state.training?.sessDay, JSON.stringify(_state.training?.days?.[_state.training?.sessDay]?.exercises?.map(e=>[e.done,e.repsAchieved]))],
             progression: [Object.keys(_state.training?.history||{}).length, _state.training?.weekCount],
-            corps:       [_state.body?.mesures?.poids?.length, _state.activity?.steps, Date.now() >> 14],
+            corps:       [_state.body?.mesures?.poids?.length, _state.activity?.steps],
             bilan:       [_state.training?.weekCount, _state.app?.bilanOffset],
             achievements:[_state.app?.weekCount, JSON.stringify(_state.app?.achievements)],
           };

@@ -477,13 +477,15 @@ function _showPlateCalc(targetWeight) {
   setTimeout(() => wInp.focus(), 100);
 }
 
+/* ── sessionStorage helpers pour mode séance libre ── */
+const _getFreeExs = () => { try { return JSON.parse(sessionStorage.getItem('_freeExs') || '[]'); } catch(e) { return []; } };
+const _setFreeExs = (v) => { try { sessionStorage.setItem('_freeExs', JSON.stringify(v)); } catch(e) {} };
+
 /* ── Séance libre — ajouter des exercices à la volée ── */
 function _openFreeSession() {
   const mainEl = document.getElementById('sess-main');
   if (!mainEl) return;
   mainEl.innerHTML = '';
-
-  if (!S._freeExercises) S._freeExercises = [];
 
   const header = document.createElement('div');
   header.style.cssText = 'padding:12px;background:var(--card);border-radius:14px;margin-bottom:10px;border:1.5px solid var(--purple)';
@@ -497,20 +499,20 @@ function _openFreeSession() {
   mainEl.appendChild(header);
 
   // Display free exercises
-  S._freeExercises.forEach((ex, fi) => {
+  _getFreeExs().forEach((ex, fi) => {
     const card = document.createElement('div');
     card.style.cssText = 'background:var(--card);border-radius:12px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--border)';
     const row1 = document.createElement('div');
     row1.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:6px';
     const cb = document.createElement('input'); cb.type='checkbox'; cb.checked=ex.done||false;
-    cb.addEventListener('change', e => { S._freeExercises[fi].done=e.target.checked; _openFreeSession(); });
+    cb.addEventListener('change', e => { const _a=_getFreeExs();_a[fi].done=e.target.checked;_setFreeExs(_a); _openFreeSession(); });
     const nm = document.createElement('span');
     nm.style.cssText = 'flex:1;font-size:13px;font-weight:600;color:var(--text)'+(ex.done?';text-decoration:line-through;opacity:.5':'');
     nm.textContent = ex.name;
     const del = document.createElement('button');
     del.style.cssText = 'border:none;background:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0 4px;touch-action:manipulation;-webkit-appearance:none';
     del.textContent = '×';
-    del.onclick = () => { S._freeExercises.splice(fi, 1); _openFreeSession(); };
+    del.onclick = () => { const _ad=_getFreeExs();_ad.splice(fi,1);_setFreeExs(_ad); _openFreeSession(); };
     row1.appendChild(cb); row1.appendChild(nm); row1.appendChild(del);
 
     const row2 = document.createElement('div');
@@ -522,9 +524,9 @@ function _openFreeSession() {
       i.addEventListener('input', e => { onChange(e.target.value); });
       return i;
     }
-    const wInp=mkFreeInp(ex.weight,'kg','65px',v=>{S._freeExercises[fi].weight=v;});
-    const sInp=mkFreeInp(ex.sets,'sér','45px',v=>{S._freeExercises[fi].sets=v;});
-    const rInp=mkFreeInp(ex.reps,'reps','60px',v=>{S._freeExercises[fi].reps=v;});
+    const wInp=mkFreeInp(ex.weight,'kg','65px',v=>{const _aw=_getFreeExs();_aw[fi].weight=v;_setFreeExs(_aw);});
+    const sInp=mkFreeInp(ex.sets,'sér','45px',v=>{const _as=_getFreeExs();_as[fi].sets=v;_setFreeExs(_as);});
+    const rInp=mkFreeInp(ex.reps,'reps','60px',v=>{const _ar=_getFreeExs();_ar[fi].reps=v;_setFreeExs(_ar);});
     const sep1=document.createElement('span');sep1.style.cssText='font-size:12px;color:var(--muted)';sep1.textContent='kg ×';
     const sep2=document.createElement('span');sep2.style.cssText='font-size:12px;color:var(--muted)';sep2.textContent='×';
     row2.append(wInp,sep1,sInp,sep2,rInp);
@@ -560,10 +562,9 @@ function _openFreeSession() {
       item.innerHTML = '<span style="font-size:12px;font-weight:600;flex:1;color:var(--text)">'+lib.name+'</span>'
         +(m?'<span style="font-size:9px;padding:1px 5px;border-radius:4px;background:'+m.calBg+';color:'+m.calColor+'">'+m.label.split(' ')[0]+'</span>':'');
       const add = () => {
-        S._freeExercises.push({
-          name: lib.name, muscle: lib.muscle||'',
-          weight: '', sets: '3', reps: '8-12', done: false,
-        });
+        const _freeArr = _getFreeExs();
+        _freeArr.push({ name: lib.name, muscle: lib.muscle||'', weight: '', sets: '3', reps: '8-12', done: false });
+        _setFreeExs(_freeArr);
         searchInp.value = '';
         suggestList.innerHTML = '';
         _openFreeSession();
@@ -580,7 +581,7 @@ function _openFreeSession() {
   saveBtn.textContent = 'Sauvegarder dans le programme du jour';
   saveBtn.onclick = () => {
     const d = S.days[S.sessDay];
-    S._freeExercises.forEach(fe => {
+    _getFreeExs().forEach(fe => {
       d.exercises.push({
         id: uid(), name: fe.name, muscle: fe.muscle,
         weight: fe.weight, sets: fe.sets, reps: fe.reps,
@@ -588,7 +589,7 @@ function _openFreeSession() {
         note: '', done: fe.done, isWarmup: false, supersetGroup: '', setData: null,
       });
     });
-    S._freeExercises = [];
+    _setFreeExs([]);
     S._freeMode = false;
     save(); renderSession();
     showToast(S._freeExercises.length+' exercices ajoutes au programme', 'save', 2500);

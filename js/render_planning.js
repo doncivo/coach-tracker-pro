@@ -990,7 +990,7 @@ function showSessionComplete(di, d) {
   // ── Overlay plein écran ──
   const overlay = document.createElement('div');
   overlay.id = 'sess-complete-overlay';
-  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,var(--teal) 0%,#3d8a84 100%);z-index:8000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:18px;overflow-y:auto;-webkit-overflow-scrolling:touch';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,var(--teal) 0%,#3d8a84 100%);z-index:8000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:max(24px, env(safe-area-inset-top, 24px)) 24px max(24px, env(safe-area-inset-bottom, 24px));gap:18px;overflow-y:auto;-webkit-overflow-scrolling:touch';
 
   function mkStat(val, lbl) {
     const wrap = document.createElement('div');

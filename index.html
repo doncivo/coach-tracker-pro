@@ -208,14 +208,16 @@
     <div class="sess-progress-bar-area">
       <span class="sess-info-chip">💪 <strong id="sess-prog-ex">0/0</strong></span>
       <div class="sess-prog-bar-wrap"><div class="sess-prog-bar" id="sess-prog-bar" style="width:0%"></div></div>
-      <span class="sess-info-chip">⏱ <strong id="sess-duration">0 min</strong></span>
-      <span class="sess-info-chip" id="sess-vol-live">📦 <strong>—</strong></span>
-      <span class="sess-info-chip" id="sess-1rm-live">🏋️ <strong>—</strong></span>
-      <span class="sess-info-chip" id="sess-time-est">⏱ <strong>—</strong></span>
-      <span class="sess-info-chip sess-1rm-calc-btn" id="sess-1rm-calc-btn" title="Calculateur 1RM">🧮</span>
-      <span class="sess-info-chip" id="sess-spotify-btn" title="Musique Spotify" style="cursor:pointer">♫</span>
-      <span class="sess-info-chip" id="sess-coach-btn" title="Coach IA" style="cursor:pointer">🤖</span>
-      <button class="btn btn-ghost btn-sm" id="sess-focus-btn" style="margin-left:auto">🎯 Mode Focus</button>
+      <div class="sess-info-chips" id="sess-info-chips">
+        <span class="sess-info-chip">⏱ <strong id="sess-duration">0 min</strong></span>
+        <span class="sess-info-chip" id="sess-vol-live">📦 <strong>—</strong></span>
+        <span class="sess-info-chip" id="sess-1rm-live">🏋️ <strong>—</strong></span>
+        <span class="sess-info-chip" id="sess-time-est">⏱ <strong>—</strong></span>
+        <span class="sess-info-chip sess-1rm-calc-btn" id="sess-1rm-calc-btn" title="Calculateur 1RM">🧮</span>
+        <span class="sess-info-chip" id="sess-spotify-btn" title="Musique Spotify" style="cursor:pointer">♫</span>
+        <span class="sess-info-chip" id="sess-coach-btn" title="Coach IA" style="cursor:pointer">🤖</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="sess-focus-btn" style="flex-shrink:0">🎯</button>
     </div>
     <!-- Mobile strip nav (horizontal scroll) -->
     <div class="sess-nav-strip" id="sess-nav-strip"></div>
@@ -637,7 +639,7 @@
   </script>
 <script>
 (function() {
-  const SW_VERSION = 'ctp-v70';
+  const SW_VERSION = 'ctp-v71';
   if (!('serviceWorker' in navigator)) return;
 
   const RELOAD_KEY = 'ctp-sw-reloaded-' + SW_VERSION;

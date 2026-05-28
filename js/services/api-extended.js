@@ -55,9 +55,22 @@ const ClaudeCoach = {
       { role: 'user', content: userMessage },
     ];
 
+    const claudeKey = S.apiKeys?.claude || '';
+    if (!claudeKey) {
+      ClaudeCoach._history.push({ role:'user', content:userMessage });
+      const noKeyMsg = 'Cle API manquante — allez dans Reglages > Integrations API > Coach IA, collez votre cle API Anthropic (console.anthropic.com)';
+      ClaudeCoach._history.push({ role:'assistant', content:noKeyMsg });
+      return noKeyMsg;
+    }
+
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': claudeKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
@@ -206,11 +219,11 @@ window.ClaudeCoach = ClaudeCoach;
 const USDA = {
   BASE: 'https://api.nal.usda.gov/fdc/v1',
 
-  async search(query, maxResults = 8) {
+  async search(query, maxResults = 8, signal = null) {
     const key = (S.apiKeys?.usda) || 'DEMO_KEY';
     const url = USDA.BASE + '/foods/search?query=' + encodeURIComponent(query) +
                 '&api_key=' + key + '&pageSize=' + maxResults + '&dataType=Survey%20(FNDDS),Foundation';
-    const resp = await fetch(url);
+    const resp = await fetch(url, { signal });
     if (!resp.ok) throw new Error('USDA erreur ' + resp.status);
     const data = await resp.json();
     return (data.foods || []).map(f => ({
@@ -251,14 +264,19 @@ const USDA = {
     results.style.cssText = 'display:flex;flex-direction:column;gap:6px';
 
     let debounceTimer;
+    let _usdaController = null;
+
     inp.addEventListener('input', () => {
       clearTimeout(debounceTimer);
       const q = inp.value.trim();
       if (q.length < 2) { results.innerHTML=''; return; }
       results.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:8px">Recherche...</div>';
       debounceTimer = setTimeout(async () => {
+        // Annuler la requête précédente
+        if (_usdaController) { _usdaController.abort(); }
+        _usdaController = new AbortController();
         try {
-          const foods = await USDA.search(q);
+          const foods = await USDA.search(q, 8, _usdaController.signal);
           results.innerHTML = '';
           if (!foods.length) { results.innerHTML='<div style="font-size:11px;color:var(--muted);padding:8px">Aucun résultat</div>'; return; }
           foods.forEach(food => {
@@ -276,6 +294,7 @@ const USDA = {
             results.appendChild(row);
           });
         } catch(e) {
+          if (e.name === 'AbortError') return; // requête annulée — normal
           results.innerHTML='<div style="font-size:11px;color:var(--red);padding:8px">Erreur : '+e.message+'</div>';
         }
       }, 400);
@@ -336,6 +355,7 @@ const PubMed = {
       };
     }).filter(Boolean);
 
+    if (Object.keys(PubMed._cache).length > 50) delete PubMed._cache[Object.keys(PubMed._cache)[0]];
     PubMed._cache[cacheKey] = results;
     return results;
   },
@@ -407,6 +427,7 @@ const ICSExport = {
     S.days.forEach((d, di) => {
       const exs = (d.exercises || []).filter(e => e.name && !e.isWarmup);
       if (!exs.length) return;
+      if (!d.date) return; // skip jours sans date — évite Invalid Date dans le ICS
       const isRest = exs[0]?.name?.toLowerCase().includes('repos');
       if (isRest) return;
 

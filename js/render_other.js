@@ -817,6 +817,19 @@ function renderSettings() {
     btn.textContent='🎲 Démo'; btn.addEventListener('click', () => document.getElementById('gen-sample-data')?.click());
     return btn;
   });
+  _settingsRow(dataSec, 'Voir l\'introduction', 'Relancer l\'assistant de demarrage', () => {
+    const btn = document.createElement('button');
+    btn.style.cssText = 'background:var(--teal);color:#fff;border:none;padding:8px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;min-height:36px';
+    btn.textContent = '👋 Lancer';
+    const doLaunch = () => {
+      localStorage.removeItem('ctp_onboard_done_v2');
+      if (typeof showOnboarding === 'function') showOnboarding();
+      else location.reload();
+    };
+    btn.ontouchstart = (e) => { e.preventDefault(); doLaunch(); };
+    btn.addEventListener('click', doLaunch);
+    return btn;
+  });
   _settingsRow(dataSec, 'Reconfiguration', 'Relancer l\'assistant de démarrage', () => {
     const btn = document.createElement('button');
     btn.className = 'btn btn-ghost btn-sm';

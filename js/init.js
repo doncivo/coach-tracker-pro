@@ -1,13 +1,13 @@
 
-/* ── Bouton ⚙️ Réglages dans le header ── */
-document.addEventListener('DOMContentLoaded', () => {
+/* ── Bouton ⚙️ Réglages dans le header — exécution directe (DOMContentLoaded déjà passé) ── */
+(function _wireSettingsBtn() {
   const settingsBtn = document.getElementById('settings-hdr-btn');
   if (settingsBtn) {
-    const goSettings = () => switchTab('settings');
+    const goSettings = () => (typeof switchTab === 'function') ? switchTab('settings') : Router.navigate('settings');
     settingsBtn.addEventListener('click', goSettings);
     settingsBtn.ontouchstart = (e) => { e.preventDefault(); goSettings(); };
   }
-});
+})();
 
 
 /* ── Masquer le splash screen après chargement ── */
@@ -85,7 +85,28 @@ updateChronoDsp();
 checkWeeklyAutoSave();
 Notify.restore(); // Restaurer le rappel quotidien
 checkAndAwardAchievements();
-checkOnboarding();
+
+// ── Onboarding — vérification robuste ──
+// Vérifier aussi si les données vitales sont présentes (profil non configuré)
+(function _checkOnboardingRobust() {
+  const done = localStorage.getItem('ctp_onboard_done_v2');
+  const hasProfile = S.profilTaille && S.profilTaille !== 175; // 175 = valeur par défaut
+  const hasHistory = Object.keys(S.history || {}).length > 0;
+
+  // Afficher l'onboarding si :
+  // - jamais fait (clé absente)
+  // - OU profil vide ET pas d'historique (données vraiment fraîches)
+  const shouldShow = !done || (!hasProfile && !hasHistory && !done);
+
+  if (shouldShow) {
+    setTimeout(() => {
+      if (typeof showOnboarding === 'function') {
+        showOnboarding();
+      }
+    }, 600); // 600ms pour laisser le DOM se stabiliser
+  }
+})();
+
 _initRestTimerButtons(); // no-op depuis v45 — bindings dans RestTimer.start()
 // restoreReminder() retiré — doublon de Notify.restore() ci-dessus
 

@@ -517,22 +517,47 @@ document.getElementById('prev-month').addEventListener('click',()=>{S.calMonth--
 document.getElementById('next-month').addEventListener('click',()=>{S.calMonth++;if(S.calMonth>11){S.calMonth=0;S.calYear++;}renderCalendar();save();});
 
 /* ── Paramètres (déplacé depuis utils.js) ── */
-function _settingsSection(title) {
-  const sec = document.createElement('div'); sec.className = 'settings-section';
-  const t = document.createElement('div'); t.className = 'settings-section-title'; t.textContent = title;
-  sec.appendChild(t); return sec;
+function _settingsSection(title, icon) {
+  const sec  = document.createElement('div'); sec.className = 'settings-section';
+  const lbl  = document.createElement('div'); lbl.className = 'settings-section-title'; lbl.textContent = title;
+  const card = document.createElement('div'); card.className = 'settings-section-card';
+  sec.appendChild(lbl);
+  sec.appendChild(card);
+  sec._card = card; // référence à la card pour y ajouter les rows
+  return sec;
 }
 
-function _settingsRow(section, label, sub, controlFn) {
-  const row = document.createElement('div'); row.className = 'settings-row';
-  const lbl = document.createElement('div');
-  const lb = document.createElement('div'); lb.className = 'settings-row-label'; lb.textContent = label;
-  lbl.appendChild(lb);
-  if (sub) { const sb = document.createElement('div'); sb.className = 'settings-row-sub'; sb.textContent = sub; lbl.appendChild(sb); }
+function _settingsRow(section, label, sub, controlFn, icon) {
+  const card = section._card || section;
+  const row  = document.createElement('div'); row.className = 'settings-row';
+
+  // Icône colorée optionnelle
+  if (icon) {
+    const ic = document.createElement('div'); ic.className = 'settings-row-icon';
+    ic.style.background = icon.bg || 'var(--teal)';
+    ic.textContent = icon.emoji || '';
+    row.appendChild(ic);
+  }
+
+  // Textes
+  const lbl = document.createElement('div'); lbl.className = 'settings-row-label';
+  const t   = document.createElement('div'); t.className   = 'settings-row-title'; t.textContent = label;
+  lbl.appendChild(t);
+  if (sub) {
+    const s = document.createElement('div'); s.className = 'settings-row-sub'; s.textContent = sub;
+    lbl.appendChild(s);
+  }
   row.appendChild(lbl);
-  const ctrl = controlFn();
-  if (ctrl) { const cw = document.createElement('div'); cw.className = 'settings-row-control'; cw.appendChild(ctrl); row.appendChild(cw); }
-  section.appendChild(row);
+
+  // Contrôle
+  const ctrl = controlFn ? controlFn() : null;
+  if (ctrl) {
+    const cw = document.createElement('div'); cw.className = 'settings-row-control';
+    cw.appendChild(ctrl);
+    row.appendChild(cw);
+  }
+
+  card.appendChild(row);
 }
 
 function renderSettings() {
@@ -540,8 +565,15 @@ function renderSettings() {
   if (!wrap) return;
   wrap.innerHTML = '';
 
+  // ── TITRE DE PAGE ──
+  const pageHdr = document.createElement('div'); pageHdr.className = 'settings-page-header';
+  const pageTitle = document.createElement('div'); pageTitle.className = 'settings-page-title';
+  pageTitle.textContent = '⚙️ Réglages';
+  pageHdr.appendChild(pageTitle);
+  wrap.appendChild(pageHdr);
+
   // ── iCLOUD DRIVE ──
-  const icloudSec = _settingsSection('☁️ Sauvegarde iCloud Drive');
+  const icloudSec = _settingsSection('Sauvegarde', {emoji:'☁️', bg:'#5ba8a0'});
   _settingsRow(icloudSec, 'Derniere sauvegarde', typeof iCloudDrive!=='undefined' ? iCloudDrive.getLastBackupLabel() : '—', () => {
     const btn=document.createElement('button');btn.className='btn btn-teal btn-sm';btn.textContent='☁️ Gerer';
     btn.addEventListener('click',()=>{if(typeof iCloudDrive!=='undefined')iCloudDrive.showGuide();});
@@ -563,7 +595,7 @@ function renderSettings() {
   wrap.appendChild(icloudSec);
 
   // ── APPLE WATCH ──
-  const watchSec = _settingsSection('⌚ Apple Watch');
+  const watchSec = _settingsSection('Apple Watch', {emoji:'⌚', bg:'#1c1c1e'});
   const recScore = typeof AppleWatch!=='undefined' ? AppleWatch.calcRecoveryScore() : null;
   _settingsRow(watchSec, 'Score de recuperation', recScore ? recScore.score+'/100 — '+recScore.status : 'Aucune donnee Watch', () => {
     const btn=document.createElement('button');btn.className='btn btn-ghost btn-sm';btn.textContent='⚙ Configurer';
@@ -574,7 +606,7 @@ function renderSettings() {
   wrap.appendChild(watchSec);
 
   // ── INTÉGRATIONS API ──
-  const apiSec = _settingsSection('🔗 Integrations API');
+  const apiSec = _settingsSection('Intégrations', {emoji:'🔗', bg:'#5856d6'});
   _settingsRow(apiSec, 'Apple Sante (HealthKit)', 'Synchroniser pas, sommeil, poids depuis iPhone', () => {
     const btn = document.createElement('button'); btn.className='btn btn-ghost btn-sm';
     btn.textContent = '⚙ Configurer';
@@ -628,7 +660,7 @@ function renderSettings() {
   wrap.appendChild(apiSec);
 
   // ── PROFIL ──
-  const profSec = _settingsSection('👤 Profil');
+  const profSec = _settingsSection('Profil', {emoji:'👤', bg:'#ff6b35'});
   _settingsRow(profSec, 'Taille', 'Utilisée pour le calcul IMC & masse grasse', () => {
     const inp = document.createElement('input'); inp.type='number'; inp.className='settings-inp';
     inp.value=S.profilTaille||''; inp.placeholder='cm'; inp.min=100; inp.max=250;
@@ -724,7 +756,7 @@ function renderSettings() {
   wrap.appendChild(appSec);
 
   // ── NOTIFICATIONS ──
-  const notifSec = _settingsSection('🔔 Notifications');
+  const notifSec = _settingsSection('Notifications', {emoji:'🔔', bg:'#ff9500'});
   const notifPerm = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported';
   const notifStatus = notifPerm === 'granted' ? '✅ Activées' : notifPerm === 'denied' ? '❌ Refusées (modifier dans Réglages → Safari)' : '⬜ Non configurées';
   _settingsRow(notifSec, 'Autorisation', notifStatus, () => {
@@ -760,7 +792,7 @@ function renderSettings() {
   wrap.appendChild(notifSec);
 
   // ── DONNÉES ──
-  const dataSec = _settingsSection('💾 Données');
+  const dataSec = _settingsSection('Données', {emoji:'💾', bg:'#34c759'});
   _settingsRow(dataSec, 'Exporter mes données', 'Fichier JSON de sauvegarde complet', () => {
     const btn = document.createElement('button'); btn.className='btn btn-ghost btn-sm';
     btn.textContent='⬇ Exporter'; btn.addEventListener('click', () => document.getElementById('export-btn')?.click());

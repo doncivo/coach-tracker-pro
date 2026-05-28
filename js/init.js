@@ -1,4 +1,15 @@
 
+/* ── Bouton ⚙️ Réglages dans le header ── */
+document.addEventListener('DOMContentLoaded', () => {
+  const settingsBtn = document.getElementById('settings-hdr-btn');
+  if (settingsBtn) {
+    const goSettings = () => switchTab('settings');
+    settingsBtn.addEventListener('click', goSettings);
+    settingsBtn.ontouchstart = (e) => { e.preventDefault(); goSettings(); };
+  }
+});
+
+
 /* ── Masquer le splash screen après chargement ── */
 (function() {
   function hideSplash() {

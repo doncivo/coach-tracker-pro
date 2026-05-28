@@ -79,6 +79,7 @@
     <button class="hdr-btn" id="focus-btn" title="Mode focus" aria-label="Mode focus">🎯</button>
     <span id="hdr-fitness-score" style="display:none;cursor:pointer;font-family:var(--mono);font-size:12px;font-weight:700;padding:3px 8px;border-radius:12px;background:var(--teal);color:#fff" onclick="switchTab('dashboard')"></span>
     <button class="hdr-btn" id="search-btn" aria-label="Rechercher" title="Recherche globale" onclick="Search.open()" style="touch-action:manipulation">🔍</button>
+    <button class="hdr-btn" id="settings-hdr-btn" aria-label="Réglages" title="Réglages" style="touch-action:manipulation;font-size:18px">⚙️</button>
     <button class="hdr-btn" id="darkmode-btn" aria-label="Mode sombre">🌙</button>
     <input type="file" id="import-file" accept=".json" style="display:none">
   </div>
@@ -119,6 +120,7 @@
   <button class="bnav-more-btn" data-tab="achievements" role="menuitem"><span style="font-size:16px">🏆</span><span>Objectifs</span></button>
   <button class="bnav-more-btn" data-tab="library" role="menuitem"><span style="font-size:16px">📚</span><span>Biblio</span></button>
   <button class="bnav-more-btn" data-tab="monthly" role="menuitem"><span style="font-size:16px">📅</span><span>Calendrier</span></button>
+  <button class="bnav-more-btn" data-tab="settings" role="menuitem" style="border-top:1px solid var(--border);margin-top:4px;padding-top:10px"><span style="font-size:16px">⚙️</span><span>Réglages</span></button>
 </div>
 <div class="tabs">
   <button class="tab-btn active" data-tab="weekly">📋 Planning</button>
@@ -661,7 +663,7 @@
   </script>
 <script>
 (function() {
-  const SW_VERSION = 'ctp-v74';
+  const SW_VERSION = 'ctp-v75';
   if (!('serviceWorker' in navigator)) return;
 
   const RELOAD_KEY = 'ctp-sw-reloaded-' + SW_VERSION;

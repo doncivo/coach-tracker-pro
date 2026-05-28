@@ -540,6 +540,39 @@ function renderSettings() {
   if (!wrap) return;
   wrap.innerHTML = '';
 
+  // ── iCLOUD DRIVE ──
+  const icloudSec = _settingsSection('☁️ Sauvegarde iCloud Drive');
+  _settingsRow(icloudSec, 'Derniere sauvegarde', typeof iCloudDrive!=='undefined' ? iCloudDrive.getLastBackupLabel() : '—', () => {
+    const btn=document.createElement('button');btn.className='btn btn-teal btn-sm';btn.textContent='☁️ Gerer';
+    btn.addEventListener('click',()=>{if(typeof iCloudDrive!=='undefined')iCloudDrive.showGuide();});
+    btn.ontouchstart=(e)=>{e.stopPropagation();};
+    return btn;
+  });
+  _settingsRow(icloudSec, 'Sauvegarder maintenant', 'Envoyer les donnees vers iCloud Drive', () => {
+    const btn=document.createElement('button');btn.className='btn btn-ghost btn-sm';btn.textContent='📤 Exporter';
+    btn.addEventListener('click',()=>{if(typeof iCloudDrive!=='undefined')iCloudDrive.export();});
+    btn.ontouchstart=(e)=>{e.stopPropagation();};
+    return btn;
+  });
+  _settingsRow(icloudSec, 'Restaurer depuis iCloud', 'Importer un fichier de sauvegarde', () => {
+    const btn=document.createElement('button');btn.className='btn btn-ghost btn-sm';btn.textContent='📥 Importer';
+    btn.addEventListener('click',()=>{if(typeof iCloudDrive!=='undefined')iCloudDrive.import();});
+    btn.ontouchstart=(e)=>{e.stopPropagation();};
+    return btn;
+  });
+  wrap.appendChild(icloudSec);
+
+  // ── APPLE WATCH ──
+  const watchSec = _settingsSection('⌚ Apple Watch');
+  const recScore = typeof AppleWatch!=='undefined' ? AppleWatch.calcRecoveryScore() : null;
+  _settingsRow(watchSec, 'Score de recuperation', recScore ? recScore.score+'/100 — '+recScore.status : 'Aucune donnee Watch', () => {
+    const btn=document.createElement('button');btn.className='btn btn-ghost btn-sm';btn.textContent='⚙ Configurer';
+    btn.addEventListener('click',()=>{if(typeof AppleWatch!=='undefined')AppleWatch.showWatchGuide();});
+    btn.ontouchstart=(e)=>{e.stopPropagation();};
+    return btn;
+  });
+  wrap.appendChild(watchSec);
+
   // ── INTÉGRATIONS API ──
   const apiSec = _settingsSection('🔗 Integrations API');
   _settingsRow(apiSec, 'Apple Sante (HealthKit)', 'Synchroniser pas, sommeil, poids depuis iPhone', () => {

@@ -172,6 +172,9 @@ function renderDashboard(){
   });
   wrap.appendChild(statsGrid);
 
+  // ── RÉCUPÉRATION APPLE WATCH (si données disponibles) ──
+  if (typeof renderRecoveryWidget === 'function') renderRecoveryWidget(wrap);
+
   // ── COURBE POIDS (si ≥3 mesures) ──
   const weightEntries = (S.mesures?.poids || []).slice(-10);
   if (weightEntries.length >= 2) {

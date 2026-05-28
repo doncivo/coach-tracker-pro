@@ -354,6 +354,20 @@ let S={
   mesureObjectifs:{},
   dayTemplates:[],
   apiKeys:{ usda:'DEMO_KEY', spotify:'', spotifyToken:'', googleCalId:'' },
+  watchData:{
+    hrv:{},        // date → ms (HRV nightly average)
+    rhr:{},        // date → bpm (resting heart rate)
+    vo2max:{},     // date → ml/kg/min
+    sleepDeep:{},  // date → hours
+    sleepRem:{},   // date → hours
+    sleepCore:{},  // date → hours
+    calActive:{},  // date → kcal
+    exerciseMin:{},// date → minutes
+    spo2:{},       // date → %
+    skinTemp:{},   // date → celsius delta
+    workouts:[],   // [{date, type, duration, calBurned, hrAvg, hrMax}]
+  },
+  icloudBackup:{ lastBackup:null, autoBackup:true },
   objective:{text:'',targetDate:'',targetWeight:'',targetExercise:'',targetLoad:''},
   achievements:{},
   undoStack:[],

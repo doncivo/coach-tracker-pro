@@ -116,6 +116,14 @@
 
 <div class="tab-pane active" id="tab-weekly">
   <div class="weekly-wrap">
+    <div class="plan-csv-bar">
+      <span style="font-size:11px;font-weight:700;color:var(--muted)">Planning</span>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-ghost btn-sm" id="import-csv-btn" title="Importer un programme CSV">📥 Importer CSV</button>
+        <button class="btn btn-ghost btn-sm" id="export-csv-planning-btn" title="Exporter le planning en CSV">📤 Exporter CSV</button>
+      </div>
+    </div>
+    <input type="file" id="import-csv-file" accept=".csv" style="display:none">
     <nav class="day-tabs" id="day-tabs"></nav>
     <div id="week-heatmap"></div>
     <div class="day-panel"><div class="day-detail" id="day-detail"></div></div>
@@ -581,6 +589,7 @@
   <script src="js/services/persist.js"></script>
   <script src="js/services/compute.js"></script>
   <script src="js/services/mesures-objectifs.js"></script>
+  <script src="js/services/csv-planning.js"></script>
   <script src="js/services/notify.js"></script>
   <script src="js/services/share.js"></script>
   <script src="js/services/search.js"></script>
@@ -620,7 +629,7 @@
   </script>
 <script>
 (function() {
-  const SW_VERSION = 'ctp-v66';
+  const SW_VERSION = 'ctp-v67';
   if (!('serviceWorker' in navigator)) return;
 
   const RELOAD_KEY = 'ctp-sw-reloaded-' + SW_VERSION;

@@ -2302,3 +2302,17 @@ nav.tabs   { flex-shrink: 0; }
   border-color: rgba(221,107,32,.4);
   color: var(--orange, #dd6b20);
 }
+
+
+/* ================================================================
+   PLANNING — CSV Import/Export bar
+   ================================================================ */
+
+.plan-csv-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px 6px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}

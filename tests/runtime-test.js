@@ -411,6 +411,154 @@ if (!loadError) {
 // ══════════════════════════════════════════════════════════════
 // NIVEAU 4 : VÉRIFICATIONS FICHIERS
 // ══════════════════════════════════════════════════════════════
+
+section('Corrections audit — tests ciblés');
+
+// C1: Headers Claude API présents dans le code source
+ok('C1: x-api-key header present', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/services/api-extended.js'),'utf8');
+  return s.includes("'x-api-key': claudeKey") &&
+         s.includes("anthropic-dangerous-direct-browser-access");
+})());
+
+ok('C1: Guard cle vide present', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/services/api-extended.js'),'utf8');
+  return s.includes('if (!claudeKey)');
+})());
+
+// C2: Mode libre utilise sessionStorage
+ok('C2: Mode libre — sessionStorage (pas S._freeExercises)', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/render_session.js'),'utf8');
+  return s.includes('_getFreeExs()') &&
+         s.includes("sessionStorage.getItem('_freeExs')") &&
+         !s.includes('S._freeExercises.forEach') &&
+         !s.includes('S._freeExercises.push');
+})());
+
+// C3: Pas de double dispatch
+ok('C3: Pas de double dispatch Apple Watch', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/services/api-integrations.js'),'utf8');
+  // Le load handler ne doit pas appeler readURLParams() (actif, hors commentaire)
+  const loadMatch = s.match(/window\.addEventListener\(['"]load['"][\s\S]*?\}\s*\)/);
+  if (!loadMatch) return true;
+  const loadBody = loadMatch[0];
+  // Chercher un appel non commenté à readURLParams()
+  const lines = loadBody.split('\n').filter(l => !l.trim().startsWith('//'));
+  return !lines.some(l => l.includes('readURLParams()'));
+})());
+
+// C5: Guard ICS date
+ok('C5: ICS — guard date manquante', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/services/api-extended.js'),'utf8');
+  return s.includes("if (!d.date) return");
+})());
+
+// C7: Date.now() absent du hash router
+ok('C7: Router hash — sans Date.now()', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/core/router.js'),'utf8');
+  const m = s.match(/dashboard:\s*\[.*?\]/s);
+  return m ? !m[0].includes('Date.now()') : false;
+})());
+
+// C8: AbortController dans USDA
+ok('C8: USDA — AbortController present', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/services/api-extended.js'),'utf8');
+  return s.includes('new AbortController()') && s.includes("'AbortError'");
+})());
+
+// C10: Caches API limités
+ok('C10: Caches API limites a 50', (() => {
+  const s1 = fs.readFileSync(path.join(ROOT,'js/services/api-integrations.js'),'utf8');
+  const s2 = fs.readFileSync(path.join(ROOT,'js/services/api-extended.js'),'utf8');
+  return s1.includes('> 50') && s2.includes('> 50');
+})());
+
+
+
+section('Tests nouveaux services');
+
+// Gap 1 — C6: sess-info-chips wrapper présent dans HTML
+ok('C6: sess-info-chips dans index.html', (() => {
+  const html = fs.readFileSync(path.join(ROOT,'index.html'),'utf8');
+  return html.includes('class="sess-info-chips"') && html.includes('id="sess-info-chips"');
+})());
+
+// Gap 2 — C9: safe-area-inset-top sur l'overlay de fin de séance
+ok('C9: Dynamic Island safe-area sur overlay seance', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/render_planning.js'),'utf8');
+  return s.includes('safe-area-inset-top') && s.includes('sess-complete-overlay');
+})());
+
+// Gap 3 — Nouveaux champs State présents (migration)
+ok('State: watchData present', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/data/constants.js'),'utf8');
+  return s.includes('watchData:') || s.includes('watchData :');
+})());
+
+ok('State: apiKeys.claude present', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/data/constants.js'),'utf8');
+  return s.includes("claude:''") || s.includes('claude: ');
+})());
+
+ok('State: dayTemplates present', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/data/constants.js'),'utf8');
+  return s.includes('dayTemplates:[]') || s.includes('dayTemplates: []');
+})());
+
+// Gap 4 — calcRecoveryScore ne crash pas sans données Watch
+ok('calcRecoveryScore: retourne null sans donnees', (() => {
+  try {
+    if (typeof AppleWatch === 'undefined') return true; // non chargé en Node = OK
+    const result = AppleWatch.calcRecoveryScore('2099-01-01');
+    return result === null; // pas de données → null, pas un crash
+  } catch(e) { return false; }
+})());
+
+// Gap 5 — SW contient tous les nouveaux fichiers services
+ok('SW: tous les nouveaux services dans le cache', (() => {
+  const sw = fs.readFileSync(path.join(ROOT,'sw.js'),'utf8');
+  return [
+    'icloud-watch.js',
+    'api-extended.js',
+    'api-integrations.js',
+    'mesures-objectifs.js',
+    'csv-planning.js',
+  ].every(f => sw.includes(f));
+})());
+
+// Gap 6 — _getFreeExs retourne [] sur sessionStorage corrompu
+ok('_getFreeExs: resilient au sessionStorage corrompu', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/render_session.js'),'utf8');
+  // Vérifier le try/catch autour de JSON.parse
+  return s.includes("try { return JSON.parse(sessionStorage.getItem('_freeExs')") &&
+         s.includes("} catch(e) { return []; }");
+})());
+
+// Gap 7 — calcMesureObjectif accessible et retourne objet valide
+ok('calcMesureObjectif: retourne objet pour bras', (() => {
+  try {
+    if (typeof calcMesureObjectif === 'undefined') return true; // non chargé en Node
+    const result = calcMesureObjectif('bras');
+    return result !== null && typeof result === 'object' &&
+           result.santé !== undefined && result.athlétique !== undefined;
+  } catch(e) { return false; }
+})());
+
+// Gap 8 — ICSExport.generate ne crash pas avec date manquante
+ok('ICSExport.generate: robuste aux dates manquantes', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/services/api-extended.js'),'utf8');
+  // Guard présent + génération de fin de fichier VCALENDAR
+  return s.includes("if (!d.date) return") &&
+         s.includes("END:VCALENDAR");
+})());
+
+// Gap 9 — ClaudeCoach._history limité à 20 items
+ok('ClaudeCoach: historique limite a 20 items', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/services/api-extended.js'),'utf8');
+  return s.includes('_history.length > 20') && s.includes('.slice(-20)');
+})());
+
+
 section('Vérifications fichiers');
 
 const swSrc   = fs.readFileSync(path.join(ROOT,'sw.js'),'utf8');

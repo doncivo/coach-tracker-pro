@@ -382,11 +382,22 @@ function renderCalTracker() {
     scanBtn.innerHTML = '📷 Scanner code-barres';
     scanBtn.addEventListener('click', () => {
       window._barcodeCb = (result) => {
-        nameInp.value   = result.name;
-        calInp.value    = result.cal;
-        protInp.value   = result.protein;
-        carbInp.value   = result.carbs;
-        fatInp.value    = result.fat;
+        // Si le résultat est un code-barres brut (barcode), appeler Open Food Facts
+        if (result._rawBarcode && typeof OpenFoodFacts !== 'undefined') {
+          OpenFoodFacts.scanAndFill(result._rawBarcode, (product) => {
+            nameInp.value   = product.name    || '';
+            calInp.value    = product.cal     || '';
+            protInp.value   = product.protein || '';
+            carbInp.value   = product.carbs   || '';
+            fatInp.value    = product.fat     || '';
+          });
+        } else {
+          nameInp.value   = result.name;
+          calInp.value    = result.cal;
+          protInp.value   = result.protein;
+          carbInp.value   = result.carbs;
+          fatInp.value    = result.fat;
+        }
       };
       openBarcodeScanner(window._barcodeCb);
     });

@@ -427,6 +427,34 @@ function renderLibrary(){
     // Add to planning button
     const addBtn=document.createElement('button');addBtn.className='btn btn-ghost btn-sm';addBtn.style.cssText='margin-top:8px;width:100%';addBtn.textContent='+ Ajouter au planning ('+DAYS_SH[S.activeDay]+')';
     addBtn.addEventListener('click',()=>{const d=S.days[S.activeDay];const newEx={id:uid(),name:ex.name,muscle:ex.muscle,weight:'',sets:'3',reps:'8–12',rest:'',tempo:'',repsAchieved:'',rpe:'',rir:'',note:'',done:false,setData:null,isWarmup:false,supersetGroup:''};d.exercises.push(newEx);save();showToast(ex.name+' ajouté à '+DAYS[S.activeDay],'save');});
+
+    // Wger enrichment button + detail panel
+    const wgerRow = document.createElement('div');
+    wgerRow.style.cssText = 'display:flex;gap:6px;margin-top:6px';
+    const wgerBtn = document.createElement('button');
+    wgerBtn.className = 'btn btn-ghost btn-sm';
+    wgerBtn.style.cssText = 'flex:1;font-size:10px;border-color:rgba(91,168,160,.3);color:var(--teal-d)';
+    wgerBtn.textContent = '🏋️ Wger — Images & instructions';
+    const wgerPanel = document.createElement('div');
+    wgerPanel.style.cssText = 'margin-top:6px;display:none';
+    let wgerLoaded = false;
+    const toggleWger = () => {
+      if (wgerPanel.style.display === 'none') {
+        wgerPanel.style.display = 'block';
+        wgerBtn.textContent = '▲ Masquer Wger';
+        if (!wgerLoaded) {
+          wgerLoaded = true;
+          if (typeof WgerAPI !== 'undefined') WgerAPI.showExerciseDetail(ex.name, wgerPanel);
+        }
+      } else {
+        wgerPanel.style.display = 'none';
+        wgerBtn.textContent = '🏋️ Wger — Images & instructions';
+      }
+    };
+    wgerBtn.ontouchstart=(e)=>{e.preventDefault();toggleWger();};
+    wgerBtn.onclick=toggleWger;
+    wgerRow.appendChild(wgerBtn);
+    body.appendChild(wgerRow); body.appendChild(wgerPanel);
     body.appendChild(addBtn);card.appendChild(body);grid.appendChild(card);
   });
   if(!filtered.length)grid.innerHTML='<div class="prog-no-data">Aucun exercice trouvé.</div>';
@@ -502,6 +530,29 @@ function renderSettings() {
   const wrap = document.getElementById('settings-wrap');
   if (!wrap) return;
   wrap.innerHTML = '';
+
+  // ── INTÉGRATIONS API ──
+  const apiSec = _settingsSection('🔗 Integrations API');
+  _settingsRow(apiSec, 'Apple Sante (HealthKit)', 'Synchroniser pas, sommeil, poids depuis iPhone', () => {
+    const btn = document.createElement('button'); btn.className='btn btn-ghost btn-sm';
+    btn.textContent = '⚙ Configurer';
+    btn.addEventListener('click', () => { if(typeof HealthKitBridge!=='undefined') HealthKitBridge.showSetupGuide(); });
+    btn.ontouchstart = (e) => { e.stopPropagation(); };
+    return btn;
+  });
+  _settingsRow(apiSec, 'Open Food Facts', 'Nutrition automatique par code-barres', () => {
+    const btn = document.createElement('button'); btn.className='btn btn-ghost btn-sm';
+    btn.style.cssText = 'background:rgba(56,161,105,.1);color:var(--green);border-color:rgba(56,161,105,.3)';
+    btn.textContent = '✅ Active';
+    return btn;
+  });
+  _settingsRow(apiSec, 'Wger Exercise DB', 'Images et instructions par exercice', () => {
+    const btn = document.createElement('button'); btn.className='btn btn-ghost btn-sm';
+    btn.style.cssText = 'background:rgba(56,161,105,.1);color:var(--green);border-color:rgba(56,161,105,.3)';
+    btn.textContent = '✅ Active';
+    return btn;
+  });
+  wrap.appendChild(apiSec);
 
   // ── PROFIL ──
   const profSec = _settingsSection('👤 Profil');

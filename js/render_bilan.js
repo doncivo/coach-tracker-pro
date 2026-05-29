@@ -55,7 +55,16 @@ function renderBilan(){
   if(bCals>0){const cC=bc('Calories (7j)');const tdeeR=computeTDEE();const diff=Math.round(bCals/7-tdeeR.tdee);cC.innerHTML+=`<div class="bilan-big">${Math.round(bCals/7).toLocaleString('fr')}<span style="font-size:13px;color:var(--muted)">kcal/j</span></div><div class="bilan-sub" style="color:${diff>200?'var(--orange)':diff<-200?'var(--teal)':'var(--green)'}">${diff>0?'+'+diff:diff} kcal vs TDEE</div>`;grid.appendChild(cC);}
   if(bSleepAvg>0){const cSl=bc('Sommeil (7j)');cSl.innerHTML+=`<div class="bilan-big">${bSleepAvg.toFixed(1)}<span style="font-size:13px;color:var(--muted)">h/nuit</span></div><div class="bilan-sub" style="color:${bSleepAvg>=7?'var(--green)':bSleepAvg>=6?'var(--orange)':'var(--red)'}">${bSleepAvg>=7?'Optimal ✅':bSleepAvg>=6?'Insuffisant ⚠️':'Critique ❌'}</div>`;grid.appendChild(cSl);}
   // Recent sessions from history
-  const recentSess=Object.entries(S.history||{}).sort(([a],[b])=>b.localeCompare(a)).slice(0,5).flatMap(([d,v])=>(Array.isArray(v)?v:[]).filter(e=>e.volume>0).map(e=>({...e,date:d})));
+  // B1 fix: S.history[key] est {days:[], weekType:...} pas un tableau
+  const recentSess=Object.entries(S.history||{}).sort(([a],[b])=>b.localeCompare(a)).slice(0,5).flatMap(([wkKey,wkData])=>{
+    const days=(wkData?.days||[]);
+    return days.map((d,di)=>({
+      name: d?.name || DAYS_SH[di] || 'Séance',
+      date: wkKey,
+      volume: (d?.exercises||[]).filter(e=>!e.isWarmup).reduce((a,ex)=>a+calcVol(ex),0),
+      duration: d?.duration || null,
+    })).filter(s=>s.volume>0);
+  });
   if(recentSess.length){
     const cSess=bc('Séances récentes');
     cSess.style.gridColumn='1/-1';

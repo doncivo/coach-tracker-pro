@@ -594,6 +594,46 @@ ok('session: focus inputs use _debouncedSave', (() => {
 })());
 
 
+
+section('Audit complet v80 — nouveaux tests');
+
+// B1: recentSess lit bien les jours (pas Array.isArray)
+ok('B1: bilan recentSess - lit .days correctement', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/render_bilan.js'),'utf8');
+  return s.includes('wkData?.days') && !s.includes('Array.isArray(v)');
+})());
+
+// B2: pagehide flush présent
+ok('B2: store pagehide flush présent', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/core/store.js'),'utf8');
+  return s.includes("'pagehide'") && s.includes('_flushNow');
+})());
+
+// B2: visibilitychange flush présent
+ok('B2: store visibilitychange flush présent', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/core/store.js'),'utf8');
+  return s.includes("'visibilitychange'") && s.includes('visibilityState');
+})());
+
+// B3: save() sans JSON.stringify loop
+ok('B3: state-bridge sans JSON.stringify par-day loop', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/core/state-bridge.js'),'utf8');
+  return !s.includes('JSON.stringify(day)') && s.includes('_pendingFlush');
+})());
+
+// B4: no more direct save() in reps input
+ok('B4: reps input debounced', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/render_session.js'),'utf8');
+  return !s.includes("setD.reps = e.target.value; refreshSecondary(); save();");
+})());
+
+// TRAINING_SET_DAYS_BATCH reducer exists
+ok('Store: TRAINING_SET_DAYS_BATCH reducer', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/core/store.js'),'utf8');
+  return s.includes("'TRAINING_SET_DAYS_BATCH'");
+})());
+
+
 section('Vérifications fichiers');
 
 const swSrc   = fs.readFileSync(path.join(ROOT,'sw.js'),'utf8');

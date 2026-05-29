@@ -960,7 +960,7 @@ function renderSessExercise(d,exercises,vi){
     ri.className = 'set-card-inp set-card-reps';
     ri.value = setD.reps || '';
     ri.placeholder = ex.reps || '?';
-    ri.addEventListener('input', e => { setD.reps = e.target.value; refreshSecondary(); save(); });
+    ri.addEventListener('input', e => { setD.reps = e.target.value; refreshSecondary(); _debouncedSave(); });
 
     const valBtn = document.createElement('button');
     valBtn.className = 'set-card-go' + (setD.done ? ' validated' : '');

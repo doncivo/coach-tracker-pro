@@ -175,31 +175,29 @@
      le Store ne sait pas que ses données ont changé.
      Ce hook force une synchronisation depuis le fallback.
   ───────────────────────────────────────────── */
-  const _origSave = window.save;
+  // B3 fix: suppression du JSON.stringify×7 par appel save()
+  // La sync des mutations profondes est gérée par un dispatch direct
+  let _pendingFlush = false;
   window.save = function(skipUndo) {
-    // Récupérer les mutations profondes depuis le fallback
-    // et les synchroniser vers le Store via un batch dispatch
+    if (_pendingFlush) return;
+    // Si des mutations directes ont eu lieu sur les jours (fb.days muté),
+    // dispatcher un seul batch update au prochain tick
     const fb = _fallback;
-    const state = Store.getState();
-    
-    // Si days a été muté en place, forcer la resync
-    if (fb.days && fb.days !== state.training.days) {
-      // Les jours ont été remplacés (mkDay, etc.)
-      fb.days.forEach((day, i) => {
-        if (JSON.stringify(day) !== JSON.stringify(state.training.days[i])) {
+    if (fb.days) {
+      _pendingFlush = true;
+      Promise.resolve().then(() => {
+        _pendingFlush = false;
+        const state = Store.getState();
+        if (fb.days && fb.days !== state.training.days) {
           Store.dispatch({
-            type: 'TRAINING_UPDATE_DAY',
-            payload: { dayIndex: i, changes: day }
-          }, { skipUndo: true });
+            type: 'TRAINING_SET_DAYS_BATCH',
+            payload: fb.days
+          }, { skipUndo: !!skipUndo });
         }
       });
     }
-    
-    // Appel original (persist.js)
-    if (_origSave) _origSave.call(this, skipUndo);
-    else if (typeof Persist !== 'undefined') {
-      Persist.save(Store.getState(), { skipUndo: !!skipUndo });
-    }
+    // Déclencher persist via Store (le debounce 400ms gère la fréquence)
+    Store._triggerPersist && Store._triggerPersist();
   };
 
 })();

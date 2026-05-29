@@ -128,6 +128,16 @@ const Store = (() => {
   /* ─────────────────────────────────────────────
      PERSISTANCE
   ───────────────────────────────────────────── */
+  function _flushNow() {
+    // Sauvegarde immédiate — appelée sur pagehide/visibilitychange
+    clearTimeout(_saveTimer);
+    _saveTimer = null;
+    try {
+      const flat = _flattenForStorage(_state);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(flat));
+    } catch(e) { /* silencieux — dernier recours */ }
+  }
+
   function _persist() {
     clearTimeout(_saveTimer);
     _saveTimer = setTimeout(() => {
@@ -163,6 +173,13 @@ const Store = (() => {
         }
       }
     }, 400);
+  }
+
+  // Flush immédiat avant fermeture (évite la perte des 400ms de debounce)
+  if (typeof window !== 'undefined') {
+    window.addEventListener('pagehide',        () => _flushNow(), { passive: true });
+    window.addEventListener('visibilitychange',() => { if (document.visibilityState === 'hidden') _flushNow(); }, { passive: true });
+    window.addEventListener('beforeunload',    () => _flushNow());
   }
 
   function _saveUndo() {
@@ -328,6 +345,8 @@ const Store = (() => {
           });
           return Object.assign({}, state, { days });
         }
+        case 'TRAINING_SET_DAYS_BATCH':
+          return Object.assign({}, state, { days: action.payload });
         case 'TRAINING_ARCHIVE_WEEK':
           return Object.assign({}, state, {
             history: action.payload.history,
@@ -633,6 +652,9 @@ const Store = (() => {
       localStorage.removeItem(UNDO_KEY);
       _subscribers.forEach(fn => fn(_state, { type: 'RESET' }));
     },
+
+    /** Déclencher une persistance manuelle (sans action) */
+    _triggerPersist() { _persist(); },
 
     /** Exporter le state brut (pour débogage) */
     export() {

@@ -592,7 +592,7 @@ function computeTDEE(){
   return {tdee:Math.round(bmr*mult), bmr:Math.round(bmr), mult, sessions, age, gender};
 }
 
-function mkDay(i,wt){const p=PA[i];return{date:'',muscles:[...p.muscles],warmup:p.warmup||'',exercises:p.exercises.map(e=>({...e,setData:null})),cardio:{...p.cardio}};}
+/* défini dans data/constants.js */
 
 function syncMuscles(di){const d=S.days[di];const seen=[];d.exercises.filter(e=>!e.isWarmup).forEach(ex=>{if(ex.muscle&&!seen.includes(ex.muscle))seen.push(ex.muscle);});const ns=['','',''];seen.slice(0,3).forEach((k,i)=>ns[i]=k);S.days[di].muscles=ns;const el=document.getElementById('mpicker-'+di);if(el)el.querySelectorAll('.muscle-slot-sel').forEach((s,i)=>{s.value=ns[i];applySlotColor(s,ns[i]);});renderDayTabs();save();}
 
@@ -600,10 +600,7 @@ function mkCard(label,val,sub,status,delta){const c=document.createElement('div'
 
 function mkSec(title){const t=document.createElement('div');t.className='kpi-section-title';t.textContent=title;wrap.appendChild(t);const g=document.createElement('div');g.className='kpi-grid';wrap.appendChild(g);return g;}
 
-function escHtml(s) {
-  if (s == null) return '';
-  return String(s).replace(/[&<>"']/g, m => _ESC[m]);
-}
+/* défini dans data/constants.js */
 
 function saveObj() {
     const get = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
@@ -684,19 +681,4 @@ function updateStats(){
 
 }
 
-function validateImport(data) {
-  const errors = [];
-  if (typeof data !== 'object' || data === null) {
-    return { ok: false, errors: ['Le fichier JSON est invalide ou corrompu.'] };
-  }
-  if (!Array.isArray(data.days) || data.days.length !== 7) {
-    errors.push('days: doit être un tableau de 7 éléments.');
-  }
-  if (typeof data.weekType !== 'string' || !['A','B'].includes(data.weekType)) {
-    errors.push('weekType: doit être "A" ou "B".');
-  }
-  if (data.mesures && typeof data.mesures !== 'object') {
-    errors.push('mesures: format invalide.');
-  }
-  return { ok: errors.length === 0, errors };
-}
+/* validateImport défini dans data/constants.js */

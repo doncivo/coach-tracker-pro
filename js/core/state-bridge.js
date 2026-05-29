@@ -165,16 +165,6 @@
   // Remplacer S par le proxy
   window.S = proxy;
 
-  // save() devient un no-op — persist.js gère tout via Store.subscribe
-  // On garde la fonction pour ne pas casser les 92 appels existants
-  window.save = function(skipUndo) {
-    // Persist.save() est déjà abonné au Store via subscribe()
-    // On force juste une sauvegarde immédiate si besoin
-    if (typeof Persist !== 'undefined') {
-      Persist.save(Store.getState(), { skipUndo: !!skipUndo });
-    }
-  };
-
   console.log('[CTP] State bridge actif — S est maintenant un proxy réactif');
 
   /* ─────────────────────────────────────────────
@@ -184,29 +174,22 @@
      le Store ne sait pas que ses données ont changé.
      Ce hook force une synchronisation depuis le fallback.
   ───────────────────────────────────────────── */
-  // B3 fix: suppression du JSON.stringify×7 par appel save()
-  // La sync des mutations profondes est gérée par un dispatch direct
-  let _pendingFlush = false;
+  // window.save — version unique et correcte
+  // Sync les mutations directes sur S.days puis déclenche la persistance
   window.save = function(skipUndo) {
-    if (_pendingFlush) return;
-    // Si des mutations directes ont eu lieu sur les jours (fb.days muté),
-    // dispatcher un seul batch update au prochain tick
     const fb = _fallback;
-    if (fb.days) {
-      _pendingFlush = true;
-      Promise.resolve().then(() => {
-        _pendingFlush = false;
-        const state = Store.getState();
-        if (fb.days && fb.days !== state.training.days) {
-          Store.dispatch({
-            type: 'TRAINING_SET_DAYS_BATCH',
-            payload: fb.days
-          }, { skipUndo: !!skipUndo });
-        }
-      });
+    const state = Store.getState();
+
+    // Si S.days a été muté directement, synchroniser vers le Store
+    if (fb.days && fb.days !== state.training.days) {
+      Store.dispatch({
+        type: 'TRAINING_SET_DAYS_BATCH',
+        payload: fb.days
+      }, { skipUndo: !!skipUndo });
+    } else {
+      // Déclencher persist directement (données non-training : nutrition, mesures…)
+      Store._triggerPersist && Store._triggerPersist();
     }
-    // Déclencher persist via Store (le debounce 400ms gère la fréquence)
-    Store._triggerPersist && Store._triggerPersist();
   };
 
 })();

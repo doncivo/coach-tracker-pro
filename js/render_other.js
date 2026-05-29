@@ -402,6 +402,14 @@ function _renderBadges() {
 
 /* ══ BIBLIOTHÈQUE ══ */
 function renderLibrary(){
+  // Listeners filtre — attachés une seule fois avec guard
+  ['lib-search','lib-filter-muscle','lib-filter-pattern'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el._libListenerBound) {
+      el._libListenerBound = true;
+      el.addEventListener('input', renderLibrary);
+    }
+  });
   const search=(document.getElementById('lib-search').value||'').toLowerCase();
   const muscleFilter=document.getElementById('lib-filter-muscle').value;
   const patternFilter=document.getElementById('lib-filter-pattern').value;
@@ -494,10 +502,21 @@ function renderLibrary(){
     return;
   }
 }
-['lib-search','lib-filter-muscle','lib-filter-pattern'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('input',renderLibrary);});
+/* lib-search/filter listeners : déplacés dans renderLibrary() pour éviter l'empilement */
 
 /* ══ CALENDAR ══ */
 function renderCalendar(){
+  // Listeners navigation mois — attachés une seule fois
+  const prevM = document.getElementById('prev-month');
+  const nextM = document.getElementById('next-month');
+  if (prevM && !prevM._calBound) {
+    prevM._calBound = true;
+    prevM.addEventListener('click', () => { S.calMonth--; if(S.calMonth<0){S.calMonth=11;S.calYear--;} renderCalendar(); save(); });
+  }
+  if (nextM && !nextM._calBound) {
+    nextM._calBound = true;
+    nextM.addEventListener('click', () => { S.calMonth++; if(S.calMonth>11){S.calMonth=0;S.calYear++;} renderCalendar(); save(); });
+  }
   const {calYear,calMonth}=S;const title=new Date(calYear,calMonth,1).toLocaleDateString('fr-FR',{month:'long',year:'numeric'});document.getElementById('cal-month-title').textContent=title.charAt(0).toUpperCase()+title.slice(1);
   const grid=document.getElementById('cal-grid');grid.innerHTML='';
   ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].forEach(h=>{const dh=document.createElement('div');dh.className='cal-dh';dh.textContent=h;grid.appendChild(dh);});
@@ -539,8 +558,7 @@ function renderCalendar(){
   }
 
 }
-document.getElementById('prev-month').addEventListener('click',()=>{S.calMonth--;if(S.calMonth<0){S.calMonth=11;S.calYear--;}renderCalendar();save();});
-document.getElementById('next-month').addEventListener('click',()=>{S.calMonth++;if(S.calMonth>11){S.calMonth=0;S.calYear++;}renderCalendar();save();});
+/* prev-month/next-month listeners : déplacés dans renderCalendar() */
 
 /* ── Paramètres (déplacé depuis utils.js) ── */
 function _settingsSection(title, icon) {

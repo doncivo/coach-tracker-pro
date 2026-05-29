@@ -115,20 +115,7 @@ function renderStepsGrid() {
 /* ══ CALORIES TRACKER ══ */
 const MEAL_NAMES = ['Petit-déjeuner 🌅', 'Déjeuner 🌞', 'Dîner 🌙', 'Collation 🍎'];
 
-function calDayKey(offset) {
-  const d = new Date();
-  d.setDate(d.getDate() + offset);
-  return localDateStr(d);
-}
-
-function calDayLabel(offset) {
-  if (offset === 0) return "Aujourd'hui";
-  if (offset === -1) return 'Hier';
-  if (offset === 1) return 'Demain';
-  const d = new Date();
-  d.setDate(d.getDate() + offset);
-  return d.toLocaleDateString('fr-FR', {weekday:'long', day:'2-digit', month:'long'});
-}
+/* calDayKey / calDayLabel — définis plus bas dans ce fichier (version correcte) */
 
 
 /* ================================================================
@@ -824,26 +811,24 @@ function renderSleepChart(container) {
 /* ── Recherche aliments français avec calcul auto par poids ── */
 
 
-let _corpsListenersInit = false;
-
 function renderCorps(){
-  // Inputs profil — bind une seule fois pour éviter l'empilement de listeners
-  const profilInp=document.getElementById('profil-taille');
-  if(profilInp){ profilInp.value=S.profilTaille||''; }
-  const poignetInp=document.getElementById('profil-poignet');
-  if(poignetInp){ poignetInp.value=S.profilPoignet||17; }
-  const sexeSelC=document.getElementById('profil-sexe');
-  if(sexeSelC){ sexeSelC.value=S.profilSexe||'H'; }
-  const ageInp=document.getElementById('profil-age');
-  if(ageInp){ ageInp.value=S.profilAge||30; }
+  // Inputs profil — guard sur l'élément (dataset) pour survivre aux rechargements SW
+  const profilInp  = document.getElementById('profil-taille');
+  const poignetInp = document.getElementById('profil-poignet');
+  const sexeSelC   = document.getElementById('profil-sexe');
+  const ageInp     = document.getElementById('profil-age');
 
-  if(!_corpsListenersInit) {
-    _corpsListenersInit = true;
-    if(profilInp)  profilInp.addEventListener('input',  e=>{S.profilTaille=parseInt(e.target.value)||0;save();renderCorps();});
-    if(poignetInp) poignetInp.addEventListener('input', e=>{S.profilPoignet=parseFloat(e.target.value)||17;save();renderCorps();});
-    if(sexeSelC)   sexeSelC.addEventListener('change',  e=>{S.profilSexe=e.target.value;save();renderCorps();});
-    if(ageInp)     ageInp.addEventListener('input',     e=>{S.profilAge=parseInt(e.target.value)||30;save();});
-  }
+  // Mettre à jour les valeurs
+  if(profilInp)  profilInp.value  = S.profilTaille  || '';
+  if(poignetInp) poignetInp.value = S.profilPoignet || 17;
+  if(sexeSelC)   sexeSelC.value   = S.profilSexe    || 'H';
+  if(ageInp)     ageInp.value     = S.profilAge     || 30;
+
+  // Attacher les listeners — guard sur l'élément lui-même (résiste aux rechargements)
+  if(profilInp  && !profilInp._bound)  { profilInp._bound  = true; profilInp.addEventListener('input',  e=>{S.profilTaille=parseInt(e.target.value)||0;save();renderCorps();}); }
+  if(poignetInp && !poignetInp._bound) { poignetInp._bound = true; poignetInp.addEventListener('input', e=>{S.profilPoignet=parseFloat(e.target.value)||17;save();renderCorps();}); }
+  if(sexeSelC   && !sexeSelC._bound)   { sexeSelC._bound   = true; sexeSelC.addEventListener('change',  e=>{S.profilSexe=e.target.value;save();renderCorps();}); }
+  if(ageInp     && !ageInp._bound)     { ageInp._bound     = true; ageInp.addEventListener('input',     e=>{S.profilAge=parseInt(e.target.value)||30;save();}); }
   // ── Sections dynamiques — injection stable (ordre garanti) ──
   // Utilise ensureSection() pour éviter les doublons et garantir l'ordre
 

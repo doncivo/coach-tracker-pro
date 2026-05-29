@@ -572,7 +572,7 @@ ok('mesure-inp font-size 16px', (() => {
 // Corps listeners init once
 ok('renderCorps: listener guard present', (() => {
   const s = fs.readFileSync(path.join(ROOT,'js/render_corps.js'),'utf8');
-  return s.includes('_corpsListenersInit');
+  return s.includes('._bound') && s.includes('profilInp._bound');
 })());
 
 // ensureSection pattern
@@ -616,9 +616,11 @@ ok('B2: store visibilitychange flush présent', (() => {
 })());
 
 // B3: save() sans JSON.stringify loop
-ok('B3: state-bridge sans JSON.stringify par-day loop', (() => {
+ok('B3: state-bridge window.save unique et correct', (() => {
   const s = fs.readFileSync(path.join(ROOT,'js/core/state-bridge.js'),'utf8');
-  return !s.includes('JSON.stringify(day)') && s.includes('_pendingFlush');
+  // Une seule définition de window.save, sans pendingFlush bloquant
+  const count = (s.match(/window\.save\s*=/g) || []).length;
+  return count === 1 && !s.includes('_pendingFlush') && s.includes('TRAINING_SET_DAYS_BATCH');
 })());
 
 // B4: no more direct save() in reps input

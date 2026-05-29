@@ -52,10 +52,10 @@ const Persist = (() => {
       _saveUndo(state);
     }
 
-    clearTimeout(_saveTimer);
-    _saveTimer = setTimeout(() => {
-      _writeToDisk(state);
-    }, DEBOUNCE_MS);
+    // H1 fix: persist.js n'a plus son propre debounce.
+    // Le Store gère déjà un debounce 400ms via _triggerPersist().
+    // On écrit directement pour éviter le double-timer.
+    _writeToDisk(state);
   }
 
   function _writeToDisk(state) {

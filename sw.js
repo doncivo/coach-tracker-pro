@@ -1,4 +1,4 @@
-const CACHE = 'ctp-v77';
+const CACHE = 'ctp-v78';
 const ASSETS = [
   './', './index.html',
   './design/tokens.css', './css/style.css',
@@ -13,7 +13,8 @@ const ASSETS = [
   './js/services/mesures-objectifs.js',
   './js/services/api-integrations.js',
   './js/services/api-extended.js',
-  './js/services/icloud-watch.js', './js/services/compute.js', './js/services/notify.js', './js/services/share.js', './js/services/search.js', './js/services/coach.js',
+  './js/services/icloud-watch.js',
+  './js/services/body-composition.js', './js/services/compute.js', './js/services/notify.js', './js/services/share.js', './js/services/search.js', './js/services/coach.js',
   './js/core/state-bridge.js', './js/core/router.js',
   './js/utils.js', './js/charts.js',
   './js/render_dashboard.js', './js/render_planning.js',

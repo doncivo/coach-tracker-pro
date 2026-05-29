@@ -369,6 +369,8 @@ let S={
   },
   icloudBackup:{ lastBackup:null, autoBackup:true },
   objective:{text:'',targetDate:'',targetWeight:'',targetExercise:'',targetLoad:''},
+  water:{ daily:{}, goal:2500 },  // goal in ml
+  bodyCompo:{ fatPct:null, musclePct:null, boneMass:null, waterPct:null, visceralFat:null, leanMass:null },
   achievements:{},
   undoStack:[],
   sessStartTime:null,

@@ -258,7 +258,14 @@ const AppleWatch = {
     if (hkSleep)  Store.dispatch({ type:'ACTIVITY_SET_SLEEP', payload:{ date:hkDate, value:{ hours:hkSleep, quality:1 }}}, {skipUndo:true});
     if (hkWeight) Store.dispatch({ type:'BODY_ADD_MESURE', payload:{ key:'poids', entry:{ val:hkWeight, date:hkDate }}});
 
-    AppleWatch._importWatchData({ date:hkDate, hrv:hkHRV, rhr:hkRHR, vo2max:hkVO2, sleepDeep:hkDeep, sleepRem:hkREM, sleepCore:hkCore, calActive:hkCalAct, exerciseMin:hkExMin, spo2:hkSpO2, skinTemp:hkSkinT, workout:hkWorkout });
+    // Paramètres Renpho (via Apple Santé)
+    const hkFatPct    = parseFloat(params.get('hk_fat_pct'))    || null;
+    const hkLeanMass  = parseFloat(params.get('hk_lean_mass'))  || null;
+    const hkBoneMass  = parseFloat(params.get('hk_bone_mass'))  || null;
+    const hkWaterPct  = parseFloat(params.get('hk_water_pct'))  || null;
+    const hkVisceral  = parseFloat(params.get('hk_visceral'))   || null;
+
+    AppleWatch._importWatchData({ date:hkDate, hrv:hkHRV, rhr:hkRHR, vo2max:hkVO2, sleepDeep:hkDeep, sleepRem:hkREM, sleepCore:hkCore, calActive:hkCalAct, exerciseMin:hkExMin, spo2:hkSpO2, skinTemp:hkSkinT, workout:hkWorkout, fatPct:hkFatPct, leanMass:hkLeanMass, boneMass:hkBoneMass, waterPct:hkWaterPct, visceralFat:hkVisceral });
     window.history.replaceState({}, '', window.location.pathname);
     return true;
   },
@@ -390,6 +397,11 @@ const AppleWatch = {
       ['😴','Stades de sommeil','Profond, REM, Core'],
       ['🔥','Calories actives','Depense pendant la journee'],
       ['⏱','Minutes d exercice','Objectif OMS : 30 min/jour'],
+    ['🔴','% Graisse corporelle','Renpho → Apple Santé → body fat percentage'],
+    ['💪','Masse maigre (kg)','Renpho → lean body mass'],
+    ['🦴','Masse osseuse (kg)','Renpho → bone mass'],
+    ['💧','% Eau corporelle','Renpho → body water percentage'],
+    ['🫁','Graisse viscérale','Renpho → visceral fat level'],
       ['🩸','SpO2 (oxygene sanguin)','Series 6+ uniquement'],
       ['🌡','Temperature cutanee','Series 8 / Ultra uniquement'],
     ];
@@ -428,7 +440,7 @@ const AppleWatch = {
     urlBox.style.cssText='background:var(--bg);border-radius:12px;padding:12px;border:1.5px solid var(--teal)';
     const urlLbl=document.createElement('div');urlLbl.style.cssText='font-size:10px;font-weight:700;text-transform:uppercase;color:var(--teal-d);margin-bottom:6px';urlLbl.textContent='URL du Raccourci (copier dans Raccourcis)';
     const urlVal=document.createElement('div');
-    const urlStr = appURL + '?hk_date=DATE&hk_steps=PAS&hk_hrv=HRV&hk_rhr=FC_REPOS&hk_vo2max=VO2&hk_sleep=SOMMEIL_TOTAL&hk_sleep_deep=PROFOND&hk_sleep_rem=REM&hk_cal_active=CAL&hk_exercise_min=EXERCICE&hk_weight=POIDS&hk_spo2=SPO2';
+    const urlStr = appURL + '?hk_date=DATE&hk_steps=PAS&hk_weight=POIDS&hk_hrv=HRV&hk_rhr=FC_REPOS&hk_vo2max=VO2&hk_sleep=SOMMEIL_TOTAL&hk_sleep_deep=PROFOND&hk_sleep_rem=REM&hk_cal_active=CAL&hk_spo2=SPO2&hk_fat_pct=GRAISSE_PCT&hk_lean_mass=MASSE_MAIGRE_KG&hk_bone_mass=MASSE_OSSEUSE_KG&hk_water_pct=EAU_PCT&hk_visceral=GRAISSE_VISCERALE';
     urlVal.style.cssText='font-family:var(--mono);font-size:9px;color:var(--text);word-break:break-all;line-height:1.6';
     urlVal.textContent=urlStr;
     const copyBtn=document.createElement('button');copyBtn.style.cssText='margin-top:8px;width:100%;padding:8px;border-radius:8px;border:none;background:var(--teal);color:#fff;font-size:12px;font-weight:700;font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none';

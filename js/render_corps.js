@@ -650,52 +650,57 @@ function _showFoodSearchFR(callback) {
 }
 
 
+let _corpsListenersInit = false;
+
 function renderCorps(){
-  const profilInp=document.getElementById('profil-taille');if(profilInp){profilInp.value=S.profilTaille||'';profilInp.addEventListener('input',e=>{S.profilTaille=parseInt(e.target.value)||0;save();renderCorps();});}
-  // Profil poignet + sexe + age
-  const poignetInp=document.getElementById('profil-poignet');if(poignetInp){poignetInp.value=S.profilPoignet||17;poignetInp.addEventListener('input',e=>{S.profilPoignet=parseFloat(e.target.value)||17;save();renderCorps();});}
-  const sexeSelC=document.getElementById('profil-sexe');if(sexeSelC){sexeSelC.value=S.profilSexe||'H';sexeSelC.addEventListener('change',e=>{S.profilSexe=e.target.value;save();renderCorps();});}
-  const ageInp=document.getElementById('profil-age');if(ageInp){ageInp.value=S.profilAge||30;ageInp.addEventListener('input',e=>{S.profilAge=parseInt(e.target.value)||30;save();});}
-  // ── 5. SUIVI POIDS AVEC OBJECTIF ──
-  (function() {
-    let wp = document.getElementById('corps-weight-progress');
-    if (!wp) { wp = document.createElement('div'); wp.id='corps-weight-progress'; wp.style.cssText='padding:0 12px;margin-bottom:0'; }
-    const mPoids = document.querySelector('#corps-sect-mesures');
-    if (mPoids) mPoids.insertBefore(wp, mPoids.firstChild);
-    if (typeof renderWeightProgress === 'function') renderWeightProgress(wp);
-  })();
+  // Inputs profil — bind une seule fois pour éviter l'empilement de listeners
+  const profilInp=document.getElementById('profil-taille');
+  if(profilInp){ profilInp.value=S.profilTaille||''; }
+  const poignetInp=document.getElementById('profil-poignet');
+  if(poignetInp){ poignetInp.value=S.profilPoignet||17; }
+  const sexeSelC=document.getElementById('profil-sexe');
+  if(sexeSelC){ sexeSelC.value=S.profilSexe||'H'; }
+  const ageInp=document.getElementById('profil-age');
+  if(ageInp){ ageInp.value=S.profilAge||30; }
 
-  // ── 3. TRACKER D'EAU ──
-  (function() {
-    let wt = document.getElementById('corps-water-tracker');
-    if (!wt) { wt = document.createElement('div'); wt.id='corps-water-tracker'; wt.style.cssText='padding:0 12px 12px'; }
-    const mNutr = document.querySelector('#corps-sect-nutrition');
-    if (mNutr) mNutr.appendChild(wt);
-    if (typeof renderWaterTracker === 'function') renderWaterTracker(wt);
-  })();
+  if(!_corpsListenersInit) {
+    _corpsListenersInit = true;
+    if(profilInp)  profilInp.addEventListener('input',  e=>{S.profilTaille=parseInt(e.target.value)||0;save();renderCorps();});
+    if(poignetInp) poignetInp.addEventListener('input', e=>{S.profilPoignet=parseFloat(e.target.value)||17;save();renderCorps();});
+    if(sexeSelC)   sexeSelC.addEventListener('change',  e=>{S.profilSexe=e.target.value;save();renderCorps();});
+    if(ageInp)     ageInp.addEventListener('input',     e=>{S.profilAge=parseInt(e.target.value)||30;save();});
+  }
+  // ── Sections dynamiques — injection stable (ordre garanti) ──
+  // Utilise ensureSection() pour éviter les doublons et garantir l'ordre
 
-  // ── 4. COMPOSITION CORPORELLE ENRICHIE ──
-  (function() {
-    let bc = document.getElementById('corps-body-compo');
-    if (!bc) { bc = document.createElement('div'); bc.id='corps-body-compo'; bc.style.cssText='padding:0 12px 12px'; }
-    const mMes = document.querySelector('#corps-sect-mesures');
-    if (mMes) mMes.appendChild(bc);
-    if (typeof renderBodyComposition === 'function') renderBodyComposition(bc);
-  })();
-
-  // ── 1. SILHOUETTE CORPORELLE SVG ──
-  (function() {
-    let sil = document.getElementById('corps-silhouette');
-    if (!sil) { sil = document.createElement('div'); sil.id='corps-silhouette'; sil.style.cssText='padding:0 12px 16px'; }
-    const mMes = document.querySelector('#corps-sect-mesures');
-    if (mMes) {
-      // Insérer la silhouette après le titre de section mais avant la grille
-      const grid = document.getElementById('corps-grid');
-      if (grid) mMes.insertBefore(sil, grid);
-      else mMes.appendChild(sil);
+  function ensureSection(id, parentId, style, insertBefore) {
+    let el = document.getElementById(id);
+    if (!el) {
+      el = document.createElement('div');
+      el.id = id;
+      el.style.cssText = style || '';
+      const parent = document.getElementById(parentId);
+      if (parent) {
+        const ref = insertBefore ? document.getElementById(insertBefore) : null;
+        if (ref && ref.parentNode === parent) parent.insertBefore(el, ref);
+        else parent.appendChild(el);
+      }
     }
-    if (typeof renderBodySilhouette === 'function') renderBodySilhouette(sil);
-  })();
+    return el;
+  }
+
+  // MESURES tab — ordre : Poids → Silhouette → Corps grid → Composition
+  const wpEl  = ensureSection('corps-weight-progress', 'corps-sect-mesures', 'padding:0 12px 10px', 'corps-bf-whr');
+  const silEl = ensureSection('corps-silhouette',       'corps-sect-mesures', 'padding:0 12px 10px', 'corps-grid');
+  const bcEl  = ensureSection('corps-body-compo',       'corps-sect-mesures', 'padding:0 12px 12px');
+
+  // NUTRITION tab — eau en bas
+  const wtEl  = ensureSection('corps-water-tracker',    'corps-sect-nutrition', 'padding:0 12px 12px');
+
+  if (typeof renderWeightProgress === 'function')  renderWeightProgress(wpEl);
+  if (typeof renderBodySilhouette === 'function')  renderBodySilhouette(silEl);
+  if (typeof renderBodyComposition === 'function') renderBodyComposition(bcEl);
+  if (typeof renderWaterTracker === 'function')    renderWaterTracker(wtEl);
 
   // ── % MG et Ratio taille/hanches ──
   const bfWhrDiv = document.getElementById('corps-bf-whr');

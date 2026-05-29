@@ -1139,7 +1139,7 @@ function renderSessExercise(d,exercises,vi){
   const noteArea=document.createElement('div');noteArea.className='sess-note-area';
   const noteLbl=document.createElement('div');noteLbl.style.cssText='font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:3px';noteLbl.textContent='📝 Note sur cet exercice';
   const noteInp=document.createElement('textarea');noteInp.className='sess-note-inp';noteInp.rows=2;noteInp.placeholder='Technique, douleur, sensation, amplitude...';noteInp.value=ex.note||'';
-  noteInp.addEventListener('input',e=>{d.exercises[realIdx].note=e.target.value;save();});
+  noteInp.addEventListener('input',e=>{d.exercises[realIdx].note=e.target.value;_debouncedSave();});
   noteArea.appendChild(noteLbl);noteArea.appendChild(noteInp);mainEl.appendChild(noteArea);
   // Prev/Next
   const navBtns=document.createElement('div');navBtns.className='sess-nav-btns';
@@ -1184,9 +1184,9 @@ function openFocusMode(){
   ex.setData.slice(0,nSets).forEach((setD,si)=>{
     const row=document.createElement('div');row.className='focus-set-row'+(setD.done?' f-done':si===ex.setData.findIndex(s=>!s.done)?' f-active':'');
     const sn=document.createElement('div');sn.style.cssText='font-size:12px;font-weight:700;color:var(--muted);width:24px';sn.textContent=setD.done?'✓':(si+1);
-    const wi=document.createElement('input');wi.type='text';wi.className='focus-inp';wi.value=setD.weight||ex.weight||'';wi.placeholder='kg';wi.addEventListener('input',e=>{setD.weight=e.target.value;save();});
+    const wi=document.createElement('input');wi.type='text';wi.className='focus-inp';wi.value=setD.weight||ex.weight||'';wi.placeholder='kg';wi.addEventListener('input',e=>{setD.weight=e.target.value;_debouncedSave();});
     const u1=document.createElement('span');u1.className='focus-unit';u1.textContent='kg ×';
-    const ri=document.createElement('input');ri.type='number';ri.className='focus-inp';ri.value=setD.reps||'';ri.placeholder='reps';ri.style.width='70px';ri.addEventListener('input',e=>{setD.reps=e.target.value;save();});
+    const ri=document.createElement('input');ri.type='number';ri.className='focus-inp';ri.value=setD.reps||'';ri.placeholder='reps';ri.style.width='70px';ri.addEventListener('input',e=>{setD.reps=e.target.value;_debouncedSave();});
     const u2=document.createElement('span');u2.className='focus-unit';u2.textContent='reps';
     const vb=document.createElement('button');vb.className='focus-val-btn'+(setD.done?' f-validated':'');vb.textContent=setD.done?'✓ Fait':'✓';
     [wi,ri].forEach(inp=>inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();vb.click();}}));

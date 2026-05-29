@@ -559,6 +559,41 @@ ok('ClaudeCoach: historique limite a 20 items', (() => {
 })());
 
 
+
+section('Audit corrections v79');
+
+// mesure-inp font-size 16px (iOS zoom)
+ok('mesure-inp font-size 16px', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'css/style.css'),'utf8');
+  const m = s.match(/\.mesure-inp\s*\{[^}]+\}/);
+  return m ? m[0].includes('font-size: 16px') || m[0].includes('font-size:16px') : false;
+})());
+
+// Corps listeners init once
+ok('renderCorps: listener guard present', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/render_corps.js'),'utf8');
+  return s.includes('_corpsListenersInit');
+})());
+
+// ensureSection pattern
+ok('renderCorps: ensureSection stable injection', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/render_corps.js'),'utf8');
+  return s.includes('function ensureSection(');
+})());
+
+// card bg bug fixed
+ok('body-composition: card bg no broken regex', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/services/body-composition.js'),'utf8');
+  return !s.includes(".replace(')', ',0.5)')");
+})());
+
+// debounced save in session inputs
+ok('session: focus inputs use _debouncedSave', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/render_session.js'),'utf8');
+  return s.includes('_debouncedSave') && !s.includes("e.target.value;save();});");
+})());
+
+
 section('Vérifications fichiers');
 
 const swSrc   = fs.readFileSync(path.join(ROOT,'sw.js'),'utf8');

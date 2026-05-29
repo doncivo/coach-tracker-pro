@@ -64,7 +64,7 @@ window.renderBodySilhouette = function(containerEl) {
     { side:'L', key:'taille',   label:'Abdomen' },
     { side:'L', key:'cuisse-g', label:'Cuisse G' },
     { side:'L', key:'mollet-g', label:'Mollet G' },
-    { side:'R', key:'poitrine', label:'Épaule' },
+    { side:'R', key:'bras',     label:'Épaule D' },  // Mesure bras D (proxy)
     { side:'R', key:'bras',     label:'Biceps D' },
     { side:'R', key:'taille',   label:'Taille' },
     { side:'R', key:'hanches',  label:'Hanche' },
@@ -313,8 +313,9 @@ window.renderBodyComposition = function(containerEl) {
     card.style.cssText = 'background:var(--card);border-radius:16px;padding:12px 8px 10px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;position:relative;overflow:hidden';
 
     // Fond coloré très léger
-    if (hasVal && cat.bg !== 'transparent') {
-      card.style.background = cat.bg.replace(')', ',0.5)').replace('rgba', 'rgba');
+    // Fond coloré très léger — bg déjà correct depuis getCat
+    if (hasVal && cat.bg && cat.bg !== 'transparent' && cat.bg !== 'var(--border)') {
+      card.style.background = cat.bg;
     }
 
     const lbl = document.createElement('div');

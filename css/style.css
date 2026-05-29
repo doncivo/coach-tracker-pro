@@ -461,7 +461,7 @@ nav.tabs   { flex-shrink: 0; }
 .mesure-unit { color: var(--muted); font-size: 11px; }
 .mesure-delta { font-size: 10px; font-weight: 700; margin-left: auto; }
 .mesure-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 18px; padding: 0 6px; min-height: 36px; }
-.mesure-inp { border: 1.5px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-family: var(--font); padding: 8px 10px; }
+.mesure-inp { border: 1.5px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-family: var(--font); padding: 8px 10px; font-size: 16px; -webkit-appearance: none; } /* 16px: prevents iOS auto-zoom */
 .mesure-inp:focus { outline: none; border-color: var(--teal); }
 .poids-big { font-family: var(--mono); font-size: 32px; font-weight: 800; color: var(--teal-d); line-height: 1; }
 

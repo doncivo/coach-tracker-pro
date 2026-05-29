@@ -291,6 +291,17 @@ if ('serviceWorker' in navigator && navigator.serviceWorker.ready && typeof navi
 const _startTab = S._currentTab || 'weekly';
 setTimeout(() => Router.navigate(_startTab), 0);
 
+/* ── Activer le stockage persistant + charger depuis IDB si disponible ── */
+(async () => {
+  if (typeof IDBStorage === 'undefined') return;
+  // Demander le stockage persistant silencieusement
+  await IDBStorage.requestPersistent();
+  // Charger depuis IDB en arrière-plan (peut avoir plus d'historique que localStorage)
+  if (typeof Persist !== 'undefined' && typeof Persist.loadFromIDB === 'function') {
+    await Persist.loadFromIDB();
+  }
+})();
+
 /* ── 9. PWA manifest dynamique ── */
 const _manifest = {
   name: 'Coach Tracker Pro',

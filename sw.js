@@ -1,4 +1,4 @@
-const CACHE = 'ctp-v87';
+const CACHE = 'ctp-v88';
 const ASSETS = [
   './', './index.html',
   './design/tokens.css', './css/style.css',
@@ -8,6 +8,7 @@ const ASSETS = [
   './js/core/store.js',
   './js/store/training.js', './js/store/activity.js',
   './js/store/body.js', './js/store/goals.js', './js/store/app.js',
+  './js/services/idb-storage.js',
   './js/services/persist.js',
   './js/services/csv-planning.js',
   './js/services/mesures-objectifs.js',

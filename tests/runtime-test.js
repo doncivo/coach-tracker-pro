@@ -728,6 +728,41 @@ ok('Fix 3: computeTDEE utilise profilSexe reel', (() => {
 })());
 
 
+
+section('IndexedDB Storage');
+
+ok('idb-storage.js existe', (() => {
+  return fs.existsSync(path.join(ROOT,'js/services/idb-storage.js'));
+})());
+
+ok('idb-storage.js chargé dans index.html avant persist.js', (() => {
+  const h = fs.readFileSync(path.join(ROOT,'index.html'),'utf8');
+  const idbPos  = h.indexOf('idb-storage.js');
+  const persPos = h.indexOf('persist.js');
+  return idbPos > 0 && persPos > 0 && idbPos < persPos;
+})());
+
+ok('persist.js écrit dans IDB (_writeToDisk)', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/services/persist.js'),'utf8');
+  return s.includes('IDBStorage.set(flat)');
+})());
+
+ok('persist.js expose loadFromIDB', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/services/persist.js'),'utf8');
+  return s.includes('loadFromIDB,');
+})());
+
+ok('persist.js resetAll vide aussi IDB', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/services/persist.js'),'utf8');
+  return s.includes('IDBStorage.clear()');
+})());
+
+ok('sw.js cache idb-storage.js', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'sw.js'),'utf8');
+  return s.includes('idb-storage.js');
+})());
+
+
 section('Vérifications fichiers');
 
 const swSrc   = fs.readFileSync(path.join(ROOT,'sw.js'),'utf8');

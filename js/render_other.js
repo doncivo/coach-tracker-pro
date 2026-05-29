@@ -831,6 +831,38 @@ function renderSettings() {
 
   // ── DONNÉES ──
   const dataSec = _settingsSection('Données', {emoji:'💾', bg:'#34c759'});
+
+  // ── Indicateur de stockage ──
+  (async () => {
+    if (typeof IDBStorage !== 'undefined') {
+      const est = await IDBStorage.estimate();
+      const persistent = await IDBStorage.isPersistent();
+      if (est) {
+        const storageRow = dataSec._card || dataSec;
+        const infoDiv = document.createElement('div');
+        infoDiv.style.cssText = 'padding:10px 14px;display:flex;flex-direction:column;gap:4px;border-bottom:1px solid var(--border)';
+        const barWrap = document.createElement('div');
+        barWrap.style.cssText='height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin:4px 0';
+        const barFill=document.createElement('div');
+        const color = est.pct>80?'var(--red)':est.pct>50?'var(--orange)':'var(--green)';
+        barFill.style.cssText=`width:${est.pct}%;height:100%;background:${color};border-radius:2px`;
+        barWrap.appendChild(barFill);
+        const top=document.createElement('div');top.style.cssText='display:flex;justify-content:space-between;font-size:12px';
+        const lbl=document.createElement('span');lbl.style.cssText='color:var(--text);font-weight:600';lbl.textContent='Stockage utilisé';
+        const val=document.createElement('span');val.style.cssText='color:var(--muted);font-family:var(--mono)';val.textContent=est.used+'MB / '+est.quota+'MB';
+        top.append(lbl,val);
+        const sub=document.createElement('div');sub.style.cssText='font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px';
+        sub.innerHTML=(persistent?'🔒 Stockage persistant (données protégées)':'⚠️ Stockage non persistant — '+
+          '<button style="border:none;background:none;color:var(--teal-d);font-size:11px;font-weight:700;cursor:pointer;touch-action:manipulation;-webkit-appearance:none;padding:0">Activer</button>');
+        if(!persistent){
+          const btn=sub.querySelector('button');
+          if(btn){const doP=async()=>{const ok=await IDBStorage.requestPersistent();showToast(ok?'🔒 Stockage persistant activé !':'Ajoutez l\'app sur l\'écran d\'accueil',ok?'save':'warn',3000);};btn.ontouchstart=e=>{e.preventDefault();doP();};btn.onclick=doP;}
+        }
+        infoDiv.append(top,barWrap,sub);
+        storageRow.insertBefore(infoDiv,storageRow.firstChild);
+      }
+    }
+  })();
   _settingsRow(dataSec, 'Exporter mes données', 'Fichier JSON de sauvegarde complet', () => {
     const btn = document.createElement('button'); btn.className='btn btn-ghost btn-sm';
     btn.textContent='⬇ Exporter'; btn.addEventListener('click', () => document.getElementById('export-btn')?.click());

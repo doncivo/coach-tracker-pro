@@ -59,9 +59,12 @@ const Persist = (() => {
   }
 
   function _writeToDisk(state) {
+    const flat = _flatten(state);
+    const json = JSON.stringify(flat);
+
+    // 1. localStorage — écriture synchrone immédiate (cache rapide)
     try {
-      const flat = _flatten(state);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(flat));
+      localStorage.setItem(STORAGE_KEY, json);
       _showSaveBadge();
     } catch(e) {
       if (e.name === 'QuotaExceededError' || e.code === 22) {
@@ -69,6 +72,13 @@ const Persist = (() => {
       } else {
         Errors.error('Erreur sauvegarde localStorage', 'persist.js', e.message);
       }
+    }
+
+    // 2. IndexedDB — écriture asynchrone (stockage principal illimité)
+    if (typeof IDBStorage !== 'undefined') {
+      IDBStorage.set(flat).catch(e => {
+        Errors.warn('IDB write failed', 'persist.js', e.message);
+      });
     }
   }
 
@@ -124,16 +134,45 @@ const Persist = (() => {
      LOAD — localStorage → state structuré
   ───────────────────────────────────────────── */
   function load() {
+    // Chargement synchrone depuis localStorage (rapide, pour le démarrage)
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return null;
       const parsed  = JSON.parse(raw);
-      const migrated = migrateState(parsed);
-      return migrated;
+      return migrateState(parsed);
     } catch(e) {
       Errors.error('Erreur chargement données', 'persist.js', e.message);
       if (typeof showToast === 'function')
         showToast('⚠️ Erreur de chargement — données réinitialisées.', 'error', 5000);
+      return null;
+    }
+  }
+
+  /* Chargement async depuis IndexedDB (plus récent si l'historique a débordé localStorage) */
+  async function loadFromIDB() {
+    if (typeof IDBStorage === 'undefined') return null;
+    try {
+      const flat = await IDBStorage.get();
+      if (!flat) return null;
+      // Comparer les versions (IDB peut avoir des données plus récentes que localStorage)
+      const lsRaw = localStorage.getItem(STORAGE_KEY);
+      if (lsRaw) {
+        const lsData = JSON.parse(lsRaw);
+        // Si IDB a plus d'entrées d'historique, utiliser IDB
+        const idbHist = Object.keys(flat.history || {}).length;
+        const lsHist  = Object.keys(lsData.history || {}).length;
+        if (idbHist > lsHist) {
+          const migrated = migrateState(flat);
+          if (typeof Store !== 'undefined' && migrated) {
+            Store.load._fromObject(migrated);
+            showToast('📦 Données complètes chargées depuis IndexedDB', 'save', 3000);
+          }
+          return migrated;
+        }
+      }
+      return null;
+    } catch(e) {
+      Errors.warn('IDB load failed', 'persist.js', e.message);
       return null;
     }
   }
@@ -385,6 +424,7 @@ const Persist = (() => {
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(UNDO_KEY);
     localStorage.removeItem(AUTOSAVE_KEY);
+    if (typeof IDBStorage !== 'undefined') IDBStorage.clear();
     Store.reset();
     if (typeof showToast === 'function')
       showToast('🗑️ Toutes les données supprimées', 'warn');
@@ -476,6 +516,7 @@ const Persist = (() => {
   return {
     save,
     load,
+    loadFromIDB,
     migrateState,
     exportJSON,
     importJSON,

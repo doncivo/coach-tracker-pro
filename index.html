@@ -617,6 +617,7 @@
   <script src="js/store/body.js"></script>
   <script src="js/store/goals.js"></script>
   <script src="js/store/app.js"></script>
+  <script src="js/services/idb-storage.js"></script>
   <script src="js/services/persist.js"></script>
   <script src="js/services/compute.js"></script>
   <script src="js/services/mesures-objectifs.js"></script>
@@ -664,7 +665,7 @@
   </script>
 <script>
 (function() {
-  const SW_VERSION = 'ctp-v87';
+  const SW_VERSION = 'ctp-v88';
   if (!('serviceWorker' in navigator)) return;
 
   const RELOAD_KEY = 'ctp-sw-reloaded-' + SW_VERSION;

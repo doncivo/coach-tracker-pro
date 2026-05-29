@@ -194,7 +194,7 @@ const Persist = (() => {
 
     // Garanties sur les mesures
     if (!s.mesures) s.mesures = {};
-    ['poids','poitrine','taille','hanches','bras','cuisse','cou','mollet']
+    ['poids','poitrine','taille','hanches','bras','cuisse','cou','mollet','bras-g','cuisse-g','mollet-g']
       .forEach(k => { if (!s.mesures[k]) s.mesures[k] = []; });
 
     // Garanties sur les champs critiques

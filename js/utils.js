@@ -43,10 +43,16 @@ function showPRToast(name){showToast('🏆 NOUVEAU PR ! '+name,'pr',3500);}
 
 /* ══ EXPORT / IMPORT ══ */
 document.getElementById('export-btn').addEventListener('click',()=>{
-  const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(b);
-  a.download='coach-tracker-'+localDateStr()+'.json';a.click();
-  showToast('Export réussi ✓','save');
+  // C3 fix: use Persist.exportJSON() which correctly flattens the Store state
+  if (typeof Persist !== 'undefined') {
+    Persist.exportJSON();
+  } else {
+    const state = typeof Store !== 'undefined' ? Store.bridge() : S;
+    const b = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(b);
+    a.download = 'coach-tracker-' + localDateStr() + '.json'; a.click();
+    showToast('Export réussi ✓','save');
+  }
 });
 document.getElementById('import-btn').addEventListener('click',()=>document.getElementById('import-file').click());
 document.getElementById('import-file').addEventListener('change', e => {
@@ -383,65 +389,12 @@ function switchTab(tabName) {
   S._currentTab = tabName;
 }
 
-// Wire top tabs
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-});
+// C2 fix: Navigation listeners handled by router.js to avoid double-render
+// Les listeners de navigation sont gérés par router.js (init.js route)
+// On garde uniquement les aliases pour la compatibilité code existant
 
-// Wire bottom nav main buttons
-document.querySelectorAll('.bnav-btn[data-tab]').forEach(btn => {
-  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-});
-
-// Wire "More" button
-document.getElementById('bnav-more-btn').addEventListener('click', (e) => {
-  e.stopPropagation();
-  const menu = document.getElementById('bnav-more-menu');
-  const btn  = document.getElementById('bnav-more-btn');
-  const open = menu.classList.toggle('open');
-  btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-});
-
-// Wire "More" drawer items
-document.querySelectorAll('.bnav-more-btn[data-tab]').forEach(btn => {
-  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-});
-
-// Close more menu on outside click
-document.addEventListener('click', () => {
-  const mm = document.getElementById('bnav-more-menu');
-  if (mm) mm.classList.remove('open');
-  const mb = document.getElementById('bnav-more-btn');
-  if (mb) mb.setAttribute('aria-expanded','false');
-});
-
-// ── Swipe gesture between tabs ────────────────────────────────
+// C2 fix: Swipe gérée par router.js uniquement (évite double-déclenchement)
 const TAB_ORDER = ['dashboard','weekly','session','progression','corps','bilan','kpi','achievements','library','monthly','settings'];
-/* _swipeStartX — déclaré dans constants.js */
-document.addEventListener('touchstart', e => {
-  _swipeStartX = e.touches[0].clientX;
-  _swipeStartY = e.touches[0].clientY;
-  _swipeActive = true;
-}, { passive: true });
-document.addEventListener('touchmove', e => {
-  if (!_swipeActive) return;
-  const dx = e.touches[0].clientX - _swipeStartX;
-  const dy = e.touches[0].clientY - _swipeStartY;
-  // Cancel if vertical scroll dominates
-  if (Math.abs(dy) > Math.abs(dx)) _swipeActive = false;
-}, { passive: true });
-document.addEventListener('touchend', e => {
-  if (!_swipeActive) return;
-  _swipeActive = false;
-  const dx = e.changedTouches[0].clientX - _swipeStartX;
-  const dy = Math.abs(e.changedTouches[0].clientY - _swipeStartY);
-  // Only horizontal swipe > 60px with small vertical component
-  if (Math.abs(dx) < 60 || dy > 50) return;
-  const cur = S._currentTab || 'weekly';
-  const idx = TAB_ORDER.indexOf(cur);
-  if (dx < 0 && idx < TAB_ORDER.length - 1) switchTab(TAB_ORDER[idx + 1]); // swipe left → next
-  if (dx > 0 && idx > 0) switchTab(TAB_ORDER[idx - 1]); // swipe right → prev
-});
 
 /* ══ MUSCLE PICKER ══ */
 function applySlotColor(sel,val){const m=MM[val];if(m){sel.style.background=m.calBg;sel.style.color=m.calColor;sel.style.borderColor=m.calColor;sel.classList.add('filled');}else{sel.style.background='var(--surface)';sel.style.color='var(--text)';sel.style.borderColor='var(--border)';sel.classList.remove('filled');}}

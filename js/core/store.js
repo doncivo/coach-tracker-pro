@@ -48,11 +48,18 @@ const Store = (() => {
     body: {
       mesures: {
         poids: [], poitrine: [], taille: [], hanches: [],
-        bras: [], cuisse: [], cou: [], mollet: []
+        bras: [], cuisse: [], cou: [], mollet: [],
+        'bras-g': [], 'cuisse-g': [], 'mollet-g': [],  // C4: left/right pairs
       },
       photos:         [],
       painLog:        [],
       profilTaille:   175,
+      // Données dynamiques persistées
+      water:       { daily: {}, goal: 2500 },
+      bodyCompo:   { fatPct: null, musclePct: null, leanMass: null, boneMass: null, waterPct: null, visceralFat: null, subFatPct: null, protPct: null, lastSync: null },
+      watchData:   { hrv:{}, rhr:{}, vo2max:{}, sleepDeep:{}, sleepRem:{}, sleepCore:{}, calActive:{}, exerciseMin:{}, spo2:{}, skinTemp:{}, workouts:[] },
+      icloudBackup:{ lastBackup: null, autoBackup: true },
+      mesureObjectifs: {},
     },
 
     goals: {
@@ -238,10 +245,15 @@ const Store = (() => {
         fatGoal:       flat.fatGoal       || 0,
       },
       body: {
-        mesures:       flat.mesures       || INITIAL_STATE.body.mesures,
-        photos:        flat.photos        || [],
-        painLog:       flat.painLog       || [],
-        profilTaille:  flat.profilTaille  || 175,
+        mesures:         flat.mesures         || INITIAL_STATE.body.mesures,
+        photos:          flat.photos          || [],
+        painLog:         flat.painLog         || [],
+        profilTaille:    flat.profilTaille     || 175,
+        water:           flat.water           || { daily:{}, goal:2500 },
+        bodyCompo:       flat.bodyCompo       || INITIAL_STATE.body.bodyCompo,
+        watchData:       flat.watchData       || INITIAL_STATE.body.watchData,
+        icloudBackup:    flat.icloudBackup    || { lastBackup:null, autoBackup:true },
+        mesureObjectifs: flat.mesureObjectifs || {},
       },
       goals: {
         objective:     flat.objective     || INITIAL_STATE.goals.objective,

@@ -634,6 +634,54 @@ ok('Store: TRAINING_SET_DAYS_BATCH reducer', (() => {
 })());
 
 
+
+section('Audit complet depuis creation');
+
+// C1: water/bodyCompo dans Store INITIAL_STATE
+ok('C1: water dans Store body domain', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/core/store.js'),'utf8');
+  return s.includes("water:") && s.includes("flat.water");
+})());
+
+// C1: watchData/bodyCompo persistés
+ok('C1: bodyCompo et watchData persistés dans store', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/core/store.js'),'utf8');
+  return s.includes("flat.bodyCompo") && s.includes("flat.watchData");
+})());
+
+// C1: state-bridge DOMAIN_MAP inclut water/bodyCompo
+ok('C1: state-bridge mappe water + bodyCompo → body', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/core/state-bridge.js'),'utf8');
+  return s.includes("water:") && s.includes("bodyCompo:") && s.includes("watchData:");
+})());
+
+// C2: Pas de double-listener nav dans utils.js
+ok('C2: utils.js sans double nav listeners', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/utils.js'),'utf8');
+  return !s.includes("Wire top tabs") && !s.includes("Wire bottom nav main");
+})());
+
+// C2: Swipe unique dans router.js uniquement
+ok('C2: swipe touchstart dans router.js uniquement', (() => {
+  const utils = fs.readFileSync(path.join(ROOT,'js/utils.js'),'utf8');
+  const touchCount = (utils.match(/document\.addEventListener\('touchstart'/g) || []).length;
+  return touchCount === 0;
+})());
+
+// C3: export-btn utilise Persist
+ok('C3: export-btn utilise Persist.exportJSON', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/utils.js'),'utf8');
+  return s.includes('Persist.exportJSON()') && !s.includes("JSON.stringify(S,null,2)");
+})());
+
+// C4: bras-g/cuisse-g/mollet-g dans mesures defaults
+ok('C4: mesures defaults incluent bras-g/cuisse-g/mollet-g', (() => {
+  const s1 = fs.readFileSync(path.join(ROOT,'js/data/constants.js'),'utf8');
+  const s2 = fs.readFileSync(path.join(ROOT,'js/services/persist.js'),'utf8');
+  return s1.includes("'bras-g'") && s2.includes("'bras-g'");
+})());
+
+
 section('Vérifications fichiers');
 
 const swSrc   = fs.readFileSync(path.join(ROOT,'sw.js'),'utf8');

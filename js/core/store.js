@@ -54,6 +54,8 @@ const Store = (() => {
       photos:         [],
       painLog:        [],
       profilTaille:   175,
+      profilAge:      30,
+      profilSexe:     'H',
       // Données dynamiques persistées
       water:       { daily: {}, goal: 2500 },
       bodyCompo:   { fatPct: null, musclePct: null, leanMass: null, boneMass: null, waterPct: null, visceralFat: null, subFatPct: null, protPct: null, lastSync: null },
@@ -249,6 +251,8 @@ const Store = (() => {
         photos:          flat.photos          || [],
         painLog:         flat.painLog         || [],
         profilTaille:    flat.profilTaille     || 175,
+        profilAge:       flat.profilAge        || 30,
+        profilSexe:      flat.profilSexe       || flat._gender || 'H',
         water:           flat.water           || { daily:{}, goal:2500 },
         bodyCompo:       flat.bodyCompo       || INITIAL_STATE.body.bodyCompo,
         watchData:       flat.watchData       || INITIAL_STATE.body.watchData,
@@ -450,6 +454,10 @@ const Store = (() => {
         }
         case 'BODY_SET_TAILLE':
           return Object.assign({}, state, { profilTaille: action.payload });
+        case 'BODY_SET_PROFIL_AGE':
+          return Object.assign({}, state, { profilAge: action.payload });
+        case 'BODY_SET_PROFIL_SEXE':
+          return Object.assign({}, state, { profilSexe: action.payload });
         case 'BODY_ADD_PAIN':
           return Object.assign({}, state, {
             painLog: [...state.painLog, action.payload]

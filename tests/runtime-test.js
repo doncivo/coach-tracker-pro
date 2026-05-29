@@ -682,6 +682,52 @@ ok('C4: mesures defaults incluent bras-g/cuisse-g/mollet-g', (() => {
 })());
 
 
+
+section('Corrections finales v82');
+
+// Fix 1: icône rendue dans _settingsSection
+ok('Fix 1: _settingsSection rend les icones', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/render_other.js'),'utf8');
+  return s.includes('ic.textContent = icon.emoji') && s.includes("icon && icon.emoji");
+})());
+
+// Fix 2: profilAge dans Store body domain
+ok('Fix 2: profilAge dans Store INITIAL_STATE', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/core/store.js'),'utf8');
+  return s.includes("profilAge:      30") && s.includes("flat.profilAge");
+})());
+
+// Fix 2: profilSexe dans Store
+ok('Fix 2: profilSexe dans Store INITIAL_STATE', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/core/store.js'),'utf8');
+  return s.includes("profilSexe:     'H'") && s.includes("flat.profilSexe");
+})());
+
+// Fix 2: state-bridge mappe profilAge + profilSexe
+ok('Fix 2: state-bridge mappe profilAge + profilSexe', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/core/state-bridge.js'),'utf8');
+  return s.includes("profilAge:       'body'") && s.includes("profilSexe:");
+})());
+
+// Fix 2: onboarding sauvegarde profilAge
+ok('Fix 2: onboarding sauvegarde profilAge', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/render_dashboard.js'),'utf8');
+  return s.includes("S.profilAge=a") && !s.includes("S._age=a");
+})());
+
+// Fix 3: computeTDEE utilise profilAge réel
+ok('Fix 3: computeTDEE utilise profilAge reel', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/utils.js'),'utf8');
+  return s.includes("S.profilAge") && !s.includes("const age=35;");
+})());
+
+// Fix 3: computeTDEE utilise profilSexe réel
+ok('Fix 3: computeTDEE utilise profilSexe reel', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/utils.js'),'utf8');
+  return s.includes("S.profilSexe") && s.includes("isMale");
+})());
+
+
 section('Vérifications fichiers');
 
 const swSrc   = fs.readFileSync(path.join(ROOT,'sw.js'),'utf8');

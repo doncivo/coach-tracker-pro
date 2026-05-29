@@ -741,7 +741,7 @@ const ONBOARD_STEPS = [
       if(h>0) S.profilTaille=h;
       if(w>0){ if(!S.mesures.poids)S.mesures.poids=[];
         const td=localDateStr(); if(!S.mesures.poids.find(e=>e.date===td)) S.mesures.poids.push({date:td,val:String(w)});}
-      S._gender=g; S._age=a; save();
+      S._gender=g; S.profilSexe=g; S.profilAge=a; save(); // sync both legacy + new fields
     }
   },
   { id:'measures', icon:'📏', title:'Mensurations',

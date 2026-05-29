@@ -30,6 +30,8 @@ const KPIView = {
     // Body
     S.mesures      = state.body.mesures;
     S.profilTaille = state.body.profilTaille;
+    S.profilAge    = state.body.profilAge    || 30;
+    S.profilSexe   = state.body.profilSexe   || state.app._gender || 'H';
     S.painLog      = state.body.painLog;
     // App
     S._gender      = state.app._gender;

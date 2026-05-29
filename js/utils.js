@@ -565,16 +565,31 @@ function computeStreak(){
 
 /* ── Fonctions restaurées (manquantes après nettoyage) ── */
 function computeTDEE(){
-  const poids=parseFloat(S.mesures&&S.mesures.poids)||70;
-  const taille=parseFloat(S.profilTaille)||175;
-  const age=35; // default (could add to profile)
-  // Assume male for now (could add gender to profile)
-  const bmr=10*poids+6.25*taille-5*age+5;
-  // Activity multiplier based on weekly sessions
-  const weeks7=lastNDays(7);
-  const sessions=weeks7.filter(d=>S.history&&S.history[d]&&S.history[d].length>0).length;
-  const mult=sessions>=5?1.725:sessions>=3?1.55:sessions>=1?1.375:1.2;
-  return {tdee:Math.round(bmr*mult),bmr:Math.round(bmr),mult,sessions};
+  // Fix 3: utilise le vrai profil utilisateur
+  const poidsEntries = S.mesures&&S.mesures.poids&&S.mesures.poids.length
+    ? S.mesures.poids.slice(-1)[0]
+    : null;
+  const poids   = parseFloat(poidsEntries?.val || poidsEntries?.value) || 70;
+  const taille  = parseFloat(S.profilTaille) || 175;
+  const age     = parseInt(S.profilAge) || parseInt(S._age) || 30;
+  const gender  = S.profilSexe || S._gender || 'H';
+  const isMale  = gender === 'H' || gender === 'm';
+
+  // Mifflin-St Jeor
+  const bmr = isMale
+    ? Math.round(10*poids + 6.25*taille - 5*age + 5)
+    : Math.round(10*poids + 6.25*taille - 5*age - 161);
+
+  // Multiplicateur basé sur les séances réelles des 7 derniers jours
+  const weeks7   = lastNDays(7);
+  const sessions = weeks7.filter(d => {
+    const hd = S.history && S.history[d];
+    if (!hd) return false;
+    const days = Array.isArray(hd) ? hd : (hd.days || []);
+    return days.some(day => (day.exercises||[]).some(e => e.done && !e.isWarmup));
+  }).length;
+  const mult = sessions>=5?1.725:sessions>=3?1.55:sessions>=1?1.375:1.2;
+  return {tdee:Math.round(bmr*mult), bmr:Math.round(bmr), mult, sessions, age, gender};
 }
 
 function mkDay(i,wt){const p=PA[i];return{date:'',muscles:[...p.muscles],warmup:p.warmup||'',exercises:p.exercises.map(e=>({...e,setData:null})),cardio:{...p.cardio}};}

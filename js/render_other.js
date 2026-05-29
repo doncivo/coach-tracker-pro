@@ -545,11 +545,23 @@ document.getElementById('next-month').addEventListener('click',()=>{S.calMonth++
 /* ── Paramètres (déplacé depuis utils.js) ── */
 function _settingsSection(title, icon) {
   const sec  = document.createElement('div'); sec.className = 'settings-section';
-  const lbl  = document.createElement('div'); lbl.className = 'settings-section-title'; lbl.textContent = title;
+  const lbl  = document.createElement('div'); lbl.className = 'settings-section-title';
+
+  // Icône colorée optionnelle devant le titre
+  if (icon && icon.emoji) {
+    const ic = document.createElement('span');
+    ic.style.cssText = 'display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:5px;font-size:12px;margin-right:6px;background:' + (icon.bg || 'var(--teal)') + ';vertical-align:middle;flex-shrink:0';
+    ic.textContent = icon.emoji;
+    lbl.appendChild(ic);
+    lbl.appendChild(document.createTextNode(title));
+  } else {
+    lbl.textContent = title;
+  }
+
   const card = document.createElement('div'); card.className = 'settings-section-card';
   sec.appendChild(lbl);
   sec.appendChild(card);
-  sec._card = card; // référence à la card pour y ajouter les rows
+  sec._card = card;
   return sec;
 }
 

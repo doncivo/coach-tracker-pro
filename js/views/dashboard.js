@@ -32,6 +32,8 @@ const DashboardView = {
     S._dob         = state.app._dob;
     S._level       = state.app._level;
     S.profilTaille = state.body.profilTaille;
+    S.profilAge    = state.body.profilAge    || 30;
+    S.profilSexe   = state.body.profilSexe   || state.app._gender || 'H';
   },
 
 };

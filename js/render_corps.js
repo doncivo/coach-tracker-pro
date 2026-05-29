@@ -379,8 +379,15 @@ function renderCalTracker() {
     const scanBtn = document.createElement('button');
     scanBtn.className = 'btn btn-ghost';
     scanBtn.style.cssText = 'font-size:11px;padding:5px 10px;min-height:30px;flex:1';
-    scanBtn.innerHTML = '📷 Scanner code-barres';
-    const usdaBtn = document.createElement('button');usdaBtn.style.cssText='font-size:11px;padding:5px 10px;min-height:30px;flex:1;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--teal-d);font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none';usdaBtn.textContent='🔍 USDA';
+    scanBtn.innerHTML = '📷 Code-barres';
+    // ── Recherche aliments FRANÇAIS ──
+    const frSearchBtn = document.createElement('button');
+    frSearchBtn.style.cssText='font-size:11px;padding:5px 10px;min-height:36px;flex:1;border-radius:8px;border:1.5px solid var(--teal);background:var(--teal);color:#fff;font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none;font-weight:700';
+    frSearchBtn.textContent='🇫🇷 Rechercher';
+    frSearchBtn.addEventListener('click',()=>_showFoodSearchFR(result=>{nameInp.value=result.name;calInp.value=result.cal;protInp.value=result.protein;carbInp.value=result.carbs;fatInp.value=result.fat;}));
+    frSearchBtn.ontouchstart=(e)=>{e.stopPropagation();};
+    scanRow.appendChild(frSearchBtn);
+    const usdaBtn = document.createElement('button');usdaBtn.style.cssText='font-size:11px;padding:5px 10px;min-height:36px;flex:1;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--teal-d);font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none';usdaBtn.textContent='🔍 USDA (EN)';
     usdaBtn.addEventListener('click',()=>{if(typeof USDA!=='undefined')USDA.showSearch(result=>{nameInp.value=result.name;calInp.value=result.cal;protInp.value=result.protein;carbInp.value=result.carbs;fatInp.value=result.fat;});});usdaBtn.ontouchstart=(e)=>{e.stopPropagation();};
     scanRow.appendChild(usdaBtn);
     scanBtn.addEventListener('click', () => {
@@ -505,6 +512,143 @@ function renderSleepChart(container) {
   });
   ChartEngine.bar(container, data, {height: 90});
 }
+
+/* ── Recherche aliments français avec calcul auto par poids ── */
+function _showFoodSearchFR(callback) {
+  document.getElementById('food-fr-overlay')?.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'food-fr-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);z-index:9500;display:flex;align-items:flex-end;justify-content:center';
+
+  const sheet = document.createElement('div');
+  sheet.style.cssText = 'background:var(--surface);border-radius:24px 24px 0 0;padding:16px;width:100%;max-width:520px;max-height:85vh;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:10px';
+
+  const handle = document.createElement('div');
+  handle.style.cssText = 'width:36px;height:4px;border-radius:2px;background:var(--border);margin:0 auto';
+
+  const title = document.createElement('div');
+  title.style.cssText = 'font-size:17px;font-weight:700;color:var(--text)';
+  title.textContent = '🇫🇷 Aliments — Base française';
+
+  // Champ recherche
+  const searchInp = document.createElement('input');
+  searchInp.type = 'text';
+  searchInp.placeholder = 'Tapez un aliment (ex: poulet, riz, yaourt...)';
+  searchInp.setAttribute('autocomplete','off');
+  searchInp.style.cssText = 'padding:12px 14px;border-radius:12px;border:1.5px solid var(--teal);background:var(--bg);font-size:16px;font-family:var(--font);color:var(--text);-webkit-appearance:none;outline:none;width:100%;box-sizing:border-box';
+
+  // Champ poids
+  const weightRow = document.createElement('div');
+  weightRow.style.cssText = 'display:flex;align-items:center;gap:8px';
+  const weightLbl = document.createElement('span');
+  weightLbl.style.cssText = 'font-size:12px;font-weight:700;color:var(--muted);flex-shrink:0';
+  weightLbl.textContent = 'Portion :';
+  const weightInp = document.createElement('input');
+  weightInp.type = 'number'; weightInp.min = 1; weightInp.max = 2000; weightInp.value = 100;
+  weightInp.style.cssText = 'width:80px;padding:8px 10px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-size:16px;font-weight:700;font-family:var(--mono);color:var(--text);text-align:center;-webkit-appearance:none';
+  const weightUnit = document.createElement('span');
+  weightUnit.style.cssText = 'font-size:12px;color:var(--muted)';
+  weightUnit.textContent = 'g';
+  weightRow.appendChild(weightLbl); weightRow.appendChild(weightInp); weightRow.appendChild(weightUnit);
+
+  // Résultats
+  const results = document.createElement('div');
+  results.style.cssText = 'display:flex;flex-direction:column;gap:4px;max-height:300px;overflow-y:auto;-webkit-overflow-scrolling:touch';
+
+  function renderResults(q) {
+    results.innerHTML = '';
+    const foods = (typeof searchFoodsFR === 'function') ? searchFoodsFR(q) : [];
+
+    if (!foods.length && q.length >= 2) {
+      results.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:12px;text-align:center">Aucun aliment trouvé pour "'+q+'"</div>';
+      return;
+    }
+    if (!q || q.length < 2) {
+      // Afficher les 10 premiers par défaut
+      const defaults = (typeof FOODS_FR !== 'undefined' ? FOODS_FR : []).slice(0, 10);
+      renderFoodList(defaults, '');
+      return;
+    }
+    renderFoodList(foods, q);
+  }
+
+  function renderFoodList(foods, q) {
+    results.innerHTML = '';
+    foods.forEach(food => {
+      const row = document.createElement('button');
+      row.style.cssText = 'display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--card);font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none';
+
+      const info = document.createElement('div');
+      info.style.cssText = 'flex:1;min-width:0';
+
+      // Nom de l'aliment
+      const nm = document.createElement('div');
+      nm.style.cssText = 'font-size:13px;font-weight:600;color:var(--text)';
+      nm.textContent = food.n;
+
+      // Macros pour 100g
+      const macros100 = document.createElement('div');
+      macros100.style.cssText = 'font-size:10px;color:var(--muted);margin-top:1px';
+      macros100.textContent = food.cal + 'kcal · P:' + food.prot + 'g · G:' + food.carbs + 'g · L:' + food.fat + 'g  /100g';
+
+      // Macros pour portion calculée en temps réel
+      const portionDiv = document.createElement('div');
+      portionDiv.style.cssText = 'font-size:11px;color:var(--teal-d);font-weight:600;margin-top:1px';
+
+      function updatePortion() {
+        const g = parseFloat(weightInp.value) || 100;
+        const r = g / 100;
+        portionDiv.textContent = 'Pour ' + g + 'g : ' + Math.round(food.cal * r) + 'kcal · P:' + Math.round(food.prot * r * 10) / 10 + 'g · G:' + Math.round(food.carbs * r * 10) / 10 + 'g · L:' + Math.round(food.fat * r * 10) / 10 + 'g';
+      }
+      updatePortion();
+      weightInp.addEventListener('input', updatePortion);
+
+      info.appendChild(nm); info.appendChild(macros100); info.appendChild(portionDiv);
+
+      const addIcon = document.createElement('span');
+      addIcon.style.cssText = 'color:var(--teal);font-size:18px;flex-shrink:0';
+      addIcon.textContent = '+';
+
+      row.appendChild(info); row.appendChild(addIcon);
+
+      const doAdd = () => {
+        const g = parseFloat(weightInp.value) || 100;
+        const r = g / 100;
+        overlay.remove();
+        if (callback) callback({
+          name:    food.n + ' (' + g + 'g)',
+          cal:     Math.round(food.cal    * r),
+          protein: Math.round(food.prot   * r * 10) / 10,
+          carbs:   Math.round(food.carbs  * r * 10) / 10,
+          fat:     Math.round(food.fat    * r * 10) / 10,
+        });
+      };
+      row.ontouchstart = (e) => { e.preventDefault(); doAdd(); };
+      row.onclick = doAdd;
+      results.appendChild(row);
+    });
+  }
+
+  // Afficher les aliments par défaut au démarrage
+  renderResults('');
+
+  searchInp.addEventListener('input', () => renderResults(searchInp.value.trim()));
+
+  const cancel = document.createElement('button');
+  cancel.style.cssText = 'padding:12px;border:none;background:none;color:var(--muted);font-size:14px;font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none;width:100%';
+  cancel.textContent = 'Annuler';
+  cancel.ontouchstart = (e) => { e.preventDefault(); overlay.remove(); };
+  cancel.onclick = () => overlay.remove();
+
+  sheet.append(handle, title, searchInp, weightRow, results, cancel);
+  overlay.appendChild(sheet);
+  overlay.ontouchstart = (e) => { if (e.target === overlay) overlay.remove(); };
+  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+  document.body.appendChild(overlay);
+  setTimeout(() => searchInp.focus(), 200);
+}
+
 
 function renderCorps(){
   const profilInp=document.getElementById('profil-taille');if(profilInp){profilInp.value=S.profilTaille||'';profilInp.addEventListener('input',e=>{S.profilTaille=parseInt(e.target.value)||0;save();renderCorps();});}

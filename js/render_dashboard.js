@@ -712,6 +712,9 @@ const ONBOARD_STEPS = [
         <div class="onboard-field"><label class="onboard-label">⚖️ Poids (kg)</label>
           <input type="number" class="onboard-inp" id="ob-weight" placeholder="75" min="30" max="300" step="0.1"></div>
       </div>
+      <div style="font-size:11px;color:var(--muted);background:var(--bg);border-radius:8px;padding:8px 10px;margin-top:6px">
+        💡 Tour de poignet et autres mesures disponibles dans Corps → Mensurations
+      </div>
       <div id="ob-bmi-box" style="display:none;margin-top:10px;background:var(--bg);border:1px solid var(--teal);border-radius:10px;padding:10px 14px;font-size:12px">
         IMC : <strong id="ob-bmi-val"></strong> — <span id="ob-bmi-cat"></span>
       </div>`,
@@ -909,12 +912,23 @@ function showOnboarding(){
   if(!ov){setTimeout(showOnboarding,200);return;}
   ov.style.display='flex';
   _obRender();
-  if(!_obListenersBound){
-    _obListenersBound=true;
-    document.getElementById('onboard-next')?.addEventListener('click',_obNext);
-    document.getElementById('onboard-back')?.addEventListener('click',_obBack);
-    document.getElementById('onboard-skip')?.addEventListener('click',()=>{ONBOARD_STEPS[_obStep].save();_obFinish();});
+  // Re-bind toujours (iOS Safari requires fresh listeners after innerHTML changes)
+  const nextBtn=document.getElementById('onboard-next');
+  const backBtn=document.getElementById('onboard-back');
+  const skipEl=document.getElementById('onboard-skip');
+  if(nextBtn){
+    nextBtn.onclick=_obNext;
+    nextBtn.ontouchstart=(e)=>{e.preventDefault();_obNext();};
   }
+  if(backBtn){
+    backBtn.onclick=_obBack;
+    backBtn.ontouchstart=(e)=>{e.preventDefault();_obBack();};
+  }
+  if(skipEl){
+    skipEl.onclick=()=>{ONBOARD_STEPS[_obStep].save();_obFinish();};
+    skipEl.ontouchstart=(e)=>{e.preventDefault();ONBOARD_STEPS[_obStep].save();_obFinish();};
+  }
+  _obListenersBound=true;
 }
 
 function checkOnboarding(){if(!localStorage.getItem(ONBOARD_KEY))setTimeout(showOnboarding,800);}

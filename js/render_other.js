@@ -466,7 +466,33 @@ function renderLibrary(){
     body.appendChild(wgerRow); body.appendChild(wgerPanel); body.appendChild(pubmedPanel);
     body.appendChild(addBtn);card.appendChild(body);grid.appendChild(card);
   });
-  if(!filtered.length)grid.innerHTML='<div class="prog-no-data">Aucun exercice trouvé.</div>';
+  // Si filtres actifs mais aucun résultat → message + reset
+  const hasActiveFilter = search || muscleFilter || patternFilter || equipFilter || diffFilter;
+  if(!filtered.length && hasActiveFilter) {
+    grid.innerHTML = '';
+    const noRes = document.createElement('div');
+    noRes.style.cssText = 'padding:24px;text-align:center';
+    const msg = document.createElement('div');
+    msg.style.cssText = 'font-size:13px;color:var(--muted);margin-bottom:12px';
+    msg.textContent = 'Aucun exercice avec ces filtres';
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'btn btn-ghost btn-sm';
+    resetBtn.textContent = 'Réinitialiser les filtres';
+    resetBtn.onclick = () => {
+      const s=document.getElementById('lib-search');if(s)s.value='';
+      const m=document.getElementById('lib-filter-muscle');if(m)m.value='';
+      const p=document.getElementById('lib-filter-pattern');if(p)p.value='';
+      const q=document.getElementById('lib-filter-equipment');if(q)q.value='';
+      const d=document.getElementById('lib-filter-difficulty');if(d)d.value='';
+      renderLibrary();
+    };
+    noRes.appendChild(msg); noRes.appendChild(resetBtn);
+    grid.appendChild(noRes);
+    return;
+  } else if (!filtered.length) {
+    grid.innerHTML = '<div class="prog-no-data">Aucun exercice dans la bibliothèque</div>';
+    return;
+  }
 }
 ['lib-search','lib-filter-muscle','lib-filter-pattern'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('input',renderLibrary);});
 
@@ -864,6 +890,36 @@ function renderSettings() {
     btn.textContent='🧪 Lancer'; btn.addEventListener('click', () => window.open(location.href.split('?')[0]+'?test=1','_blank'));
     return btn;
   });
+
+  // ── ZONE DE DANGER ──
+  const dangerSec = _settingsSection('Zone de danger', {emoji:'⚠️', bg:'#ff3b30'});
+  _settingsRow(dangerSec, 'Tout réinitialiser', 'Efface données, historique et cache', () => {
+    const btn = document.createElement('button');
+    btn.style.cssText = 'padding:8px 14px;border-radius:10px;background:rgba(229,62,62,.1);color:var(--red,#e53e3e);font-size:13px;font-weight:700;font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none;min-height:36px;border:1.5px solid rgba(229,62,62,.3)';
+    btn.textContent = '🗑 Tout effacer';
+    const doReset = async () => {
+      if (!confirm('ATTENTION\\n\\nCette action supprimera :\\n- Tout votre historique\\n- Votre programme\\n- Vos mensurations\\n- Le cache\\n\\nIrréversible. Continuer ?')) return;
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+        if ('caches' in window) {
+          const keys = await caches.keys();
+          await Promise.all(keys.map(k => caches.delete(k)));
+        }
+        if ('serviceWorker' in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map(r => r.unregister()));
+        }
+        window.location.replace(window.location.origin + window.location.pathname + '?fresh=1');
+      } catch(e) {
+        alert('Erreur : ' + e.message);
+      }
+    };
+    btn.ontouchstart = (e) => { e.preventDefault(); doReset(); };
+    btn.addEventListener('click', doReset);
+    return btn;
+  });
+  wrap.appendChild(dangerSec);
 }
 
 function renderABCompare(container) {

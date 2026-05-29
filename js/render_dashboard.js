@@ -1244,62 +1244,8 @@ function applyMacroGoals() {
 /* sendLocalNotif — défini dans utils.js */
 
 // ── Planifier rappel d'entraînement quotidien ──
-function scheduleTrainingReminder(hour, minute) {
-  // Sauvegarde l'heure choisie
-  S._reminderHour   = hour;
-  S._reminderMinute = minute;
-  save();
 
-  // Calcule le délai jusqu'à la prochaine occurrence
-  function getNextMs() {
-    const now  = new Date();
-    const next = new Date();
-    next.setHours(hour, minute, 0, 0);
-    if (next <= now) next.setDate(next.getDate() + 1); // demain si déjà passé
-    return next - now;
-  }
 
-  // Annuler le timer précédent
-  if (window._reminderTimeout) clearTimeout(window._reminderTimeout);
-
-  function fire() {
-    const today = new Date();
-    // Vérifier si une séance est prévue aujourd'hui
-    const dayIdx = (today.getDay() + 6) % 7; // lundi=0
-    const todayDay = S.days[dayIdx];
-    const hasSession = todayDay?.exercises?.some(e => e.name?.trim() && !e.isWarmup);
-    
-    if (hasSession) {
-      const exs = todayDay.exercises.filter(e => e.name?.trim() && !e.isWarmup);
-      sendLocalNotif(
-        "💪 C'est l'heure de t'entraîner !",
-        `${exs.length} exercice${exs.length>1?'s':''} au programme — ${exs.slice(0,2).map(e=>e.name).join(', ')}${exs.length>2?' +'+( exs.length-2):''}`,
-        './icons/icon-192.png'
-      );
-    } else {
-      sendLocalNotif("😴 Journée de repos", "Récupération active recommandée.", './icons/icon-192.png');
-    }
-    // Replanifier pour demain
-    window._reminderTimeout = setTimeout(fire, getNextMs());
-  }
-
-  window._reminderTimeout = setTimeout(fire, getNextMs());
-  showToast(`🔔 Rappel planifié à ${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`, 'ok', 3000);
-}
-
-function cancelTrainingReminder() {
-  if (window._reminderTimeout) clearTimeout(window._reminderTimeout);
-  S._reminderHour = null; S._reminderMinute = null;
-  save();
-  showToast('🔕 Rappel annulé', 'warn', 2000);
-}
-
-// ── Relancer le rappel au démarrage si configuré ──
-function restoreReminder() {
-  if (S._reminderHour != null && S._reminderMinute != null) {
-    scheduleTrainingReminder(S._reminderHour, S._reminderMinute);
-  }
-}
 
 
 // ╔══════════════════════════════════════════════════════╗

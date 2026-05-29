@@ -151,7 +151,6 @@
     </div>
     <input type="file" id="import-csv-file" accept=".csv" style="display:none">
     <nav class="day-tabs" id="day-tabs"></nav>
-    <div id="week-heatmap"></div>
     <div class="day-panel"><div class="day-detail" id="day-detail"></div></div>
     <aside class="side-panel">
       <div class="sp-block">
@@ -665,7 +664,7 @@
   </script>
 <script>
 (function() {
-  const SW_VERSION = 'ctp-v83';
+  const SW_VERSION = 'ctp-v84';
   if (!('serviceWorker' in navigator)) return;
 
   const RELOAD_KEY = 'ctp-sw-reloaded-' + SW_VERSION;

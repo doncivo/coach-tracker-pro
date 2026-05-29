@@ -43,86 +43,9 @@ function renderDayTabs(){
     tab.addEventListener('click',()=>{S.activeDay=i;renderDayTabs();renderDayDetail(i);});
     nav.appendChild(tab);
   }
-  _renderWeekHeatmap();
 }
 
-/* ── Heatmap musculaire hebdomadaire ── */
-function _renderWeekHeatmap() {
-  const wrap = document.getElementById('week-heatmap');
-  if (!wrap) return;
-  wrap.innerHTML = '';
 
-  // Groupes musculaires pertinents (hors repos, mobilité, cardio)
-  const groups = [
-    { keys: ['pec','ep','tri'], label: 'Push',  color: '#c0506a' },
-    { keys: ['dos','bic'],      label: 'Pull',  color: '#6050b0' },
-    { keys: ['jam'],            label: 'Legs',  color: '#3a9060' },
-    { keys: ['abd','bas'],      label: 'Core',  color: '#904090' },
-    { keys: ['car'],            label: 'Cardio',color: '#b07800' },
-  ];
-
-  // Calculer le volume par groupe et par jour
-  const volByDayGroup = S.days.map(d => {
-    const result = {};
-    groups.forEach(g => {
-      const vol = (d.exercises || [])
-        .filter(e => !e.isWarmup && g.keys.includes(e.muscle))
-        .reduce((sum, e) => sum + (parseFloat(e.weight)||0) * (parseInt(e.sets)||0) * (parseInt(e.reps)||1), 0);
-      result[g.label] = vol;
-    });
-    return result;
-  });
-
-  const maxVol = Math.max(...volByDayGroup.flatMap(d => Object.values(d)), 1);
-
-  const grid = document.createElement('div');
-  grid.className = 'week-heatmap';
-
-  // En-tête : jours
-  const headerRow = document.createElement('div');
-  headerRow.className = 'whm-row whm-header';
-  const corner = document.createElement('div'); corner.className = 'whm-label'; corner.textContent = '';
-  headerRow.appendChild(corner);
-  S.days.forEach((d, i) => {
-    const cell = document.createElement('div');
-    cell.className = 'whm-day-lbl' + (i === S.activeDay ? ' whm-active' : '');
-    cell.textContent = ['L','M','M','J','V','S','D'][i];
-    cell.ontouchstart = (e) => { e.preventDefault(); S.activeDay=i; renderDayTabs(); renderDayDetail(i); };
-    cell.onclick = () => { S.activeDay=i; renderDayTabs(); renderDayDetail(i); };
-    headerRow.appendChild(cell);
-  });
-  grid.appendChild(headerRow);
-
-  // Lignes : groupes musculaires
-  groups.forEach(g => {
-    const row = document.createElement('div');
-    row.className = 'whm-row';
-
-    const lbl = document.createElement('div');
-    lbl.className = 'whm-label'; lbl.textContent = g.label;
-    lbl.style.color = g.color;
-    row.appendChild(lbl);
-
-    S.days.forEach((d, i) => {
-      const vol = volByDayGroup[i][g.label] || 0;
-      const pct = Math.min(1, vol / maxVol);
-      const cell = document.createElement('div');
-      cell.className = 'whm-cell' + (i === S.activeDay ? ' whm-active' : '');
-      if (vol > 0) {
-        const alpha = 0.15 + pct * 0.85;
-        cell.style.background = g.color;
-        cell.style.opacity = alpha.toFixed(2);
-        cell.title = g.label + ' ' + DAYS_SH[i] + ' : ' + Math.round(vol) + 'kg';
-      }
-      cell.ontouchstart = (e) => { e.preventDefault(); S.activeDay=i; renderDayTabs(); renderDayDetail(i); };
-      cell.onclick = () => { S.activeDay=i; renderDayTabs(); renderDayDetail(i); };
-      row.appendChild(cell);
-    });
-    grid.appendChild(row);
-  });
-
-  wrap.appendChild(grid);
-}
 
 /* ── Copier un jour depuis la semaine précédente ── */
 function _copyDayFromHistory(dayIndex) {

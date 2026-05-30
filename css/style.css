@@ -280,9 +280,7 @@ nav.tabs   { flex-shrink: 0; }
   font-size: 15px;
   font-weight: 600;
   color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* pas de nowrap — permet au titre de passer sur 2 lignes si nécessaire */
 }
 .settings-row-sub {
   font-size: 12px;

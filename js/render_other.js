@@ -814,147 +814,116 @@ function renderSettings() {
   // ── NOTIFICATIONS ──
   const notifSec = _settingsSection('Notifications', {emoji:'🔔', bg:'#ff9500'});
 
-  // ── Ligne autorisation — statut dynamique ──
-  _settingsRow(notifSec, 'Autorisation', '', () => {
+  const _isStandalone = window.navigator.standalone === true ||
+    window.matchMedia('(display-mode: standalone)').matches;
+  const _notifPerm = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported';
+
+  // ── Statut + guide d'installation ──
+  _settingsRow(notifSec, 'Statut', '', () => {
     const wrap1 = document.createElement('div');
-    wrap1.style.cssText = 'display:flex;align-items:center;gap:8px;flex-wrap:wrap';
+    wrap1.style.cssText = 'display:flex;flex-direction:column;gap:8px;width:100%';
 
-    const statusLbl = document.createElement('span');
-    statusLbl.style.cssText = 'font-size:12px;color:var(--muted)';
+    if (_notifPerm === 'granted' && _isStandalone) {
+      const ok = document.createElement('div');
+      ok.style.cssText = 'font-size:13px;font-weight:600;color:var(--green)';
+      ok.textContent = 'Notifications activees';
+      wrap1.appendChild(ok);
 
-    const perm = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported';
+    } else if (_notifPerm === 'denied') {
+      const msg = document.createElement('div');
+      msg.style.cssText = 'font-size:13px;color:var(--red);font-weight:600';
+      msg.textContent = 'Notifications bloquees';
+      const help = document.createElement('div');
+      help.style.cssText = 'font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5';
+      help.textContent = 'Reglages iPhone -> Apps -> Safari -> Notifications';
+      wrap1.append(msg, help);
 
-    if (perm === 'granted') {
-      statusLbl.textContent = '✅ Activées';
-      wrap1.appendChild(statusLbl);
-    } else if (perm === 'denied') {
-      statusLbl.textContent = '❌ Bloquées';
-      const helpLbl = document.createElement('span');
-      helpLbl.style.cssText = 'font-size:11px;color:var(--muted)';
-      helpLbl.textContent = 'Réglages iPhone → Safari → Notifications';
-      wrap1.appendChild(statusLbl);
-      wrap1.appendChild(document.createElement('br'));
-      wrap1.appendChild(helpLbl);
-    } else if (perm === 'unsupported') {
-      statusLbl.textContent = '⚠️ Non supporté';
-      wrap1.appendChild(statusLbl);
+    } else if (!_isStandalone) {
+      // Guide d'installation PWA
+      const title = document.createElement('div');
+      title.style.cssText = 'font-size:13px;font-weight:600;color:var(--text)';
+      title.textContent = 'Installation requise';
+      const desc = document.createElement('div');
+      desc.style.cssText = 'font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5';
+      desc.textContent = 'Les notifications iOS necessitent l\'app installee sur l\'ecran d\'accueil.';
+      const steps = document.createElement('div');
+      steps.style.cssText = 'margin-top:10px;display:flex;flex-direction:column;gap:6px';
+      [
+        { num:'1', txt:'Appuyez sur le bouton Partage (en bas de Safari)' },
+        { num:'2', txt:`Choisissez "Sur l'ecran d'accueil"` },
+        { num:'3', txt:'Appuyez sur Ajouter' },
+        { num:'4', txt:`Ouvrez l'app depuis son icone, puis revenez ici` },
+      ].forEach(({num, txt}) => {
+        const s = document.createElement('div');
+        s.style.cssText = 'display:flex;gap:10px;align-items:flex-start';
+        const n = document.createElement('div');
+        n.style.cssText = 'width:20px;height:20px;border-radius:50%;background:var(--teal);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px';
+        n.textContent = num;
+        const t = document.createElement('div');
+        t.style.cssText = 'font-size:12px;color:var(--muted);line-height:1.5;flex:1';
+        t.textContent = txt;
+        s.append(n, t);
+        steps.appendChild(s);
+      });
+      wrap1.append(title, desc, steps);
+
     } else {
-      // 'default' — peut demander
+      // PWA installee, permission non demandee
       const btn = document.createElement('button');
-      btn.className = 'btn btn-teal btn-sm';
-      btn.textContent = '🔔 Activer les notifications';
-      btn.style.cssText += ';min-height:36px;touch-action:manipulation;-webkit-appearance:none';
-
-      const doRequest = () => {
-        // Vérifier que c'est une PWA installée (iOS exige ça)
-        const isStandalone = window.navigator.standalone === true ||
-          window.matchMedia('(display-mode: standalone)').matches;
-        if (!isStandalone) {
-          showToast('Ajoutez l\'app sur l\'ecran d\'accueil pour activer les notifications', 'warn', 5000);
-          return;
-        }
-        // Demander la permission — doit être appelé directement depuis gesture
+      btn.className = 'btn btn-teal';
+      btn.style.cssText += ';width:100%;touch-action:manipulation;-webkit-appearance:none';
+      btn.textContent = 'Activer les notifications';
+      const doReq = () => {
         if (typeof Notify !== 'undefined') {
-          Notify.requestPermission().then(ok => {
-            if (ok) {
-              btn.style.display = 'none';
-              statusLbl.textContent = '✅ Activées';
-              wrap1.appendChild(statusLbl);
-              renderSettings(); // rafraîchir la section
-            }
-          });
+          Notify.requestPermission().then(ok => { if(ok) renderSettings(); });
         } else if (typeof Notification !== 'undefined') {
-          Notification.requestPermission().then(result => {
-            if (result === 'granted') renderSettings();
-          });
+          Notification.requestPermission().then(r => { if(r==='granted') renderSettings(); });
         }
       };
-      // iOS: ontouchstart pour éviter le délai 300ms
-      btn.ontouchstart = e => { e.preventDefault(); doRequest(); };
-      btn.onclick = doRequest;
+      btn.ontouchstart = e => { e.preventDefault(); doReq(); };
+      btn.onclick = doReq;
       wrap1.appendChild(btn);
     }
     return wrap1;
   });
 
-  // ── Ligne rappel entraînement ──
-  _settingsRow(notifSec, 'Rappel quotidien', 'Notification a l\'heure choisie', () => {
-    const wrap2 = document.createElement('div');
-    wrap2.style.cssText = 'display:flex;flex-direction:column;gap:8px';
-
-    // iOS : notifications uniquement en PWA installée
-    const isStandalone = window.navigator.standalone === true ||
-      window.matchMedia('(display-mode: standalone)').matches;
-
-    if (!isStandalone) {
-      const hint = document.createElement('div');
-      hint.style.cssText = 'font-size:11px;color:var(--muted);font-style:italic';
-      hint.textContent = 'Disponible apres installation sur l\'ecran d\'accueil';
-      wrap2.appendChild(hint);
-      return wrap2;
-    }
-
-    const row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:8px;flex-wrap:wrap';
-
-    const timeInp = document.createElement('input');
-    timeInp.type = 'time';
-    timeInp.style.cssText = 'border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-size:16px;background:var(--bg);color:var(--text);font-family:var(--font);-webkit-appearance:none;outline:none;min-height:40px';
-    const h = S._reminderHour; const m = S._reminderMinute;
-    timeInp.value = (h != null) ? String(h).padStart(2,'0')+':'+String(m).padStart(2,'0') : '08:00';
-
-    const setBtn = document.createElement('button');
-    setBtn.className = 'btn btn-teal btn-sm';
-    setBtn.style.cssText += ';min-height:36px;touch-action:manipulation;-webkit-appearance:none';
-    setBtn.textContent = (h != null) ? '✅ Modifier' : '🔔 Activer';
-
-    const doSet = () => {
-      const parts = timeInp.value.split(':');
-      const hh = parseInt(parts[0]); const mm = parseInt(parts[1]);
-      if (isNaN(hh) || isNaN(mm)) { showToast('Choisissez une heure valide', 'warn'); return; }
-
-      // Vérifier/demander permission d'abord
-      const perm2 = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported';
-      if (perm2 === 'granted') {
+  // ── Rappel quotidien (uniquement si PWA + permission) ──
+  if (_isStandalone) {
+    _settingsRow(notifSec, 'Rappel quotidien', `Notification a l'heure choisie`, () => {
+      const wrap2 = document.createElement('div');
+      wrap2.style.cssText = 'display:flex;flex-direction:column;gap:8px;width:100%';
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:8px;flex-wrap:wrap';
+      const timeInp = document.createElement('input');
+      timeInp.type = 'time';
+      timeInp.style.cssText = 'border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-size:16px;background:var(--bg);color:var(--text);font-family:var(--font);-webkit-appearance:none;outline:none;min-height:44px;flex:1';
+      const rh = S._reminderHour, rm = S._reminderMinute;
+      timeInp.value = rh != null ? String(rh).padStart(2,'0')+':'+String(rm).padStart(2,'0') : '08:00';
+      const setBtn = document.createElement('button');
+      setBtn.className = 'btn btn-teal btn-sm';
+      setBtn.style.cssText += ';min-height:44px;touch-action:manipulation;-webkit-appearance:none';
+      setBtn.textContent = rh != null ? 'Modifier' : 'Activer';
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'btn btn-ghost btn-sm';
+      cancelBtn.style.cssText += ';min-height:44px;touch-action:manipulation;-webkit-appearance:none;display:'+(rh!=null?'inline-flex':'none');
+      cancelBtn.textContent = 'Annuler';
+      const doSet = () => {
+        const parts = timeInp.value.split(':');
+        const hh = parseInt(parts[0]), mm = parseInt(parts[1]);
+        if (isNaN(hh)||isNaN(mm)) return;
+        if (_notifPerm !== 'granted') { showToast('Activez d\'abord les notifications', 'warn'); return; }
         scheduleTrainingReminder(hh, mm);
-        setBtn.textContent = '✅ Modifier';
+        setBtn.textContent = 'Modifier';
         cancelBtn.style.display = 'inline-flex';
-      } else if (perm2 === 'denied') {
-        showToast('Notifications bloquées — Réglages iPhone → Safari', 'warn', 4000);
-      } else {
-        // Demander la permission puis programmer
-        (typeof Notify !== 'undefined' ? Notify.requestPermission() : Notification.requestPermission())
-          .then(ok => {
-            if (ok === true || ok === 'granted') {
-              scheduleTrainingReminder(hh, mm);
-              setBtn.textContent = '✅ Modifier';
-              cancelBtn.style.display = 'inline-flex';
-            } else {
-              showToast('Permission refusée', 'warn');
-            }
-          });
-      }
-    };
-    setBtn.ontouchstart = e => { e.preventDefault(); doSet(); };
-    setBtn.onclick = doSet;
-
-    const cancelBtn = document.createElement('button');
-    cancelBtn.className = 'btn btn-ghost btn-sm';
-    cancelBtn.style.cssText += ';min-height:36px;touch-action:manipulation;-webkit-appearance:none;display:'+(h!=null?'inline-flex':'none');
-    cancelBtn.textContent = '🔕 Annuler';
-    const doCancel = () => {
-      cancelTrainingReminder();
-      cancelBtn.style.display = 'none';
-      setBtn.textContent = '🔔 Activer';
-      timeInp.value = '08:00';
-    };
-    cancelBtn.ontouchstart = e => { e.preventDefault(); doCancel(); };
-    cancelBtn.onclick = doCancel;
-
-    row.append(timeInp, setBtn, cancelBtn);
-    wrap2.appendChild(row);
-    return wrap2;
-  });
+      };
+      setBtn.ontouchstart = e=>{e.preventDefault();doSet();}; setBtn.onclick = doSet;
+      const doCancel = () => { cancelTrainingReminder(); cancelBtn.style.display='none'; setBtn.textContent='Activer'; timeInp.value='08:00'; };
+      cancelBtn.ontouchstart = e=>{e.preventDefault();doCancel();}; cancelBtn.onclick = doCancel;
+      row.append(timeInp, setBtn, cancelBtn);
+      wrap2.appendChild(row);
+      return wrap2;
+    });
+  }
 
   wrap.appendChild(notifSec);
 

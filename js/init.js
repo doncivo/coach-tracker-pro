@@ -294,11 +294,42 @@ setTimeout(() => Router.navigate(_startTab), 0);
 /* ── Activer le stockage persistant + charger depuis IDB si disponible ── */
 (async () => {
   if (typeof IDBStorage === 'undefined') return;
-  // Demander le stockage persistant silencieusement
   await IDBStorage.requestPersistent();
-  // Charger depuis IDB en arrière-plan (peut avoir plus d'historique que localStorage)
   if (typeof Persist !== 'undefined' && typeof Persist.loadFromIDB === 'function') {
     await Persist.loadFromIDB();
+  }
+})();
+
+/* ── Mise à jour automatique du programme si nouvelle version PA ── */
+(function() {
+  try {
+    const storedVersion = localStorage.getItem('ctp_pa_version');
+    if (storedVersion !== _PA_VERSION) {
+      // Nouvelle version du programme détectée
+      // Réinitialiser les jours de la semaine courante depuis le nouveau PA
+      // en préservant l'historique et les données déjà saisies cette semaine
+      const hasCompletedSets = (S.days || []).some(d =>
+        (d.exercises || []).some(e => e.done || (e.setData && e.setData.some && e.setData.some(s => s.reps)))
+      );
+
+      if (!hasCompletedSets) {
+        // Aucune série complétée cette semaine → reset propre
+        S.days = Array.from({length: 7}, (_, i) => mkDay(i, S.weekType || 'A'));
+        save();
+        console.log('[CTP] Programme mis à jour vers', _PA_VERSION);
+      } else {
+        // Des séries ont été faites → proposer via toast (non-destructif)
+        setTimeout(() => {
+          showToast(
+            'Nouveau programme disponible. Archivez la semaine pour l\'appliquer.',
+            'save', 5000
+          );
+        }, 2000);
+      }
+      localStorage.setItem('ctp_pa_version', _PA_VERSION);
+    }
+  } catch(e) {
+    console.warn('[CTP] Version check failed:', e);
   }
 })();
 

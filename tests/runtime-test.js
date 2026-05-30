@@ -765,6 +765,55 @@ ok('sw.js cache idb-storage.js', (() => {
 })());
 
 
+
+section('Nouveau programme Ali v2');
+
+ok('constants.js: _PA_VERSION défini', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/data/constants.js'),'utf8');
+  return s.includes("const _PA_VERSION = 'v2-ali-optimise-2026'");
+})());
+
+ok('Lundi: 8 exercices (4 pec + 3 bic + 1 abd)', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/data/constants.js'),'utf8');
+  return s.includes("Développé couché barre") && s.includes("Curl barre EZ") && s.includes("Planche");
+})());
+
+ok('Lundi: biceps excessifs supprimés (wrist curl, spider, curl inversé)', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/data/constants.js'),'utf8');
+  return !s.includes("Wrist curl") && !s.includes("Spider curl") && !s.includes("Curl inversé");
+})());
+
+ok('Mardi: Dos A + Triceps A (8 exercices)', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/data/constants.js'),'utf8');
+  return s.includes("Tirage vertical poulie prise large") && s.includes("Dips assistés");
+})());
+
+ok('Mardi: Farmer carry supprimé, Kickback supprimé', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/data/constants.js'),'utf8');
+  return !s.includes("Farmer") && !s.includes("Kickback");
+})());
+
+ok('Mercredi: Squat barre ajouté', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/data/constants.js'),'utf8');
+  return s.includes("Squat barre");
+})());
+
+ok('Jeudi: 8 exercices, biceps max 2', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/data/constants.js'),'utf8');
+  return s.includes("Curl pupitre machine") && s.includes("Curl câble tension constante") && !s.includes("Curl inversé barre EZ");
+})());
+
+ok('Face pulls présents 2x (Mer + Sam)', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/data/constants.js'),'utf8');
+  return (s.match(/Face pulls/g)||[]).length >= 3;
+})());
+
+ok('init.js: détection version PA', (() => {
+  const s = fs.readFileSync(path.join(ROOT,'js/init.js'),'utf8');
+  return s.includes('ctp_pa_version') && s.includes('_PA_VERSION');
+})());
+
+
 section('Vérifications fichiers');
 
 const swSrc   = fs.readFileSync(path.join(ROOT,'sw.js'),'utf8');

@@ -239,14 +239,94 @@ const TRAINING_BLOCKS=['Accumulation','Intensification','Réalisation','Deload']
 
 /* ══ PROGRAM DATA ══ */
 function mkEx(n,m,s,r,wu){return{id:uid(),name:n,muscle:m,weight:'',sets:s,reps:r,rest:'',tempo:'',repsAchieved:'',rpe:'',rir:'',note:'',done:false,setData:null,isWarmup:wu||false,supersetGroup:''};}
+// Version du programme — incrémentée à chaque changement pour forcer la MAJ des jours
+const _PA_VERSION = 'v2-ali-optimise-2026';
+
 const PA=[
-  {muscles:['pec','bic','abd'],cardio:{type:'Rameur',duration:'5',speed:'',distance:''},warmup:'5 min rameur léger · Face pull 2×15 + rotations externes 2×12/bras · 2 séries légères développé incliné',exercises:[mkEx('Développé incliné haltères (prise neutre)','pec','4','6–10'),mkEx('Développé convergent machine','pec','3','8–12'),mkEx('Développé couché machine (angle plat)','pec','2','10–12'),mkEx('Écartés poulie (bas→haut)','pec','3','12–15'),mkEx('Curl câble unilatéral (poulie basse)','bic','2','12–15/bras'),mkEx('Pompes inclinées (finition)','pec','2','AMRAP'),mkEx('Curl incliné haltères','bic','3','10–12'),mkEx('Curl marteau','bic','2','12–15'),mkEx('Curl pupitre (machine ou EZ)','bic','2','10–12'),mkEx('Planche','abd','3','45–60 s')]},
-  {muscles:['dos','tri',''],cardio:{type:'Vélo',duration:'5',speed:'',distance:''},warmup:'5 min vélo · Tirage poulie léger 2×15 + face pulls 1×15',exercises:[mkEx('Tirage vertical poulie prise neutre','dos','4','8–12'),mkEx('Rowing poulie basse prise neutre','dos','4','8–12'),mkEx('Rowing machine poitrine appuyée','dos','3','10–12'),mkEx('Pullover poulie','dos','2','12–15'),mkEx('Rowing unilatéral haltère (banc incliné)','dos','2','10–12/côté'),mkEx('Shrugs haltères (trapèzes supérieurs)','dos','3','10–15'),mkEx('Pushdown corde','tri','3','10–12'),mkEx('Pushdown barre droite (pronation)','tri','2','10–12'),mkEx('Kickback triceps poulie (unilatéral)','tri','2','12–15/bras'),mkEx("Farmer's carry (trapèzes + avant-bras)",'dos','2','30–45 s'),mkEx('Extension triceps au-dessus tête (corde)','tri','2','12–15')]},
-  {muscles:['jam','ep',''],cardio:{type:'Vélo',duration:'7',speed:'',distance:''},warmup:'6–7 min vélo · Fentes dynamiques 2×10 + squats PDC 2×10 · Rotations externes 1×15',exercises:[mkEx('Presse à cuisses','jam','4','8–12'),mkEx('Hack squat machine','jam','3','8–12'),mkEx('SDT roumain haltères','jam','3','8–12'),mkEx('Leg curl assis/couché','jam','3','10–15'),mkEx('Mollets debout','jam','4','10–15'),mkEx('Landmine press','ep','3','8–12'),mkEx('Élévations latérales','ep','3','12–20'),mkEx('Face pulls (santé épaule)','ep','2','15–20'),mkEx('Élévations latérales poulie (unilatéral)','ep','2','15–20/bras'),mkEx('Reverse pec deck (arrière épaule)','ep','3','12–20'),mkEx('Y-raise incliné','ep','2','12–15')]},
-  {muscles:['pec','bic','abd'],cardio:{type:'Rameur',duration:'5',speed:'',distance:''},warmup:'5 min rameur + face pulls 2×15',exercises:[mkEx('Développé couché machine (ou haltères)','pec','4','8–12'),mkEx('Développé décliné machine / Smith','pec','2','10–12'),mkEx('Développé incliné machine','pec','3','10–12'),mkEx('Pec deck','pec','3','12–15'),mkEx('Cross-over poulie (haut→bas)','pec','2','12–15'),mkEx('Curl barre EZ','bic','3','8–10'),mkEx('Curl pupitre machine / pupitre EZ','bic','2','10–12'),mkEx('Curl câble (poulie) — tension continue','bic','2','12–15'),mkEx('Spider curl (banc incliné)','bic','2','10–12'),mkEx('Curl inversé barre EZ','bic','2','10–15'),mkEx('Wrist curl haltères','bic','2','15–20'),mkEx('Reverse wrist curl','bic','2','15–20'),mkEx('Pallof press','abd','3','12/côté')]},
-  {muscles:['dos','tri',''],cardio:{type:'Vélo',duration:'5',speed:'',distance:''},warmup:'5 min vélo + face pulls 2×15',exercises:[mkEx('Rowing barre T / machine','dos','4','8–12'),mkEx('Tirage vertical poulie','dos','3','10–12'),mkEx('Rowing unilatéral poulie','dos','3','10–12/côté'),mkEx('Pulldown bras tendus (poulie)','dos','2','12–15'),mkEx('Reverse pec deck (arrière épaule)','dos','3','12–20'),mkEx('Rowing haut poulie (coudes hauts)','dos','2','12–15'),mkEx('Dips assistés (si épaule OK)','tri','3','8–12'),mkEx('Extension triceps machine','tri','2','8–12'),mkEx('Extension triceps unilatérale poulie','tri','2','12–15'),mkEx('Pushdown barre V (pompe triceps)','tri','2','12–15')]},
-  {muscles:['jam','ep',''],cardio:{type:'Rameur',duration:'6',speed:'',distance:''},warmup:'5–7 min rameur · Hip thrust léger 2×12 · Rotations externes 1×15',exercises:[mkEx('Hip thrust barre','jam','4','8–12'),mkEx('Leg press pieds hauts','jam','3','10–12'),mkEx('Fentes bulgares','jam','3','10/jambe'),mkEx('Leg curl','jam','3','12–15'),mkEx('Mollets assis','jam','3','12–20'),mkEx('Élévations latérales machine/poulie','ep','4','12–20'),mkEx('Développé épaules machine (prise neutre)','ep','2','8–12'),mkEx('Oiseau à la poulie (arrière épaule)','ep','3','12–20/bras'),mkEx('Face pulls','ep','2','15–20')]},
-  {muscles:['rep','',''],cardio:{type:'Marche rapide',duration:'45',speed:'',distance:''},warmup:'Marche 30–60 min + mobilité 10 min · Étirements dynamiques',exercises:[]}
+  // ── LUNDI : Pectoraux A + Biceps A + Abdos ──────────────────
+  {muscles:['pec','bic','abd'],cardio:{type:'Rameur',duration:'5',speed:'',distance:''},
+   warmup:'5 min rameur léger · Face pull 2×15 + rotations externes 2×12/bras · 2 séries légères développé incliné',
+   exercises:[
+    mkEx('Développé incliné haltères (prise neutre)','pec','4','6–10'),
+    mkEx('Développé convergent machine','pec','3','8–12'),
+    mkEx('Développé couché barre','pec','3','8–12'),
+    mkEx('Écartés poulie (bas→haut)','pec','3','12–15'),
+    mkEx('Curl barre EZ','bic','3','8–10'),
+    mkEx('Curl incliné haltères','bic','3','10–12'),
+    mkEx('Curl marteau','bic','2','12–15'),
+    mkEx('Planche','abd','3','45–60 s'),
+  ]},
+  // ── MARDI : Dos A + Triceps A ────────────────────────────────
+  {muscles:['dos','tri',''],cardio:{type:'Vélo',duration:'5',speed:'',distance:''},
+   warmup:'5 min vélo · Tirage poulie léger 2×15 · Face pulls 1×15',
+   exercises:[
+    mkEx('Tirage vertical poulie prise large','dos','4','8–12'),
+    mkEx('Rowing barre T / machine','dos','4','8–12'),
+    mkEx('Rowing poulie basse prise neutre','dos','3','10–12'),
+    mkEx('Pullover poulie','dos','2','12–15'),
+    mkEx('Shrugs haltères (trapèzes supérieurs)','dos','3','10–15'),
+    mkEx('Dips assistés (si épaule OK)','tri','3','8–12'),
+    mkEx('Pushdown corde','tri','3','10–12'),
+    mkEx('Extension triceps machine','tri','2','12–15'),
+  ]},
+  // ── MERCREDI : Jambes A + Épaules A ─────────────────────────
+  {muscles:['jam','ep',''],cardio:{type:'Vélo',duration:'7',speed:'',distance:''},
+   warmup:'6–7 min vélo · Fentes dynamiques 2×10 · Squats PDC 2×10 · Rotations externes 1×15',
+   exercises:[
+    mkEx('Squat barre','jam','4','6–10'),
+    mkEx('Presse à cuisses pieds hauts','jam','3','10–12'),
+    mkEx('SDT roumain haltères','jam','3','8–12'),
+    mkEx('Leg curl assis','jam','3','10–15'),
+    mkEx('Mollets debout','jam','4','10–15'),
+    mkEx('Landmine press','ep','3','8–12'),
+    mkEx('Élévations latérales','ep','3','12–20'),
+    mkEx('Face pulls (santé épaule)','ep','2','15–20'),
+    mkEx('Reverse pec deck (arrière épaule)','ep','3','12–20'),
+  ]},
+  // ── JEUDI : Pectoraux B + Biceps B + Abdos ──────────────────
+  {muscles:['pec','bic','abd'],cardio:{type:'Rameur',duration:'5',speed:'',distance:''},
+   warmup:'5 min rameur · Face pulls 2×15 · 1 série légère développé couché',
+   exercises:[
+    mkEx('Développé couché machine','pec','4','8–12'),
+    mkEx('Développé décliné machine','pec','2','10–12'),
+    mkEx('Développé incliné machine','pec','3','10–12'),
+    mkEx('Pec deck','pec','3','12–15'),
+    mkEx('Pompes inclinées (finition)','pec','2','AMRAP'),
+    mkEx('Curl pupitre machine','bic','2','10–12'),
+    mkEx('Curl câble tension constante','bic','2','12–15'),
+    mkEx('Pallof press','abd','3','12/côté'),
+  ]},
+  // ── VENDREDI : Dos B + Triceps B ────────────────────────────
+  {muscles:['dos','tri',''],cardio:{type:'Vélo',duration:'5',speed:'',distance:''},
+   warmup:'5 min vélo · Face pulls 2×15 · Tirage léger 1×15',
+   exercises:[
+    mkEx('Rowing barre T / machine (prise inversée)','dos','4','8–12'),
+    mkEx('Tirage vertical poulie prise serrée','dos','3','10–12'),
+    mkEx('Rowing unilatéral poulie','dos','3','10–12/côté'),
+    mkEx('Pulldown bras tendus (poulie)','dos','2','12–15'),
+    mkEx('Rowing haut poulie (coudes hauts)','dos','2','12–15'),
+    mkEx('Extension triceps au-dessus tête (corde)','tri','3','10–12'),
+    mkEx('Pushdown barre V','tri','2','10–12'),
+    mkEx('Extension triceps unilatérale câble','tri','2','12–15'),
+  ]},
+  // ── SAMEDI : Jambes B + Épaules B ───────────────────────────
+  {muscles:['jam','ep',''],cardio:{type:'Rameur',duration:'6',speed:'',distance:''},
+   warmup:'5–7 min rameur · Hip thrust léger 2×12 · Rotations externes 1×15',
+   exercises:[
+    mkEx('Hip thrust barre','jam','4','8–12'),
+    mkEx('Hack squat machine','jam','3','10–12'),
+    mkEx('Fentes bulgares','jam','3','10/jambe'),
+    mkEx('Leg press pieds hauts','jam','3','10–12'),
+    mkEx('Leg curl couché','jam','3','12–15'),
+    mkEx('Mollets assis','jam','3','12–20'),
+    mkEx('Élévations latérales machine','ep','4','12–20'),
+    mkEx('Développé épaules machine (prise neutre)','ep','2','8–12'),
+    mkEx('Face pulls','ep','2','15–20'),
+  ]},
+  // ── DIMANCHE : Repos ─────────────────────────────────────────
+  {muscles:['rep','',''],cardio:{type:'Marche rapide',duration:'45',speed:'',distance:''},
+   warmup:'Marche 30–60 min + mobilité 10 min · Étirements dynamiques',
+   exercises:[]},
 ];
 function mkDay(i,wt){const p=PA[i];return{date:'',muscles:[...p.muscles],warmup:p.warmup||'',exercises:p.exercises.map(e=>({...e,setData:null})),cardio:{...p.cardio}};}
 

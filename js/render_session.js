@@ -649,13 +649,42 @@ function renderSession(){
   // Nutrition today
   const nkey=todayStr();
   document.querySelectorAll('.nutri-btn').forEach(btn=>{btn.classList.remove('sel-deficit','sel-maint','sel-surplus');if(S.nutrition[nkey]===btn.dataset.n)btn.classList.add('sel-'+btn.dataset.n);btn.onclick=()=>{S.nutrition[nkey]=btn.dataset.n;document.querySelectorAll('.nutri-btn').forEach(b=>b.classList.remove('sel-deficit','sel-maint','sel-surplus'));btn.classList.add('sel-'+btn.dataset.n);save();};});
-  const d=S.days[S.sessDay];const exercises=d.exercises.filter(e=>e.name.trim());
-  updateSessProgress(d,exercises);
-  const navEl=document.getElementById('sess-nav');const mainEl=document.getElementById('sess-main');
+  // Guard : s'assurer que sessDay est valide
+  if (S.sessDay === undefined || S.sessDay === null) S.sessDay = 0;
+  if (S.sessDay < 0 || S.sessDay > 6) S.sessDay = 0;
+
+  const d         = S.days[S.sessDay] || {};
+  const exercises = (d.exercises || []).filter(e => e.name && e.name.trim());
+  updateSessProgress(d, exercises);
+  const navEl  = document.getElementById('sess-nav');
+  const mainEl = document.getElementById('sess-main');
+  if (!navEl || !mainEl) return;
 
   // Mode séance libre
-  if (S._freeMode) { navEl.innerHTML=''; _openFreeSession(); return; }
-  if(!exercises.length){navEl.innerHTML='';mainEl.innerHTML='<div style="text-align:center;padding:50px;color:var(--muted);font-size:12px">Aucun exercice pour ce jour.<br>Ajoutez des exercices dans le Planning.</div>';return;}
+  if (S._freeMode) { navEl.innerHTML = ''; _openFreeSession(); return; }
+
+  // Jour de repos ou aucun exercice
+  if (!exercises.length) {
+    const isRest = (d.muscles || [])[0] === 'rep';
+    navEl.innerHTML = '';
+    mainEl.innerHTML = `
+      <div style="text-align:center;padding:40px 20px">
+        <div style="font-size:48px;margin-bottom:12px">${isRest ? '😴' : '📋'}</div>
+        <div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:8px">
+          ${isRest ? 'Jour de repos' : 'Aucun exercice'}
+        </div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.5">
+          ${isRest
+            ? 'Récupération active · Marche · Étirements · Sommeil'
+            : 'Ajoutez des exercices dans le Planning pour ce jour.'}
+        </div>
+        <button onclick="if(typeof Router!=='undefined')Router.navigate('weekly')"
+          style="padding:12px 24px;border-radius:14px;border:none;background:var(--teal);color:#fff;font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer;touch-action:manipulation">
+          📋 Voir le planning
+        </button>
+      </div>`;
+    return;
+  }
   if(_sessActiveEx>=exercises.length)_sessActiveEx=0;
   renderSessNav(d,exercises);renderSessExercise(d,exercises,_sessActiveEx);
 }

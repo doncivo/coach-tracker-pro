@@ -308,7 +308,7 @@ nav.tabs   { flex-shrink: 0; }
   border-radius: 9px;
   border: 1.5px solid var(--border);
   background: var(--bg);
-  font-size: 13px;
+  font-size:16px;
   font-family: var(--mono);
   color: var(--text);
   -webkit-appearance: none;
@@ -853,9 +853,9 @@ nav.tabs   { flex-shrink: 0; }
 }
 
 /* Inputs tableau */
-.inp-w { width: 54px; font-family: var(--mono); text-align: center; }
-.inp-sm { width: 42px; font-family: var(--mono); text-align: center; }
-.inp-note { width: 100%; font-size: 10px; }
+.inp-w { width: 54px; font-family: var(--mono); font-size: 16px; text-align: center; }
+.inp-sm { width: 42px; font-family: var(--mono); font-size: 16px; text-align: center; }
+.inp-note { width: 100%; font-size: 16px; }
 .set-val-btn {
   padding: 4px 8px;
   border-radius: 6px;
@@ -962,7 +962,7 @@ nav.tabs   { flex-shrink: 0; }
 .steps-lbl { font-size:8px; color:var(--muted); font-weight:600; }
 .steps-val { font-size:9px; font-family:var(--mono); color:var(--text); font-weight:700; }
 .steps-summary { margin-top:8px; display:flex; gap:12px; flex-wrap:wrap; }
-.steps-goal-inp { width:70px; padding:4px 8px; border-radius:8px; border:1.5px solid var(--border); background:var(--bg); color:var(--text); font-family:var(--mono); font-size:14px; text-align:center; }
+.steps-goal-inp { width:70px; padding:4px 8px; border-radius:8px; border:1.5px solid var(--border); background:var(--bg); color:var(--text); font-family:var(--mono); font-size:16px; text-align:center; }
 .steps-goal-inp:focus { outline:none; border-color:var(--teal); }
 
 /* ── Sommeil ── */
@@ -979,7 +979,7 @@ nav.tabs   { flex-shrink: 0; }
 
 /* ── Progression ── */
 .prog-filter-row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px; }
-.prog-filter-sel { padding:6px 10px; border-radius:8px; border:1.5px solid var(--border); background:var(--bg); color:var(--text); font-family:var(--font); font-size:12px; cursor:pointer; }
+.prog-filter-sel { padding:6px 10px; border-radius:8px; border:1.5px solid var(--border); background:var(--bg); color:var(--text); font-family:var(--font); font-size:16px; cursor:pointer; }
 .prog-ex-card { background:var(--card); border-radius:14px; border:1px solid var(--border); padding:14px; box-shadow:var(--sh); margin-bottom:10px; }
 .prog-ex-name { font-size:13px; font-weight:700; color:var(--text); margin-bottom:8px; }
 .prog-1rm { font-family:var(--mono); font-size:20px; font-weight:800; color:var(--teal-d); }
@@ -1113,16 +1113,16 @@ nav.tabs   { flex-shrink: 0; }
 .snum.snum-done{color:var(--teal-d)}
 .snum.snum-active{color:var(--text)}
 .snum.snum-warmup{color:var(--orange)}
-.set-inp{width:52px;text-align:center;font-family:var(--mono);font-size:14px;padding:5px 4px;border-radius:7px;border:1.5px solid var(--border);background:var(--surface);color:var(--text)}
+.set-inp{width:52px;text-align:center;font-family:var(--mono);font-size:16px;padding:5px 4px;border-radius:7px;border:1.5px solid var(--border);background:var(--surface);color:var(--text)}
 .set-inp:focus{outline:none;border-color:var(--teal)}
-.inp-r,.inp-rpe,.inp-rir{width:44px;text-align:center;font-family:var(--mono);font-size:12px;padding:4px 3px;border-radius:6px}
+.inp-r,.inp-rpe,.inp-rir{width:44px;text-align:center;font-family:var(--mono);font-size:16px;padding:4px 3px;border-radius:6px}
 .set-1rm-val,.set-vol-val,.set-prev-val{font-family:var(--mono);font-size:10px;color:var(--muted)}
 .set-copy-btn{background:none;border:none;cursor:pointer;font-size:13px;color:var(--muted);padding:0 3px}
 .set-val-btn{padding:4px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;min-height:36px;transition:all .15s;color:var(--muted)}
 .set-val-btn.validated{background:var(--teal);border-color:var(--teal);color:#fff}
 .sess-add-set-btn{width:100%;padding:7px;border-radius:10px;border:1.5px dashed var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:11px;font-weight:600;font-family:var(--font);transition:all .15s;margin-top:4px}
 .sess-add-set-btn:hover{border-color:var(--teal);color:var(--teal-d)}
-.sess-note-inp,.sess-note-area{width:100%;margin-top:6px;min-height:52px;resize:vertical;font-family:var(--font);font-size:13px;padding:7px 10px;border-radius:9px;border:1.5px solid var(--border);background:var(--bg);color:var(--text)}
+.sess-note-inp,.sess-note-area{width:100%;margin-top:6px;min-height:52px;resize:vertical;font-family:var(--font);font-size:16px;padding:7px 10px;border-radius:9px;border:1.5px solid var(--border);background:var(--bg);color:var(--text)}
 .sess-note-inp:focus,.sess-note-area:focus{outline:none;border-color:var(--teal)}
 .sess-rpe-alert{background:color-mix(in srgb,var(--orange) 10%,transparent);border:1px solid color-mix(in srgb,var(--orange) 30%,transparent);border-radius:8px;padding:5px 10px;font-size:11px;color:var(--orange);margin-top:5px}
 .srow-warmup td{opacity:.75;background:var(--bg)}
@@ -1142,10 +1142,10 @@ nav.tabs   { flex-shrink: 0; }
 .focus-unit{font-size:13px;color:var(--muted);text-align:center;margin-top:3px}
 
 /* ── Planning: exercice table ── */
-.ex-name-inp{font-size:13px;font-weight:600}
+.ex-name-inp{font-size:16px;font-weight:600}
 .ex-num-inp,.inp-r{width:36px;text-align:center;font-family:var(--mono)}
-.ex-note-inp{font-size:11px;color:var(--muted)}
-.ex-muscle-sel,.ex-rpe-sel,.ex-rir-sel{font-size:11px;border-radius:6px;padding:2px 4px}
+.ex-note-inp{font-size:16px;color:var(--muted)}
+.ex-muscle-sel,.ex-rpe-sel,.ex-rir-sel{font-size:16px;border-radius:6px;padding:2px 4px}
 .ex-cb{width:16px;height:16px;cursor:pointer;accent-color:var(--teal)}
 .ex-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px}
 .ex-1rm,.ex-vol,.ex-prev{font-family:var(--mono);font-size:10px;color:var(--muted)}
@@ -1160,7 +1160,7 @@ nav.tabs   { flex-shrink: 0; }
 .ex-section.dragging{opacity:.5}
 .ex-section.drag-over{border-top:2px solid var(--teal)}
 .ex-table-hdr{background:var(--bg)!important}
-.day-date-inp{width:130px;font-size:12px}
+.day-date-inp{width:130px;font-size:16px}
 .dhc-dayname{font-size:14px;font-weight:800}
 .dhc-left{flex:1;min-width:0}
 .dhc-right{display:flex;gap:6px;flex-wrap:wrap}
@@ -1243,7 +1243,7 @@ nav.tabs   { flex-shrink: 0; }
 .obj-progress-bar-wrap{height:5px;background:var(--border);border-radius:5px;overflow:hidden;margin-top:5px}
 .obj-progress-bar{height:100%;background:var(--teal);border-radius:5px;transition:width .5s}
 .goal-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)}
-.goal-inp{flex:1;font-size:13px}
+.goal-inp{flex:1;font-size:16px}
 .goal-cb{width:16px;height:16px;cursor:pointer;accent-color:var(--teal);flex-shrink:0}
 .goal-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;flex-shrink:0}
 
@@ -1333,7 +1333,7 @@ nav.tabs   { flex-shrink: 0; }
 
   /* ── Planning : noms d'exercices ── */
   .ex-name-inp {
-    font-size: 13px;
+    font-size: 16px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1352,8 +1352,8 @@ nav.tabs   { flex-shrink: 0; }
   /* Planning table : réduire padding cellules */
   .ex-table th { padding: 5px 3px; font-size: 8px; }
   .ex-table td { padding: 4px 3px; }
-  .inp-w { width: 48px; font-size: 13px; }
-  .inp-sm { width: 36px; font-size: 13px; }
+  .inp-w { width: 48px; font-size: 16px; }
+  .inp-sm { width: 36px; font-size: 16px; }
 
   /* ── Séance : tableau séries ── */
   /* Cacher VOL. et 1RM sur mobile (secondaires) */
@@ -1363,8 +1363,8 @@ nav.tabs   { flex-shrink: 0; }
   .sess-sets-table td:nth-child(8) { display: none; }
 
   /* Réduire taille inputs séance */
-  .set-inp { width: 48px; font-size: 15px; padding: 6px 3px; }
-  .inp-r, .inp-rpe, .inp-rir { width: 36px; font-size: 12px; padding: 4px 2px; }
+  .set-inp { width: 48px; font-size:16px; padding: 6px 3px; }
+  .inp-r, .inp-rpe, .inp-rir { width: 36px; font-size:16px; padding: 4px 2px; }
 
   /* Bouton valider séance plus grand et plus visible */
   .set-val-btn {
@@ -1455,7 +1455,7 @@ nav.tabs   { flex-shrink: 0; }
 
   /* ── Planning : noms d'exercices ── */
   .ex-name-inp {
-    font-size: 13px;
+    font-size: 16px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1474,8 +1474,8 @@ nav.tabs   { flex-shrink: 0; }
   /* Planning table : réduire padding cellules */
   .ex-table th { padding: 5px 3px; font-size: 8px; }
   .ex-table td { padding: 4px 3px; }
-  .inp-w { width: 48px; font-size: 13px; }
-  .inp-sm { width: 36px; font-size: 13px; }
+  .inp-w { width: 48px; font-size: 16px; }
+  .inp-sm { width: 36px; font-size: 16px; }
 
   /* ── Séance : tableau séries ── */
   /* Cacher VOL. et 1RM sur mobile (secondaires) */
@@ -1485,8 +1485,8 @@ nav.tabs   { flex-shrink: 0; }
   .sess-sets-table td:nth-child(8) { display: none; }
 
   /* Réduire taille inputs séance */
-  .set-inp { width: 48px; font-size: 15px; padding: 6px 3px; }
-  .inp-r, .inp-rpe, .inp-rir { width: 36px; font-size: 12px; padding: 4px 2px; }
+  .set-inp { width: 48px; font-size:16px; padding: 6px 3px; }
+  .inp-r, .inp-rpe, .inp-rir { width: 36px; font-size:16px; padding: 4px 2px; }
 
   /* Bouton valider séance plus grand et plus visible */
   .set-val-btn {
@@ -1667,7 +1667,7 @@ nav.tabs   { flex-shrink: 0; }
   border-radius: 6px;
   background: var(--bg);
   color: var(--muted);
-  font-size: 11px;
+  font-size:16px;
   font-family: var(--font);
   padding: 2px 4px;
   -webkit-appearance: none;
@@ -1961,7 +1961,7 @@ nav.tabs   { flex-shrink: 0; }
   border-radius: 8px;
   border: 1.5px solid var(--border);
   background: var(--bg);
-  font-size: 14px;
+  font-size:16px;
   font-weight: 600;
   font-family: var(--mono);
   color: var(--text);
@@ -1999,7 +1999,7 @@ nav.tabs   { flex-shrink: 0; }
   border-radius: 6px;
   background: var(--bg);
   color: var(--muted);
-  font-size: 11px;
+  font-size:16px;
   font-family: var(--font);
   padding: 2px 4px;
   -webkit-appearance: none;
@@ -2009,7 +2009,7 @@ nav.tabs   { flex-shrink: 0; }
   flex: 1;
   border: none; border-bottom: 1px solid var(--border);
   background: transparent;
-  font-size: 11px; font-family: var(--font);
+  font-size:16px; font-family: var(--font);
   color: var(--muted);
   outline: none; padding: 2px 0;
   min-width: 80px;
@@ -2332,7 +2332,7 @@ nav.tabs   { flex-shrink: 0; }
   border: none;
   border-bottom: 1px solid var(--border);
   background: transparent;
-  font-size: 11px;
+  font-size:16px;
   font-family: var(--font);
   color: var(--muted);
   outline: none;

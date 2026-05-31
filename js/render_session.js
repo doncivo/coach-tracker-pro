@@ -1593,7 +1593,8 @@ function _renderPersonalRecords() {
   (S.days || []).forEach(d => (d.exercises || []).forEach(e => processEx(e, 'Cette semaine')));
   // Historique
   Object.entries(S.history || {}).forEach(([date, wk]) => {
-    ((wk.days || wk) || []).forEach(d => (d.exercises || []).forEach(e => processEx(e, date)));
+    const _wkDays = Array.isArray(wk) ? wk : (wk?.days || []);
+    (_wkDays).forEach(d => (d?.exercises || []).forEach(e => processEx(e, date)));
   });
 
   const sorted = Object.entries(records).sort((a, b) => b[1].oneRM - a[1].oneRM).slice(0, 12);
@@ -1639,9 +1640,10 @@ function _renderSessionTimeline() {
 
   // Collecter toutes les séances de l'historique
   const sessions = [];
-  Object.entries(S.history || {}).forEach(([date, entries]) => {
-    (entries || []).forEach(sess => {
-      if (sess.name && (sess.volume > 0 || sess.exercises?.length > 0)) {
+  Object.entries(S.history || {}).forEach(([date, weekData]) => {
+    const days = Array.isArray(weekData) ? weekData : (weekData?.days || []);
+    (days || []).forEach(sess => {
+      if (sess && sess.exercises?.length > 0) {
         sessions.push({ ...sess, date });
       }
     });

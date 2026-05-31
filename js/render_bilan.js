@@ -4,6 +4,13 @@
 
 /* ══ BILAN ══ */
 function renderBilan(){
+  // Listeners navigation — guard sur l'élément pour ne pas empiler
+  const _bp = document.getElementById('bilan-prev');
+  const _bn = document.getElementById('bilan-next');
+  const _ep = document.getElementById('export-pdf-btn');
+  if (_bp && !_bp._bilanBound) { _bp._bilanBound = true; _bp.addEventListener('click', () => { S.bilanOffset=(S.bilanOffset||0)-1; save(); renderBilan(); }); }
+  if (_bn && !_bn._bilanBound) { _bn._bilanBound = true; _bn.addEventListener('click', () => { if((S.bilanOffset||0)<0){S.bilanOffset++;save();renderBilan();} }); }
+  if (_ep && !_ep._bilanBound) { _ep._bilanBound = true; _ep.addEventListener('click', exportBilanPDF); }
   const offset=S.bilanOffset||0;const lbl=document.getElementById('bilan-week-lbl');
   lbl.textContent=offset===0?'Semaine courante':offset===-1?'Semaine précédente':'Sem. '+Math.abs(offset)+' avant';
   const cont=document.getElementById('bilan-content');cont.innerHTML='';
@@ -135,9 +142,7 @@ function renderBilan(){
   cont.appendChild(bilanChartsDiv);
 });
 }
-document.getElementById('bilan-prev')?.addEventListener('click',()=>{S.bilanOffset=(S.bilanOffset||0)-1;save();renderBilan();});
-document.getElementById('bilan-next')?.addEventListener('click',()=>{if((S.bilanOffset||0)<0){S.bilanOffset++;save();renderBilan();}});
-document.getElementById('export-pdf-btn')?.addEventListener('click', exportBilanPDF);
+/* CR2: Listeners bilan déplacés dans renderBilan() pour éviter la perte si DOM recréé */
 
 /* ══ KPI ══ */
 function computeTonnageComp(){const cur=weekVol();const keys=Object.keys(S.history).sort();const lastKey=keys[keys.length-1];const prev={};if(lastKey){(S.history[lastKey].days||[]).forEach(d=>{(d.exercises||[]).filter(e=>!e.isWarmup).forEach(ex=>{const v=calcVol(ex);if(v&&ex.muscle)prev[ex.muscle]=(prev[ex.muscle]||0)+v;});});}return{cur,prev};}

@@ -75,7 +75,7 @@ nav.tabs   { flex-shrink: 0; }
 .hdr-sub{font-size:9px;color:rgba(255,255,255,.7);letter-spacing:.06em;text-transform:uppercase;display:none}
 .hdr-right{margin-left:auto;display:flex;align-items:center;gap:4px}
 .hdr-badge{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28);color:#fff;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:600;white-space:nowrap}
-.hdr-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:6px 8px;border-radius:9px;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--font);min-height:36px;display:flex;align-items:center}
+.hdr-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:6px 8px;border-radius:9px;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;font-family:var(--font);min-height:44px;display:flex;align-items:center}
 .hdr-btn:hover,.hdr-btn:active{background:rgba(255,255,255,.3)}
 /* Hide text labels on mobile, show icons only */
 @media(max-width:600px){
@@ -128,7 +128,7 @@ nav.tabs   { flex-shrink: 0; }
 .btn-red{background:var(--red);border-color:#c53030;color:#fff}.btn-red:hover{background:#c53030}
 .btn-purple{background:var(--purple);border-color:#6b46c1;color:#fff}
 .btn-orange{background:var(--orange);border-color:#b45309;color:#fff}
-.btn-sm{padding:6px 12px;font-size:12px;min-height:36px}
+.btn-sm{padding:6px 12px;font-size:12px;min-height:44px}
 /* Grid helpers */
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
@@ -162,7 +162,7 @@ nav.tabs   { flex-shrink: 0; }
 .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
 .form-group{margin-bottom:12px}
 .form-group label{display:block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:4px}
-.form-group input,.form-group select,.form-group textarea{width:100%;border:1px solid var(--border);border-radius:var(--rs);padding:7px 10px;font-family:var(--font);font-size:12px;color:var(--text);background:var(--surface);outline:none;transition:border-color .15s}
+.form-group input,.form-group select,.form-group textarea{width:100%;border:1px solid var(--border);border-radius:var(--rs);padding:7px 10px;font-family:var(--font);font-size:16px;color:var(--text);background:var(--surface);outline:none;transition:border-color .15s}
 .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--teal)}
 /* Toast */
 .toast{position:fixed;top:70px;right:18px;padding:10px 16px;border-radius:var(--r);box-shadow:var(--sh2);font-size:12px;font-weight:600;z-index:9999;animation:toastIn .3s ease}
@@ -475,7 +475,7 @@ nav.tabs   { flex-shrink: 0; }
 .rest-timer-time { font-family: var(--mono); font-size: 42px; font-weight: 700; color: var(--text); line-height: 1; }
 .rest-timer-label { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
 .rest-timer-presets { display: flex; gap: 8px; width: 100%; }
-.rest-timer-preset { flex: 1; padding: 8px 4px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg); font-family: var(--font); font-size: 12px; font-weight: 700; color: var(--muted); cursor: pointer; text-align: center; touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; pointer-events: auto; -webkit-appearance: none; }
+.rest-timer-preset { flex: 1; padding: 8px 4px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg); font-family: var(--font); font-size: 12px; font-weight: 700; color: var(--muted); cursor: pointer; text-align: center; touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; pointer-events: auto; -webkit-appearance: none; min-height: 44px; }
 .rest-timer-preset.active { border-color: var(--teal); color: var(--teal-d); }
 .rest-timer-actions { display: flex; gap: 10px; width: 100%; }
 .rest-timer-skip { flex: 1; padding: 12px; border-radius: 14px; border: 1.5px solid var(--border); background: var(--bg); font-family: var(--font); font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; pointer-events: auto; -webkit-appearance: none; }
@@ -998,7 +998,7 @@ nav.tabs   { flex-shrink: 0; }
 
 
 .sess-nav-strip::-webkit-scrollbar { display:none; }
-.sess-nav-btn { padding:6px 12px; border-radius:10px; border:1.5px solid var(--border); background:var(--bg); font-family:var(--font); font-size:11px; font-weight:700; color:var(--muted); cursor:pointer; white-space:nowrap; transition:all .15s; min-height:36px; }
+.sess-nav-btn { padding:6px 12px; border-radius:10px; border:1.5px solid var(--border); background:var(--bg); font-family:var(--font); font-size:11px; font-weight:700; color:var(--muted); cursor:pointer; white-space:nowrap; transition:all .15s; min-height:44px; }
 .sess-nav-btn.active { background:var(--teal); border-color:var(--teal); color:#fff; }
 
 .sess-ex-card { background:var(--card); border-radius:14px; border:1px solid var(--border); padding:14px; box-shadow:var(--sh); }
@@ -1070,11 +1070,11 @@ nav.tabs   { flex-shrink: 0; }
    ═══════════════════════════════════════════════════════ */
 
 /* ── Séance: topbar ── */
-.sess-day-btn{padding:5px 9px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;min-height:32px;transition:all .15s}
+.sess-day-btn{padding:5px 9px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;min-height:44px;transition:all .15s}
 .sess-day-btn.active{background:var(--teal);border-color:var(--teal);color:#fff}
-.recovery-btn{width:34px;height:34px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.recovery-btn{width:44px;height:44px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .recovery-btn.sel{border-color:var(--teal);background:color-mix(in srgb,var(--teal) 15%,transparent)}
-.nutri-btn{padding:4px 9px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;min-height:30px;transition:all .15s}
+.nutri-btn{padding:4px 9px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;min-height:44px;transition:all .15s}
 .nutri-btn.sel-deficit{background:color-mix(in srgb,var(--red) 12%,transparent);border-color:var(--red);color:var(--red)}
 .nutri-btn.sel-maint{background:color-mix(in srgb,var(--teal) 12%,transparent);border-color:var(--teal);color:var(--teal-d)}
 .nutri-btn.sel-surplus{background:color-mix(in srgb,var(--green) 12%,transparent);border-color:var(--green);color:var(--green)}
@@ -1118,7 +1118,7 @@ nav.tabs   { flex-shrink: 0; }
 .inp-r,.inp-rpe,.inp-rir{width:44px;text-align:center;font-family:var(--mono);font-size:12px;padding:4px 3px;border-radius:6px}
 .set-1rm-val,.set-vol-val,.set-prev-val{font-family:var(--mono);font-size:10px;color:var(--muted)}
 .set-copy-btn{background:none;border:none;cursor:pointer;font-size:13px;color:var(--muted);padding:0 3px}
-.set-val-btn{padding:4px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;min-height:28px;transition:all .15s;color:var(--muted)}
+.set-val-btn{padding:4px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;min-height:36px;transition:all .15s;color:var(--muted)}
 .set-val-btn.validated{background:var(--teal);border-color:var(--teal);color:#fff}
 .sess-add-set-btn{width:100%;padding:7px;border-radius:10px;border:1.5px dashed var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:11px;font-weight:600;font-family:var(--font);transition:all .15s;margin-top:4px}
 .sess-add-set-btn:hover{border-color:var(--teal);color:var(--teal-d)}

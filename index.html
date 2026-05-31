@@ -502,8 +502,8 @@
       <input type="text" id="lib-search" class="inp" placeholder="Rechercher un exercice..." style="width:200px">
       <select id="lib-filter-muscle" class="prog-filter-sel"><option value="">Tous les groupes</option></select>
       <select id="lib-filter-pattern" class="prog-filter-sel"><option value="">Tous les patterns</option><option value="push">Poussé</option><option value="pull">Tiré</option><option value="legs">Jambes</option><option value="core">Gainage</option></select>
-      <select id="lib-filter-equipment" class="prog-filter-sel" onchange="renderLibrary()"><option value="">Tout équipement</option><option value="barre">Barre</option><option value="haltères">Haltères</option><option value="machine">Machine</option><option value="poids du corps">Poids du corps</option></select>
-      <select id="lib-filter-difficulty" class="prog-filter-sel" onchange="renderLibrary()"><option value="">Tous niveaux</option><option value="débutant">Débutant</option><option value="intermédiaire">Intermédiaire</option><option value="avancé">Avancé</option></select>
+      <select id="lib-filter-equipment" class="prog-filter-sel"><option value="">Tout équipement</option><option value="barre">Barre</option><option value="haltères">Haltères</option><option value="machine">Machine</option><option value="poids du corps">Poids du corps</option></select>
+      <select id="lib-filter-difficulty" class="prog-filter-sel"><option value="">Tous niveaux</option><option value="débutant">Débutant</option><option value="intermédiaire">Intermédiaire</option><option value="avancé">Avancé</option></select>
     </div>
     <div class="lib-grid" id="lib-grid"></div>
   </div>
@@ -664,7 +664,7 @@
   </script>
 <script>
 (function() {
-  const SW_VERSION = 'ctp-v94';
+  const SW_VERSION = 'ctp-v96';
   if (!('serviceWorker' in navigator)) return;
 
   const RELOAD_KEY = 'ctp-sw-reloaded-' + SW_VERSION;

@@ -136,9 +136,9 @@
 <div class="content">
 
 <!-- WEEKLY -->
-<div class="tab-pane" id="tab-dashboard"><div class="dashboard-wrap" id="dash-wrap"></div></div>
+<div class="tab-pane active" id="tab-dashboard"><div class="dashboard-wrap" id="dash-wrap"></div></div>
 
-<div class="tab-pane active" id="tab-weekly">
+<div class="tab-pane" id="tab-weekly">
   <div class="weekly-wrap">
     <div class="plan-csv-bar">
       <span style="font-size:11px;font-weight:700;color:var(--muted)">Planning</span>
@@ -664,7 +664,7 @@
   </script>
 <script>
 (function() {
-  const SW_VERSION = 'ctp-v100';
+  const SW_VERSION = 'ctp-v101';
   if (!('serviceWorker' in navigator)) return;
 
   const RELOAD_KEY = 'ctp-sw-reloaded-' + SW_VERSION;

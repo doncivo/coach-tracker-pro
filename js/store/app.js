@@ -7,7 +7,7 @@ const App = (() => {
 
   const selectors = {
 
-    getCurrentTab(state)    { return state.app._currentTab || 'weekly'; },
+    getCurrentTab(state)    { return state.app._currentTab || 'dashboard'; },
     isDarkMode(state)       { return !!state.app.darkMode; },
     getExViewMode(state)    { return state.app.exViewMode || 'compact'; },
     getNotes(state)         { return state.app.notes || ''; },

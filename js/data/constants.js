@@ -455,7 +455,7 @@ let S={
   undoStack:[],
   sessStartTime:null,
   _schemaVersion:SCHEMA_VERSION,
-  _currentTab:'weekly',
+  _currentTab:'dashboard',
   _restDuration:90,
   _restBeep:true,
   _reminderHour:null,

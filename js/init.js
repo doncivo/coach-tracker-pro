@@ -288,7 +288,7 @@ if ('serviceWorker' in navigator && navigator.serviceWorker.ready && typeof navi
   }, 3000);
 })();
 
-const _startTab = S._currentTab || 'weekly';
+const _startTab = 'dashboard'; // Toujours démarrer sur Accueil
 setTimeout(() => Router.navigate(_startTab), 0);
 
 /* ── Activer le stockage persistant + charger depuis IDB si disponible ── */

@@ -27,6 +27,9 @@ const KPIView = {
     S.nutrition    = state.activity.nutrition;
     S.stepsGoal    = state.activity.stepsGoal;
     S.caloriesGoal = state.activity.caloriesGoal;
+    S.proteinGoal  = state.activity.proteinGoal;
+    S.carbsGoal    = state.activity.carbsGoal;
+    S.fatGoal      = state.activity.fatGoal;
     // Body
     S.mesures      = state.body.mesures;
     S.profilTaille = state.body.profilTaille;

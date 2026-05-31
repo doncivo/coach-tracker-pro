@@ -1052,34 +1052,35 @@ function renderSettings() {
   });
 
   // ── ZONE DE DANGER ──
-  const dangerSec = _settingsSection('Zone de danger', {emoji:'⚠️', bg:'#ff3b30'});
-  _settingsRow(dangerSec, 'Tout réinitialiser', 'Efface données, historique et cache', () => {
-    const btn = document.createElement('button');
-    btn.style.cssText = 'padding:8px 14px;border-radius:10px;background:rgba(229,62,62,.1);color:var(--red,#e53e3e);font-size:13px;font-weight:700;font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none;min-height:36px;border:1.5px solid rgba(229,62,62,.3)';
-    // ── Bouton vider cache SW ──
+  // ── Bouton vider cache (section séparée) ──
+  const cacheSec = _settingsSection('Maintenance', {emoji:'🔧', bg:'#636366'});
+  _settingsRow(cacheSec, 'Vider le cache', 'Force le rechargement de l\'app', () => {
     const cacheBtn = document.createElement('button');
-    cacheBtn.style.cssText = 'width:100%;padding:12px 16px;border-radius:12px;background:transparent;font-size:13px;font-weight:700;font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none;min-height:44px;border:1.5px solid var(--border);color:var(--text);margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px';
-    cacheBtn.textContent = '🔄 Vider le cache (forcer mise à jour)';
+    cacheBtn.className = 'btn btn-sm';
+    cacheBtn.style.cssText += ';min-height:44px;touch-action:manipulation;-webkit-appearance:none;color:var(--text);border:1.5px solid var(--border)';
+    cacheBtn.textContent = '🔄 Vider';
     const doClearCache = async () => {
       try {
-        // 1. Supprimer tous les caches Service Worker
         const cacheKeys = await caches.keys();
         await Promise.all(cacheKeys.map(k => caches.delete(k)));
-        // 2. Désincrire le SW pour forcer re-téléchargement
         if ('serviceWorker' in navigator) {
           const regs = await navigator.serviceWorker.getRegistrations();
           await Promise.all(regs.map(r => r.unregister()));
         }
-        showToast('Cache vide - L\'app va se recharger', 'save', 2000);
+        showToast('Cache vide - Rechargement...', 'save', 2000);
         setTimeout(() => window.location.reload(true), 2000);
-      } catch(e) {
-        showToast('Erreur : ' + e.message, 'warn');
-      }
+      } catch(e) { showToast('Erreur: ' + e.message, 'warn'); }
     };
     cacheBtn.ontouchstart = e => { e.preventDefault(); doClearCache(); };
     cacheBtn.onclick = doClearCache;
-    dangerCard.appendChild(cacheBtn);
+    return cacheBtn;
+  });
+  wrap.appendChild(cacheSec);
 
+  const dangerSec = _settingsSection('Zone de danger', {emoji:'⚠️', bg:'#ff3b30'});
+  _settingsRow(dangerSec, 'Tout réinitialiser', 'Efface données, historique et cache', () => {
+    const btn = document.createElement('button');
+    btn.style.cssText = 'padding:8px 14px;border-radius:10px;background:rgba(229,62,62,.1);color:var(--red,#e53e3e);font-size:13px;font-weight:700;font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none;min-height:36px;border:1.5px solid rgba(229,62,62,.3)';
     btn.textContent = '🗑 Tout effacer';
     const doReset = async () => {
       if (!confirm('ATTENTION\\n\\nCette action supprimera :\\n- Tout votre historique\\n- Votre programme\\n- Vos mensurations\\n- Le cache\\n\\nIrréversible. Continuer ?')) return;

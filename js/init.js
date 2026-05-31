@@ -316,7 +316,7 @@ setTimeout(() => Router.navigate(_startTab), 0);
         // Aucune série complétée cette semaine → reset propre
         S.days = Array.from({length: 7}, (_, i) => mkDay(i, S.weekType || 'A'));
         save();
-        console.log('[CTP] Programme mis à jour vers', _PA_VERSION);
+        Errors.info && Errors.info('[CTP] Programme mis à jour vers ' + _PA_VERSION);
       } else {
         // Des séries ont été faites → proposer via toast (non-destructif)
         setTimeout(() => {

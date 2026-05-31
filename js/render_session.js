@@ -1128,6 +1128,7 @@ function renderSessExercise(d,exercises,vi){
   addSetBtn.className   = 'sess-add-set-btn';
   addSetBtn.textContent = '+ Ajouter une série';
   addSetBtn.addEventListener('click', () => {
+    if (!Array.isArray(ex.setData)) ex.setData = [];
     ex.setData.push({ weight: ex.weight || '', reps: '', done: false, rpe: '', rir: '' });
     d.exercises[realIdx].sets = String((parseInt(ex.sets) || nSets) + 1);
     ex.sets = d.exercises[realIdx].sets;

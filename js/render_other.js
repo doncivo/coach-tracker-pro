@@ -78,7 +78,7 @@ function _renderObjectiveView() {
         // Compare with latest weight
         const latest = (S.mesures.poids || []).slice(-1)[0];
         if (latest) {
-          const diff = Math.round((parseFloat(S.objective.targetWeight) - parseFloat(latest.val)) * 10) / 10;
+          const diff = Math.round(((parseFloat(S.objective.targetWeight)||0) - (parseFloat(latest.val)||0)) * 10) / 10;
           weightEl.textContent += '  (actuel : ' + latest.val + ' kg, écart : ' + (diff > 0 ? '+' : '') + diff + ' kg)';
         }
       } else weightEl.style.display = 'none';
@@ -93,7 +93,7 @@ function _renderObjectiveView() {
         // Compare with current weight for this exercise
         const exH = S.days.flatMap(d => d.exercises).find(e => e.name === S.objective.targetExercise);
         if (exH && exH.weight) {
-          const diff = Math.round((parseFloat(S.objective.targetLoad) - parseFloat(exH.weight)) * 10) / 10;
+          const diff = Math.round(((parseFloat(S.objective.targetLoad)||0) - parseFloat(exH.weight)) * 10) / 10;
           exEl.textContent += '  (actuel : ' + exH.weight + ' kg, manque : ' + diff + ' kg)';
         }
       } else exEl.style.display = 'none';
@@ -735,6 +735,24 @@ function renderSettings() {
     inp.addEventListener('change', e => { S.caloriesGoal=parseInt(e.target.value)||2500; save(); });
     return inp;
   });
+  _settingsRow(profSec, 'Objectif proteines (g/j)', 'Pour les barres macros', () => {
+    const inp2 = document.createElement('input'); inp2.type='number'; inp2.className='settings-inp';
+    inp2.value=S.proteinGoal||0; inp2.min=0; inp2.max=500; inp2.step=5; inp2.style.fontSize='16px';
+    inp2.addEventListener('change', e => { S.proteinGoal=parseInt(e.target.value)||0; save(); });
+    return inp2;
+  });
+  _settingsRow(profSec, 'Objectif glucides (g/j)', 'Pour les barres macros', () => {
+    const inp3 = document.createElement('input'); inp3.type='number'; inp3.className='settings-inp';
+    inp3.value=S.carbsGoal||0; inp3.min=0; inp3.max=1000; inp3.step=10; inp3.style.fontSize='16px';
+    inp3.addEventListener('change', e => { S.carbsGoal=parseInt(e.target.value)||0; save(); });
+    return inp3;
+  });
+  _settingsRow(profSec, 'Objectif lipides (g/j)', 'Pour les barres macros', () => {
+    const inp4 = document.createElement('input'); inp4.type='number'; inp4.className='settings-inp';
+    inp4.value=S.fatGoal||0; inp4.min=0; inp4.max=300; inp4.step=5; inp4.style.fontSize='16px';
+    inp4.addEventListener('change', e => { S.fatGoal=parseInt(e.target.value)||0; save(); });
+    return inp4;
+  });
   _settingsRow(profSec, '🧮 Calculer mes macros', 'Calcul automatique depuis ton TDEE + objectif', () => {
     const btn = document.createElement('button'); btn.className='btn btn-teal btn-sm';
     btn.textContent = 'Calculer automatiquement';
@@ -1038,6 +1056,30 @@ function renderSettings() {
   _settingsRow(dangerSec, 'Tout réinitialiser', 'Efface données, historique et cache', () => {
     const btn = document.createElement('button');
     btn.style.cssText = 'padding:8px 14px;border-radius:10px;background:rgba(229,62,62,.1);color:var(--red,#e53e3e);font-size:13px;font-weight:700;font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none;min-height:36px;border:1.5px solid rgba(229,62,62,.3)';
+    // ── Bouton vider cache SW ──
+    const cacheBtn = document.createElement('button');
+    cacheBtn.style.cssText = 'width:100%;padding:12px 16px;border-radius:12px;background:transparent;font-size:13px;font-weight:700;font-family:var(--font);cursor:pointer;touch-action:manipulation;-webkit-appearance:none;min-height:44px;border:1.5px solid var(--border);color:var(--text);margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px';
+    cacheBtn.textContent = '🔄 Vider le cache (forcer mise à jour)';
+    const doClearCache = async () => {
+      try {
+        // 1. Supprimer tous les caches Service Worker
+        const cacheKeys = await caches.keys();
+        await Promise.all(cacheKeys.map(k => caches.delete(k)));
+        // 2. Désincrire le SW pour forcer re-téléchargement
+        if ('serviceWorker' in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map(r => r.unregister()));
+        }
+        showToast('Cache vide - L\'app va se recharger', 'save', 2000);
+        setTimeout(() => window.location.reload(true), 2000);
+      } catch(e) {
+        showToast('Erreur : ' + e.message, 'warn');
+      }
+    };
+    cacheBtn.ontouchstart = e => { e.preventDefault(); doClearCache(); };
+    cacheBtn.onclick = doClearCache;
+    dangerCard.appendChild(cacheBtn);
+
     btn.textContent = '🗑 Tout effacer';
     const doReset = async () => {
       if (!confirm('ATTENTION\\n\\nCette action supprimera :\\n- Tout votre historique\\n- Votre programme\\n- Vos mensurations\\n- Le cache\\n\\nIrréversible. Continuer ?')) return;
